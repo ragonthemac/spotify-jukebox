@@ -23,7 +23,7 @@ function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 0 }: {
   albumArt?: string; isPlaying: boolean; vinylSize?: number; topPad?: number
 }) {
   const archH = topPad + Math.round(vinylSize / 2)
-  const r = '50% 50% 0 0'
+  const r = '65% 65% 0 0'
 
   const layer = (inset: number, bg: string, extra?: React.CSSProperties) => ({
     position: 'absolute' as const,
