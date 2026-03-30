@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
-import { formatDuration, getAlbumArt } from '@/lib/spotify'
+import { playTrack, formatDuration, getAlbumArt } from '@/lib/spotify'
 import type { SpotifyTrack } from '@/lib/spotify'
 
 interface Props {
@@ -13,11 +13,14 @@ interface Props {
 
 export default function TrackRow({ track, inQueue, queueId }: Props) {
   const {
+    accessToken,
+    deviceId,
     addToQueue,
     removeFromQueue,
     recentlyAdded,
     currentTrack,
     isPlaying,
+    setActiveView,
   } = useJukeboxStore()
 
   const [justAdded, setJustAdded] = useState(false)
@@ -28,9 +31,16 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
 
   const handleAdd = (e?: React.MouseEvent) => {
     e?.stopPropagation()
-    addToQueue(track)
-    setJustAdded(true)
-    setTimeout(() => setJustAdded(false), 1500)
+    if (!currentTrack && accessToken && deviceId) {
+      // Nothing playing — play immediately
+      playTrack(accessToken, track.uri, deviceId)
+      setActiveView('home')
+    } else {
+      // Something already playing — add to queue
+      addToQueue(track)
+      setJustAdded(true)
+      setTimeout(() => setJustAdded(false), 1500)
+    }
   }
 
   const handleRemove = (e: React.MouseEvent) => {
