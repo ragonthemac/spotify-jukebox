@@ -32,7 +32,7 @@ function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 120 }: {
   })
 
   return (
-    <div style={{ position: 'relative', height: archH, flexShrink: 0, overflow: 'hidden' }}>
+    <div style={{ position: 'relative', height: '100dvh', flexShrink: 0, overflow: 'hidden' }}>
       {/* Chrome outer ring */}
       <div style={layer(0, chromeH)} />
       <div style={layer(10, '#050200')} />
@@ -264,7 +264,7 @@ export default function HomeView() {
       ) : (
         <div className="flex-1 overflow-y-auto">
 
-          <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={1000} topPad={180} />
+          <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={260} />
 
           <ChromeStrip height={8} opacity={0.5} />
 
