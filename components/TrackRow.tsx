@@ -9,9 +9,10 @@ interface Props {
   track: SpotifyTrack
   inQueue?: boolean
   queueId?: string
+  cardMode?: boolean
 }
 
-export default function TrackRow({ track, inQueue, queueId }: Props) {
+export default function TrackRow({ track, inQueue, queueId, cardMode }: Props) {
   const {
     accessToken,
     deviceId,
@@ -47,6 +48,31 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (queueId) removeFromQueue(queueId)
+  }
+
+  // Card mode: square card for horizontal scroll sections (matches playlist card style)
+  if (cardMode) {
+    const art = track.album.images[0]?.url
+    return (
+      <button
+        onClick={() => handleAdd()}
+        className="flex-shrink-0 w-28 text-left active:scale-95 transition-transform"
+      >
+        <div className="w-28 h-28 rounded-xl overflow-hidden mb-2" style={{ background: 'rgba(201,162,39,0.1)', border: '1px solid rgba(201,162,39,0.2)' }}>
+          {art ? (
+            <img src={art} alt={track.album.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style={{ opacity: 0.3, color: 'var(--retro-gold)' }}>
+                <path d="M7 14L11 10L14 13L18 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          )}
+        </div>
+        <p className="text-xs font-medium truncate" style={{ color: 'var(--retro-cream)' }}>{track.name}</p>
+        <p className="text-xs truncate" style={{ color: 'var(--retro-muted)' }}>{track.artists.map(a => a.name).join(', ')}</p>
+      </button>
+    )
   }
 
   return (
