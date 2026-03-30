@@ -19,7 +19,7 @@ const chrome = 'linear-gradient(180deg, #e8d5b0 0%, #c9a460 20%, #f5e8c0 50%, #b
 const chromeH = 'linear-gradient(90deg, #e8d5b0 0%, #c9a460 20%, #f5e8c0 50%, #b8902a 80%, #e0c878 100%)'
 
 /* ─── Arch crown ─── */
-function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 120 }: {
+function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 0 }: {
   albumArt?: string; isPlaying: boolean; vinylSize?: number; topPad?: number
 }) {
   const archH = topPad + Math.round(vinylSize / 2)
@@ -265,7 +265,7 @@ export default function HomeView() {
         <div className="flex-1 overflow-y-auto">
 
           <div style={{ marginTop: 20 }}>
-            <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={260} />
+            <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={40} />
           </div>
 
           <ChromeStrip height={8} opacity={0.5} />
