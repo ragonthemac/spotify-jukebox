@@ -249,13 +249,12 @@ export async function getArtistAlbums(artistName: string, token: string): Promis
   return data.albums.items
 }
 
-export async function getAlbumTracks(albumName: string, artistName: string, token: string): Promise<SpotifyTrack[]> {
-  const q = `album:${encodeURIComponent(albumName)} artist:${encodeURIComponent(artistName)}`
-  const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
-    `/search?q=${q}&type=track`,
+export async function getAlbumTracks(albumId: string, token: string): Promise<SpotifyTrack[]> {
+  const data = await spotifyFetch<{ items: SpotifyTrack[] }>(
+    `/albums/${albumId}/tracks?limit=50`,
     token
   )
-  return data.tracks.items
+  return data.items
 }
 
 export async function getUserProfile(token: string) {

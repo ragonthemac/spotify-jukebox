@@ -5,7 +5,7 @@ import { useJukeboxStore } from '@/lib/store'
 import { getArtistTopTracks, getArtistAlbums, getAlbumTracks, type SpotifyTrack, type SpotifyAlbum } from '@/lib/spotify'
 import TrackRow from './TrackRow'
 
-function AlbumCard({ album, artistName, token }: { album: SpotifyAlbum; artistName: string; token: string }) {
+function AlbumCard({ album, token }: { album: SpotifyAlbum; token: string }) {
   const [expanded, setExpanded] = useState(false)
   const [tracks, setTracks] = useState<SpotifyTrack[]>([])
   const [loading, setLoading] = useState(false)
@@ -13,7 +13,7 @@ function AlbumCard({ album, artistName, token }: { album: SpotifyAlbum; artistNa
   const toggle = () => {
     if (!expanded && tracks.length === 0) {
       setLoading(true)
-      getAlbumTracks(album.name, artistName, token)
+      getAlbumTracks(album.id, token)
         .then(setTracks)
         .catch(console.error)
         .finally(() => setLoading(false))
@@ -170,7 +170,6 @@ export default function ArtistView() {
                     <AlbumCard
                       key={album.id}
                       album={album}
-                      artistName={activeArtist.name}
                       token={accessToken!}
                     />
                   ))}
