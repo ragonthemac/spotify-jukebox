@@ -32,7 +32,7 @@ function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 120 }: {
   })
 
   return (
-    <div style={{ position: 'relative', height: '100dvh', flexShrink: 0, overflow: 'hidden' }}>
+    <div style={{ position: 'relative', height: archH, flexShrink: 0, overflow: 'hidden' }}>
       {/* Chrome outer ring */}
       <div style={layer(0, chromeH)} />
       <div style={layer(10, '#050200')} />
@@ -200,7 +200,7 @@ export default function HomeView() {
           <div style={{ flex: 1, background: 'linear-gradient(90deg, transparent, #c9a22777, transparent)' }} />
           <div style={{ flex: 1, background: 'linear-gradient(90deg, transparent, #00d4ff55, transparent)' }} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: `12px ${pad}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: `32px ${pad}` }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
             <div style={{ width: 44, height: 16, borderRadius: 4, background: 'linear-gradient(180deg, #1a0e04, #0a0500)', border: '1px solid rgba(201,162,39,0.45)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.9)' }} />
             <span style={{ fontSize: 9, color: 'rgba(201,162,39,0.3)', letterSpacing: '0.1em', fontFamily: 'monospace', textTransform: 'uppercase' }}>insert coin</span>
@@ -264,7 +264,9 @@ export default function HomeView() {
       ) : (
         <div className="flex-1 overflow-y-auto">
 
-          <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={260} />
+          <div style={{ marginTop: 20 }}>
+            <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={260} />
+          </div>
 
           <ChromeStrip height={8} opacity={0.5} />
 
