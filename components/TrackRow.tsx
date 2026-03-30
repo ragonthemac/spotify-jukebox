@@ -1,0 +1,131 @@
+'use client'
+
+import { useState } from 'react'
+import { useJukeboxStore } from '@/lib/store'
+import { playTrack, formatDuration, getAlbumArt } from '@/lib/spotify'
+import type { SpotifyTrack } from '@/lib/spotify'
+
+interface Props {
+  track: SpotifyTrack
+  inQueue?: boolean
+  queueId?: string
+}
+
+export default function TrackRow({ track, inQueue, queueId }: Props) {
+  const {
+    accessToken,
+    deviceId,
+    addToQueue,
+    removeFromQueue,
+    recentlyAdded,
+    currentTrack,
+    isPlaying,
+    setActiveView,
+  } = useJukeboxStore()
+
+  const [justAdded, setJustAdded] = useState(false)
+  const isCurrentlyPlaying = currentTrack?.id === track.id && isPlaying
+  const wasRecentlyAdded = recentlyAdded === track.id
+
+  const art = getAlbumArt(track, 'sm')
+
+  const handleAdd = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    addToQueue(track)
+    setJustAdded(true)
+    setTimeout(() => setJustAdded(false), 1500)
+  }
+
+  const handlePlay = () => {
+    if (accessToken && deviceId) {
+      playTrack(accessToken, track.uri, deviceId)
+      setActiveView('home')
+    } else {
+      addToQueue(track)
+    }
+  }
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (queueId) removeFromQueue(queueId)
+  }
+
+  return (
+    <div
+      onClick={handlePlay}
+      className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200
+        ${isCurrentlyPlaying ? 'bg-pink-500/10 border border-pink-500/20' : 'hover:bg-white/5 active:bg-white/8'}
+        ${wasRecentlyAdded ? 'animate-slide-up' : ''}`}
+    >
+      {/* Art */}
+      <div className={`relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden
+        ${isCurrentlyPlaying ? 'ring-2 ring-pink-500' : ''}`}>
+        {art ? (
+          <img src={art} alt={track.album.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-white/10" />
+        )}
+        {isCurrentlyPlaying && (
+          <div className="absolute inset-0 bg-black/50 flex items-end justify-center pb-1.5">
+            <div className="flex gap-0.5 items-end h-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="w-0.5 bg-pink-400 rounded-full eq-bar" style={{ height: 12 }} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-medium truncate leading-tight
+          ${isCurrentlyPlaying ? 'text-pink-300' : 'text-white'}`}>
+          {track.name}
+          {track.explicit && (
+            <span className="ml-1.5 text-[9px] px-1 py-0.5 rounded bg-white/10 text-white/40 font-normal align-middle">E</span>
+          )}
+        </p>
+        <p className="text-xs text-white/40 truncate mt-0.5">
+          {track.artists.map((a) => a.name).join(', ')}
+        </p>
+      </div>
+
+      {/* Duration */}
+      <span className="text-xs text-white/25 flex-shrink-0 mr-1">
+        {formatDuration(track.duration_ms)}
+      </span>
+
+      {/* Action button */}
+      {inQueue ? (
+        <button
+          onClick={handleRemove}
+          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+            text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-all duration-150"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+      ) : (
+        <button
+          onClick={handleAdd}
+          className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+            transition-all duration-200 active:scale-90
+            ${justAdded
+              ? 'bg-pink-500 glow-pink animate-add-pop'
+              : 'bg-white/8 hover:bg-white/15 text-white/60 hover:text-white'}`}
+        >
+          {justAdded ? (
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6L5 9L10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 2V12M2 7H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          )}
+        </button>
+      )}
+    </div>
+  )
+}

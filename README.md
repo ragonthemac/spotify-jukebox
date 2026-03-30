@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎵 Jukebox — Spotify Jukebox App
 
-## Getting Started
+A retro-modern vertical jukebox powered by the Spotify API.
 
-First, run the development server:
+## Setup
+
+### 1. Create a Spotify App
+
+1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+2. Create a new app
+3. Add `http://localhost:3000/callback` to **Redirect URIs**
+4. Copy your **Client ID**
+
+### 2. Configure Environment
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Edit `.env.local`:
+```
+NEXT_PUBLIC_SPOTIFY_CLIENT_ID=your_client_id_here
+NEXT_PUBLIC_REDIRECT_URI=http://localhost:3000/callback
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> Note: `SPOTIFY_CLIENT_SECRET` is not needed — the app uses PKCE for auth (no secret exposed).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Run
 
-## Learn More
+```bash
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Spotify OAuth** via PKCE (no backend needed)
+- **Search** Spotify's full catalog in real-time
+- **Queue system** — add, remove, skip tracks
+- **Now Playing** with progress bar and controls
+- **Spotify Web Playback SDK** for full playback (Premium required)
+- **New releases** browsing on home screen
+- Neon dark UI with glassmorphism effects
 
-## Deploy on Vercel
+## Playback Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Spotify Premium**: Full playback via Web Playback SDK
+- **Free accounts**: Tap tracks to add to queue; playback controlled from Spotify app
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tech Stack
+
+- Next.js 16 (App Router)
+- TypeScript
+- Tailwind CSS v4
+- Zustand (state management)
+- Spotify Web API + Web Playback SDK
