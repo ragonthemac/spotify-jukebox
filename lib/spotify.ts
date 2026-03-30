@@ -179,11 +179,10 @@ export interface SpotifyAlbum {
 
 export async function searchTracks(
   query: string,
-  token: string,
-  limit = 20
+  token: string
 ): Promise<SpotifyTrack[]> {
   const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
-    `/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
+    `/search?q=${encodeURIComponent(query)}&type=track`,
     token
   )
   return data.tracks.items
