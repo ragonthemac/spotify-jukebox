@@ -22,33 +22,44 @@ const chromeH = 'linear-gradient(90deg, #e8d5b0 0%, #c9a460 20%, #f5e8c0 50%, #b
 function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 0 }: {
   albumArt?: string; isPlaying: boolean; vinylSize?: number; topPad?: number
 }) {
-  const archH = topPad + Math.round(vinylSize / 2)
-  const r = '100% 100% 0 0'
+  const vR = vinylSize / 2
+  const vCenterY = topPad + vR
+  const archH = topPad + vR
 
-  const layer = (inset: number, bg: string, extra?: React.CSSProperties) => ({
-    position: 'absolute' as const,
-    top: inset, left: inset, right: inset, bottom: 0,
-    borderRadius: r, background: bg, ...extra,
-  })
+  // Circular ring: each layer is a full circle centered on the vinyl center,
+  // with radius = vinyl radius + gap. Painted large-to-small to create rings.
+  const ring = (gap: number, bg: string, extra?: React.CSSProperties) => {
+    const d = (vR + gap) * 2
+    return {
+      position: 'absolute' as const,
+      width: d, height: d,
+      borderRadius: '50%',
+      top: vCenterY - (vR + gap),
+      left: '50%',
+      transform: 'translateX(-50%)',
+      background: bg,
+      ...extra,
+    }
+  }
 
   return (
     <div style={{ position: 'relative', height: archH, flexShrink: 0, overflow: 'hidden' }}>
       {/* Chrome outer ring */}
-      <div style={layer(0, chromeH)} />
-      <div style={layer(10, '#050200')} />
+      <div style={ring(60, chromeH)} />
+      <div style={ring(50, '#050200')} />
       {/* Pink neon */}
-      <div style={layer(14, '#ff2d78', { boxShadow: '0 0 14px 4px #ff2d7855', animation: 'neon-pulse 2.5s ease-in-out 0s infinite' })} />
-      <div style={layer(20, '#050200')} />
+      <div style={ring(44, '#ff2d78', { boxShadow: '0 0 16px 5px #ff2d7866', animation: 'neon-pulse 2.5s ease-in-out 0s infinite' })} />
+      <div style={ring(38, '#050200')} />
       {/* Cyan neon */}
-      <div style={layer(24, '#00d4ff', { boxShadow: '0 0 12px 3px #00d4ff44', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' })} />
-      <div style={layer(30, '#050200')} />
+      <div style={ring(32, '#00d4ff', { boxShadow: '0 0 14px 4px #00d4ff55', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' })} />
+      <div style={ring(26, '#050200')} />
       {/* Inner chrome ring */}
-      <div style={layer(34, chromeH, { opacity: 0.85 })} />
-      <div style={layer(40, '#050200')} />
+      <div style={ring(20, chromeH, { opacity: 0.85 })} />
+      <div style={ring(14, '#050200')} />
       {/* Gold accent */}
-      <div style={layer(44, '#c9a227', { opacity: 0.55 })} />
+      <div style={ring(8, '#c9a227', { opacity: 0.55 })} />
       {/* Dark interior */}
-      <div style={layer(48, '#030100')} />
+      <div style={ring(2, '#030100')} />
 
       {/* Vinyl */}
       <div style={{ position: 'absolute', top: topPad, left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
@@ -56,14 +67,11 @@ function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 0 }: {
       </div>
 
       {/* Accent dot row */}
-      <div style={{ position: 'absolute', top: 68, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 14, zIndex: 3 }}>
+      <div style={{ position: 'absolute', top: Math.max(topPad - 50, 8), left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 14, zIndex: 3 }}>
         {['#ff2d78', '#c9a227', '#00d4ff', '#a855f7', '#00d4ff', '#c9a227', '#ff2d78'].map((c, i) => (
           <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: c, boxShadow: `0 0 7px 2px ${c}88`, animation: `neon-pulse 2s ease-in-out ${i * 0.25}s infinite` }} />
         ))}
       </div>
-
-      {/* Top chrome ornament */}
-      <div style={{ position: 'absolute', top: 56, left: '50%', transform: 'translateX(-50%)', width: 60, height: 12, background: chromeH, borderRadius: '0 0 30px 30px', zIndex: 3, opacity: 0.7 }} />
 
       {/* Corner bolt clusters */}
       {[{ left: 28, bottom: 14 }, { right: 28, bottom: 14 }].map((pos, i) => (
