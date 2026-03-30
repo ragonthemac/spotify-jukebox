@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
-import { playTrack, formatDuration, getAlbumArt } from '@/lib/spotify'
+import { formatDuration, getAlbumArt } from '@/lib/spotify'
 import type { SpotifyTrack } from '@/lib/spotify'
 
 interface Props {
@@ -13,14 +13,11 @@ interface Props {
 
 export default function TrackRow({ track, inQueue, queueId }: Props) {
   const {
-    accessToken,
-    deviceId,
     addToQueue,
     removeFromQueue,
     recentlyAdded,
     currentTrack,
     isPlaying,
-    setActiveView,
   } = useJukeboxStore()
 
   const [justAdded, setJustAdded] = useState(false)
@@ -29,20 +26,11 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
 
   const art = getAlbumArt(track, 'sm')
 
-  const handleAdd = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleAdd = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
     addToQueue(track)
     setJustAdded(true)
     setTimeout(() => setJustAdded(false), 1500)
-  }
-
-  const handlePlay = () => {
-    if (accessToken && deviceId) {
-      playTrack(accessToken, track.uri, deviceId)
-      setActiveView('home')
-    } else {
-      addToQueue(track)
-    }
   }
 
   const handleRemove = (e: React.MouseEvent) => {
@@ -52,7 +40,7 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
 
   return (
     <div
-      onClick={handlePlay}
+      onClick={() => handleAdd()}
       className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200
         ${isCurrentlyPlaying ? 'bg-pink-500/10 border border-pink-500/20' : 'hover:bg-white/5 active:bg-white/8'}
         ${wasRecentlyAdded ? 'animate-slide-up' : ''}`}
