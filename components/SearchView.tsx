@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import { searchTracks } from '@/lib/spotify'
 import TrackRow from './TrackRow'
@@ -17,6 +17,8 @@ export default function SearchView() {
     setActiveView,
   } = useJukeboxStore()
 
+  const [searchError, setSearchError] = useState<string | null>(null)
+
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -32,9 +34,13 @@ export default function SearchView() {
         return
       }
       setIsSearching(true)
+      setSearchError(null)
       searchTracks(q, accessToken, 25)
         .then(setSearchResults)
-        .catch(console.error)
+        .catch((err) => {
+          console.error(err)
+          setSearchError(String(err?.message ?? err))
+        })
         .finally(() => setIsSearching(false))
     },
     [accessToken, setSearchResults, setIsSearching]
@@ -112,7 +118,13 @@ export default function SearchView() {
           </div>
         )}
 
-        {!isSearching && searchQuery && searchResults.length === 0 && (
+        {!isSearching && searchError && (
+          <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+            <p className="text-red-400 text-xs font-mono break-all">{searchError}</p>
+          </div>
+        )}
+
+        {!isSearching && !searchError && searchQuery && searchResults.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <div className="text-4xl opacity-20">🎵</div>
             <p className="text-white/40 text-sm">No results for &ldquo;{searchQuery}&rdquo;</p>
