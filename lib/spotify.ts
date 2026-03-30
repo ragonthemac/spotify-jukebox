@@ -241,6 +241,23 @@ export async function getArtistTopTracks(artistName: string, token: string): Pro
   return data.tracks.items
 }
 
+export async function getArtistAlbums(artistName: string, token: string): Promise<SpotifyAlbum[]> {
+  const data = await spotifyFetch<{ albums: { items: SpotifyAlbum[] } }>(
+    `/search?q=artist:${encodeURIComponent(artistName)}&type=album`,
+    token
+  )
+  return data.albums.items
+}
+
+export async function getAlbumTracks(albumName: string, artistName: string, token: string): Promise<SpotifyTrack[]> {
+  const q = `album:${encodeURIComponent(albumName)} artist:${encodeURIComponent(artistName)}`
+  const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
+    `/search?q=${q}&type=track`,
+    token
+  )
+  return data.tracks.items
+}
+
 export async function getUserProfile(token: string) {
   return spotifyFetch<{ display_name: string; images: { url: string }[] }>(
     '/me',
