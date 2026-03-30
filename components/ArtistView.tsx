@@ -9,13 +9,18 @@ export default function ArtistView() {
   const { activeArtist, accessToken, setActiveView } = useJukeboxStore()
   const [tracks, setTracks] = useState<SpotifyTrack[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!activeArtist || !accessToken) return
     setLoading(true)
+    setError(null)
     getArtistTopTracks(activeArtist.id, accessToken)
       .then(setTracks)
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err)
+        setError(String(err?.message ?? err))
+      })
       .finally(() => setLoading(false))
   }, [activeArtist, accessToken])
 
@@ -54,6 +59,12 @@ export default function ArtistView() {
       {/* Track list */}
       <div className="flex-1 overflow-y-auto px-4 pb-4 pt-2">
         <p className="text-white/30 text-xs uppercase tracking-widest mb-3">Popular</p>
+
+        {error && (
+          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 mb-3">
+            <p className="text-red-400 text-xs font-mono break-all">{error}</p>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex flex-col gap-3">

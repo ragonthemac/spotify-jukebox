@@ -235,7 +235,7 @@ export async function searchArtists(query: string, token: string): Promise<Spoti
 
 export async function getArtistTopTracks(artistId: string, token: string): Promise<SpotifyTrack[]> {
   const data = await spotifyFetch<{ tracks: SpotifyTrack[] }>(
-    `/artists/${artistId}/top-tracks`,
+    `/artists/${artistId}/top-tracks?market=US`,
     token
   )
   return data.tracks
