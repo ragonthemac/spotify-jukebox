@@ -39,19 +39,19 @@ export default function BottomNav() {
   const { activeView, setActiveView, queue } = useJukeboxStore()
 
   return (
-    <div className="flex-shrink-0 flex items-center justify-around px-4 pb-safe pt-2 pb-3 border-t border-white/5">
+    <div className="flex-shrink-0 flex items-center justify-around px-4 pb-safe pt-2 pb-3 border-t" style={{ borderColor: 'rgba(201,162,39,0.15)', background: 'rgba(14,8,0,0.95)' }}>
       {tabs.map((tab) => {
         const active = activeView === tab.id
           || (tab.id === 'search' && activeView === 'artist')
           || (tab.id === 'home' && (activeView === 'album' || activeView === 'playlist'))
-        const accent = tab.id === 'home' ? '#ff2d78' : tab.id === 'search' ? '#00d4ff' : '#a855f7'
+        const accent = '#c9a227'
 
         return (
           <button
             key={tab.id}
             onClick={() => setActiveView(tab.id)}
             className={`flex flex-col items-center gap-1 py-1 px-5 rounded-xl transition-all duration-200
-              ${active ? 'opacity-100' : 'opacity-40 hover:opacity-60'}`}
+              ${active ? 'opacity-100' : 'opacity-30 hover:opacity-50'}`}
           >
             <div className="relative">
               {tab.icon(active)}
