@@ -36,13 +36,19 @@ function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 120 }: {
       {/* Chrome outer ring */}
       <div style={layer(0, chromeH)} />
       <div style={layer(10, '#050200')} />
-      {/* Inner chrome ring */}
-      <div style={layer(14, chromeH, { opacity: 0.85 })} />
+      {/* Pink neon */}
+      <div style={layer(14, '#ff2d78', { boxShadow: '0 0 14px 4px #ff2d7855', animation: 'neon-pulse 2.5s ease-in-out 0s infinite' })} />
       <div style={layer(20, '#050200')} />
+      {/* Cyan neon */}
+      <div style={layer(24, '#00d4ff', { boxShadow: '0 0 12px 3px #00d4ff44', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' })} />
+      <div style={layer(30, '#050200')} />
+      {/* Inner chrome ring */}
+      <div style={layer(34, chromeH, { opacity: 0.85 })} />
+      <div style={layer(40, '#050200')} />
       {/* Gold accent */}
-      <div style={layer(24, '#c9a227', { opacity: 0.55 })} />
+      <div style={layer(44, '#c9a227', { opacity: 0.55 })} />
       {/* Dark interior */}
-      <div style={layer(28, '#030100')} />
+      <div style={layer(48, '#030100')} />
 
       {/* Vinyl */}
       <div style={{ position: 'absolute', top: topPad, left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
@@ -180,9 +186,11 @@ export default function HomeView() {
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ color: 'var(--retro-cream)' }}>
 
-      {/* Arch side extension — single chrome rail matches outermost arch ring */}
+      {/* Arch side extension — chrome rail + neon accent lights */}
       <div style={{ position: 'fixed', top: 0, left: 0, width: 10, height: '100dvh', background: chrome, opacity: 0.75, zIndex: 49, pointerEvents: 'none' }} />
       <div style={{ position: 'fixed', top: 0, right: 0, width: 10, height: '100dvh', background: chrome, opacity: 0.75, zIndex: 49, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: 0, left: 10, width: 2, height: '100dvh', background: '#ff2d78', opacity: 0.55, boxShadow: '0 0 8px 3px #ff2d7866', zIndex: 48, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
+      <div style={{ position: 'fixed', top: 0, right: 10, width: 2, height: '100dvh', background: '#00d4ff', opacity: 0.55, boxShadow: '0 0 8px 3px #00d4ff66', zIndex: 48, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
 
       {/* ── Top header ── */}
       <div style={{ flexShrink: 0 }}>
@@ -210,7 +218,6 @@ export default function HomeView() {
             </button>
           </div>
         </div>
-        <ChromeStrip height={10} opacity={0.6} />
       </div>
 
       {query ? (
@@ -257,7 +264,7 @@ export default function HomeView() {
       ) : (
         <div className="flex-1 overflow-y-auto">
 
-          <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={120} />
+          <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={1000} topPad={180} />
 
           <ChromeStrip height={8} opacity={0.5} />
 
