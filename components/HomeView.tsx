@@ -11,11 +11,56 @@ import { playTrack } from '@/lib/spotify'
 import SpinningVinyl from './SpinningVinyl'
 import TrackRow from './TrackRow'
 
+/* ─────────────────────────────────────────────
+   Design-space helpers (1080 × 1920 canvas)
+───────────────────────────────────────────── */
+const dw = (px: number) => `${(px / 1080 * 100).toFixed(3)}vw`
+const dh = (px: number) => `${(px / 1920 * 100).toFixed(3)}vh`
+// shorthand for pixel size at 1080px
+const ds = (px: number) => ({
+  width: dw(px), height: dw(px),   // square using vw
+})
+
 function rowLabel(i: number) {
-  return `${String.fromCharCode(65 + Math.floor(i / 9))}${(i % 9) + 1}`
+  return `${String.fromCharCode(65 + Math.floor(i / 3))}${(i % 3) + 1}`
 }
 
-const CHROME = 'linear-gradient(90deg, #3a2000, #c9a227, #f5e070, #f0c84a, #f5e070, #c9a227, #3a2000)'
+/* Arrow decoration component used for section headers */
+function SectionArrow({ flip }: { flip?: boolean }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', transform: flip ? 'scaleX(-1)' : undefined }}>
+      {/* Triangle tip */}
+      <div style={{
+        width: 0, height: 0,
+        borderTop: `${dh(12)} solid transparent`,
+        borderBottom: `${dh(12)} solid transparent`,
+        borderRight: `${dw(16)} solid #D9D9D9`,
+        flexShrink: 0,
+      }} />
+      {/* Gray bar */}
+      <div style={{ width: dw(43), height: dh(12), background: '#D9D9D9', flexShrink: 0 }} />
+      {/* Gradient shaft */}
+      <div style={{
+        width: dw(99), height: dh(23),
+        background: 'linear-gradient(270deg, #5F0000 24.36%, #FF6F00 102.02%)',
+        borderRadius: 2, flexShrink: 0,
+      }} />
+    </div>
+  )
+}
+
+function ProgressDots({ total = 5, active = 0 }: { total?: number; active?: number }) {
+  return (
+    <div style={{ display: 'flex', gap: dw(12) }}>
+      {Array.from({ length: total }).map((_, i) => (
+        <div key={i} style={{
+          width: dw(7), height: dw(7), borderRadius: '50%',
+          background: i === active ? '#FFA500' : 'rgba(255,165,0,0.4)',
+        }} />
+      ))}
+    </div>
+  )
+}
 
 export default function HomeView() {
   const {
@@ -26,7 +71,6 @@ export default function HomeView() {
   const [recentTracks, setRecentTracks] = useState<SpotifyTrack[]>([])
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([])
   const [loading, setLoading] = useState(true)
-
   const [query, setQuery] = useState('')
   const [trackResults, setTrackResults] = useState<SpotifyTrack[]>([])
   const [artistResults, setArtistResults] = useState<SpotifyArtist[]>([])
@@ -60,10 +104,9 @@ export default function HomeView() {
   }, [query, doSearch])
 
   const togglePlay = () => {
-    if (isPlaying) { globalPlayer?.pause() } else { globalPlayer?.resume() }
+    if (isPlaying) globalPlayer?.pause(); else globalPlayer?.resume()
     setIsPlaying(!isPlaying)
   }
-
   const handleSkip = () => {
     const next = skipNext()
     if (next && accessToken && deviceId) playTrack(accessToken, next.uri, deviceId)
@@ -73,124 +116,122 @@ export default function HomeView() {
   const progress = durationMs > 0 ? (progressMs / durationMs) * 100 : 0
   const albumArt = currentTrack?.album.images[0]?.url
 
+  // 6 items for track grid — prefer queue, then recently played
+  const gridTracks: SpotifyTrack[] = queue.length > 0
+    ? queue.slice(0, 6).map(qt => qt as unknown as SpotifyTrack)
+    : recentTracks.slice(0, 6)
+
   return (
-    <div
-      className="h-full flex flex-col overflow-hidden"
-      style={{ background: '#080400', color: 'var(--retro-cream)', position: 'relative' }}
-    >
-      {/* Side pillar glows */}
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+
+      {/* ── Jukebox photo overlay (mix-blend-mode: lighten removes black bg) ── */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/jukebox.png"
+        alt=""
+        style={{
+          position: 'absolute',
+          width: dw(1079), height: dh(1914),
+          left: dw(1), top: dh(163),
+          mixBlendMode: 'lighten',
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      />
+
+      {/* ── White glowing panel (jukebox body interior/screen) ── */}
       <div style={{
-        position: 'absolute', left: 0, top: 0, bottom: 0, width: '5px', zIndex: 20, pointerEvents: 'none',
-        background: 'linear-gradient(180deg, transparent 5%, #f5785a 20%, #f5785a 70%, transparent 95%)',
-        boxShadow: '3px 0 20px 5px rgba(245,120,90,0.5)',
-        borderRadius: '0 3px 3px 0',
-      }} />
-      <div style={{
-        position: 'absolute', right: 0, top: 0, bottom: 0, width: '5px', zIndex: 20, pointerEvents: 'none',
-        background: 'linear-gradient(180deg, transparent 5%, #5bc8e8 20%, #5bc8e8 70%, transparent 95%)',
-        boxShadow: '-3px 0 20px 5px rgba(91,200,232,0.5)',
-        borderRadius: '3px 0 0 3px',
+        position: 'absolute',
+        left: dw(-166), top: dh(71),
+        width: dw(1429), height: dh(1034),
+        background: '#FFFFFF',
+        border: `${dw(0.7)} solid #000`,
+        boxShadow: `0 0 ${dw(12)} #FFF200`,
+        zIndex: 1,
+        pointerEvents: 'none',
       }} />
 
-      {/* ════════════════════════════════════════
-          TOP CHROME STRIP
-      ════════════════════════════════════════ */}
-      <div style={{ height: '5px', background: CHROME, flexShrink: 0, boxShadow: '0 2px 10px rgba(201,162,39,0.45)' }} />
+      {/* ── Black arch background rectangle ── */}
+      <div style={{
+        position: 'absolute',
+        left: dw(227), top: dh(390),
+        width: dw(615), height: dh(305),
+        background: '#000',
+        zIndex: 2,
+      }} />
 
-      {/* ════════════════════════════════════════
-          ARCH CROWN — full width, vinyl inside
-      ════════════════════════════════════════ */}
-      <div className="flex-shrink-0" style={{ position: 'relative' }}>
-        {/* Gold chrome arch frame (outer) */}
+      {/* ── Arch vinyl viewport (arched top, vinyl spinning inside) ── */}
+      <div style={{
+        position: 'absolute',
+        left: dw(270), top: dh(422),
+        width: dw(539), height: dh(272),
+        borderRadius: `${dw(500)} ${dw(500)} 0 0`,
+        overflow: 'hidden',
+        background: '#000',
+        zIndex: 3,
+      }}>
         <div style={{
-          margin: '0 10px',
-          padding: '3px 3px 0 3px',
-          borderRadius: '50% 50% 0 0 / 100% 100% 0 0',
-          background: CHROME,
-          boxShadow: '0 0 40px rgba(201,162,39,0.4), 0 0 80px rgba(201,162,39,0.15)',
+          position: 'absolute',
+          top: 0, left: '50%',
+          transform: 'translateX(-50%)',
         }}>
-          {/* Arch interior */}
-          <div style={{
-            position: 'relative',
-            height: '215px',
-            borderRadius: '50% 50% 0 0 / 100% 100% 0 0',
-            overflow: 'hidden',
-            background: 'radial-gradient(ellipse at 50% 115%, #e8b828 0%, #c03820 22%, #1a6868 52%, #060318 82%)',
-            boxShadow: 'inset 0 -12px 36px rgba(0,0,0,0.7)',
-          }}>
-            {/* Top glow halo */}
-            <div style={{
-              position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)',
-              width: '120px', height: '20px', borderRadius: '50%',
-              background: 'rgba(255,220,80,0.4)', filter: 'blur(12px)',
-            }} />
-
-            {/* ♪ JUKEBOX ♪ marquee — sits above the vinyl */}
-            <div style={{
-              position: 'absolute', top: '14px', left: '50%', transform: 'translateX(-50%)',
-              fontFamily: 'Playfair Display, Georgia, serif',
-              fontSize: '11px', fontWeight: 900,
-              letterSpacing: '0.35em', textTransform: 'uppercase',
-              color: 'rgba(255,242,180,0.95)',
-              textShadow: '0 0 16px rgba(255,210,70,1), 0 0 32px rgba(255,180,30,0.8)',
-              whiteSpace: 'nowrap', zIndex: 2,
-            }}>
-              ♪ &nbsp;JUKEBOX&nbsp; ♪
-            </div>
-
-            {/* Colour band strips (Wurlitzer bubble tubes) */}
-            {[
-              { top: 36, h: 7, color: 'rgba(240,160,35,0.2)' },
-              { top: 47, h: 5, color: 'rgba(200,70,50,0.18)' },
-              { top: 56, h: 5, color: 'rgba(30,160,160,0.18)' },
-            ].map((b, i) => (
-              <div key={i} style={{
-                position: 'absolute', left: '14%', right: '14%',
-                top: `${b.top}px`, height: `${b.h}px`,
-                background: b.color, borderRadius: '4px', filter: 'blur(4px)',
-              }} />
-            ))}
-
-            {/* Vinyl — large, top ~73% visible */}
-            <div style={{
-              position: 'absolute',
-              bottom: '-80px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 1,
-            }}>
-              <SpinningVinyl albumArt={albumArt} isPlaying={isPlaying} size={295} />
-            </div>
-          </div>
+          <SpinningVinyl albumArt={albumArt} isPlaying={isPlaying} size={510} />
         </div>
-
-        {/* Chrome trim below arch */}
-        <div style={{
-          margin: '0 6px',
-          height: '9px',
-          background: CHROME,
-          boxShadow: '0 3px 14px rgba(201,162,39,0.5)',
-        }} />
-        <div style={{ margin: '3px 16px 0', height: '2px', background: 'rgba(201,162,39,0.25)' }} />
       </div>
 
-      {/* ════════════════════════════════════════
-          SONG INFO + CONTROLS (middle strip)
-      ════════════════════════════════════════ */}
-      <div className="flex-shrink-0 flex flex-col items-center px-5 pt-3 pb-3" style={{ background: 'rgba(4,2,0,0.95)' }}>
-        {/* Track title & artist */}
-        <div className="text-center mb-3">
+      {/* ── Utility icons (top-right, above white panel) ── */}
+      <div style={{
+        position: 'absolute',
+        right: dw(20), top: dh(80),
+        display: 'flex', gap: dw(16),
+        zIndex: 10,
+      }}>
+        <button
+          onClick={() => { setQuery(''); setActiveView('search') }}
+          style={{ color: 'rgba(0,0,0,0.5)', padding: `${dh(4)} ${dw(4)}` }}
+        >
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+        <button
+          onClick={() => { clearToken(); window.location.reload() }}
+          style={{ color: 'rgba(0,0,0,0.5)', padding: `${dh(4)} ${dw(4)}` }}
+        >
+          <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+            <path d="M5 2H2.5A1.5 1.5 0 001 3.5v7A1.5 1.5 0 002.5 12H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+            <path d="M9 10l3-3-3-3M12 7H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* ─────────────────────────────────────
+          SONG INFO — centered at y≈38.9vh
+      ───────────────────────────────────── */}
+      <div style={{
+        position: 'absolute',
+        left: '50%', transform: 'translateX(-50%)',
+        top: dh(747),
+        width: dw(540),
+        zIndex: 5,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: dh(8),
+      }}>
+        {/* Track title + artist */}
+        <div style={{ textAlign: 'center' }}>
           {currentTrack ? (
             <>
-              <h2 className="font-retro font-bold leading-tight mb-0.5" style={{ fontSize: '18px', color: 'var(--retro-cream)' }}>
+              <p style={{ fontSize: dw(22), fontWeight: 700, color: '#1a0a00', lineHeight: 1.25, marginBottom: dh(4) }}>
                 {currentTrack.name}
-              </h2>
-              <p className="font-typewriter" style={{ fontSize: '12px', color: 'var(--retro-gold)' }}>
+              </p>
+              <p style={{ fontSize: dw(14), color: '#5a3000' }}>
                 {currentTrack.artists.map((a, i) => (
                   <span key={a.id}>
-                    {i > 0 && <span style={{ color: 'var(--retro-muted)' }}> &amp; </span>}
+                    {i > 0 && ', '}
                     <button
                       onClick={() => { setActiveArtist({ id: a.id, name: a.name }); setActiveView('artist') }}
+                      style={{ color: '#FF6F00' }}
                       className="hover:underline"
                     >
                       {a.name}
@@ -201,30 +242,32 @@ export default function HomeView() {
             </>
           ) : (
             <>
-              <h2 className="font-retro font-bold" style={{ fontSize: '18px', color: 'var(--retro-muted)' }}>No track playing</h2>
-              <p className="font-typewriter mt-0.5" style={{ fontSize: '12px', color: 'var(--retro-muted)' }}>Search the catalog below</p>
+              <p style={{ fontSize: dw(20), fontWeight: 600, color: 'rgba(50,20,0,0.6)' }}>No track playing</p>
+              <p style={{ fontSize: dw(13), color: 'rgba(50,20,0,0.4)', marginTop: dh(4) }}>Search the catalog below</p>
             </>
           )}
         </div>
 
-        {/* Play / pause + skip */}
-        <div className="flex items-center gap-5 mb-3">
+        {/* Controls row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: dw(20) }}>
           <button
             onClick={togglePlay}
-            className="w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95"
             style={{
-              background: 'linear-gradient(145deg, #e8c040, #c9a227, #a07820)',
-              color: '#0e0800',
-              boxShadow: '0 0 20px rgba(201,162,39,0.55), 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,240,120,0.4)',
+              width: dw(52), height: dw(52), borderRadius: '50%',
+              background: '#FFA500',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff',
+              boxShadow: `0 ${dh(3)} ${dw(12)} rgba(255,165,0,0.6)`,
+              border: `${dw(2)} solid #cc7700`,
             }}
           >
             {isPlaying ? (
-              <svg width="16" height="16" viewBox="0 0 18 18" fill="currentColor">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
                 <rect x="3" y="2" width="4" height="14" rx="1.5" />
                 <rect x="11" y="2" width="4" height="14" rx="1.5" />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 18 18" fill="currentColor">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
                 <path d="M4 3L16 9L4 15V3Z" />
               </svg>
             )}
@@ -233,239 +276,308 @@ export default function HomeView() {
           {queue.length > 0 && (
             <button
               onClick={handleSkip}
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
               style={{
-                border: '1.5px solid rgba(201,162,39,0.4)',
-                color: 'var(--retro-gold)',
-                background: 'rgba(201,162,39,0.08)',
+                width: dw(38), height: dw(38), borderRadius: '50%',
+                background: 'rgba(255,165,0,0.2)',
+                border: `${dw(1.5)} solid #FFA500`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#cc7700',
               }}
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M2 2.5L8 7L2 11.5V2.5Z" fill="currentColor" opacity="0.7" />
+                <path d="M2 2.5L8 7L2 11.5V2.5Z" fill="currentColor" opacity="0.8" />
                 <rect x="9" y="2.5" width="3" height="9" rx="1" fill="currentColor" />
               </svg>
             </button>
           )}
+
+          {/* Volume */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: dw(8), width: dw(160) }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ color: '#cc7700', flexShrink: 0 }}>
+              <path d="M2 5H4.5L8 2V12L4.5 9H2V5Z" fill="currentColor" />
+              {volume > 0.35 && <path d="M10 4.5C11 5.5 11 8.5 10 9.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />}
+              {volume > 0.65 && <path d="M11.5 3C13 4.5 13 9.5 11.5 11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />}
+            </svg>
+            <input
+              type="range" min={0} max={1} step={0.02} value={volume}
+              onChange={(e) => { const v = parseFloat(e.target.value); setVolume(v); globalPlayer?.setVolume(v) }}
+              style={{ flex: 1, accentColor: '#FFA500' }}
+            />
+          </div>
         </div>
 
         {/* Progress bar */}
         {currentTrack && (
-          <div className="w-full mb-2">
-            <div style={{ height: '3px', background: 'rgba(201,162,39,0.15)', borderRadius: '99px', overflow: 'hidden', marginBottom: '3px' }}>
+          <div style={{ width: '100%' }}>
+            <div style={{ height: dh(4), background: 'rgba(0,0,0,0.1)', borderRadius: 99, overflow: 'hidden', marginBottom: dh(4) }}>
               <div style={{
                 width: `${progress}%`, height: '100%',
-                background: 'linear-gradient(90deg, #c9a227, #f5e070)',
-                borderRadius: '99px', transition: 'width 0.5s linear',
-                boxShadow: '0 0 6px rgba(201,162,39,0.7)',
+                background: '#FFA500',
+                borderRadius: 99, transition: 'width 0.5s linear',
               }} />
             </div>
-            <div className="flex justify-between">
-              <span className="font-typewriter" style={{ fontSize: '10px', color: 'var(--retro-muted)' }}>{formatDuration(progressMs)}</span>
-              <span className="font-typewriter" style={{ fontSize: '10px', color: 'var(--retro-muted)' }}>{formatDuration(durationMs)}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: dw(11), color: 'rgba(0,0,0,0.4)' }}>{formatDuration(progressMs)}</span>
+              <span style={{ fontSize: dw(11), color: 'rgba(0,0,0,0.4)' }}>{formatDuration(durationMs)}</span>
             </div>
           </div>
         )}
-
-        {/* Volume */}
-        <div className="flex items-center gap-2 w-full" style={{ maxWidth: '200px' }}>
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ color: 'var(--retro-muted)', flexShrink: 0 }}>
-            <path d="M2 5H4.5L8 2V12L4.5 9H2V5Z" fill="currentColor" />
-            {volume > 0.3 && <path d="M10 4.5C11 5.5 11 8.5 10 9.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />}
-            {volume > 0.65 && <path d="M11.5 3C13 4.5 13 9.5 11.5 11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />}
-          </svg>
-          <input
-            type="range" min={0} max={1} step={0.02} value={volume}
-            onChange={(e) => {
-              const v = parseFloat(e.target.value)
-              setVolume(v)
-              globalPlayer?.setVolume(v)
-            }}
-            className="flex-1"
-            style={{ accentColor: 'var(--retro-gold)' }}
-          />
-        </div>
       </div>
 
-      {/* Chrome separator */}
-      <div style={{ height: '5px', background: CHROME, flexShrink: 0, boxShadow: '0 2px 10px rgba(201,162,39,0.4)' }} />
+      {/* ─────────────────────────────────────
+          DARK BODY SECTION — y≈48.85vh
+      ───────────────────────────────────── */}
+      <div style={{
+        position: 'absolute',
+        left: dw(202), top: dh(938),
+        width: dw(681), height: dh(519),
+        background: '#260C01',
+        zIndex: 4,
+        overflow: 'hidden',
+      }} />
 
-      {/* ════════════════════════════════════════
-          LOWER PANEL — header, search, browse
-      ════════════════════════════════════════ */}
-      <div className="flex-1 overflow-y-auto" style={{
-        backgroundImage: [
-          'repeating-linear-gradient(45deg,  rgba(201,162,39,0.04) 0, rgba(201,162,39,0.04) 1px, transparent 0, transparent 50%)',
-          'repeating-linear-gradient(-45deg, rgba(201,162,39,0.04) 0, rgba(201,162,39,0.04) 1px, transparent 0, transparent 50%)',
-        ].join(', '),
-        backgroundSize: '13px 13px',
+      {/* ── Search bar — y≈49.74vh ── */}
+      <div style={{
+        position: 'absolute',
+        left: dw(236), top: dh(955),
+        width: dw(607), height: dh(43),
+        border: `${dh(1)} solid #FFA500`,
+        borderRadius: dw(10),
+        background: 'rgba(255,255,255,0.95)',
+        display: 'flex', alignItems: 'center', gap: dw(8),
+        padding: `0 ${dw(12)}`,
+        zIndex: 6,
       }}>
-        {/* ♪ JUKEBOX header row */}
-        <div className="flex items-center justify-between px-4 pt-3 pb-2">
-          <span className="font-retro text-xs tracking-widest uppercase" style={{ color: 'var(--retro-gold)', letterSpacing: '0.22em' }}>
-            ♪ Jukebox
-          </span>
-          <div className="flex items-center gap-4">
-            <button onClick={() => { setQuery(''); setActiveView('search') }} style={{ color: 'var(--retro-muted)' }}>
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-                <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </button>
-            <button onClick={() => { clearToken(); window.location.reload() }} style={{ color: 'var(--retro-muted)' }}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M5 2H2.5A1.5 1.5 0 001 3.5v7A1.5 1.5 0 002.5 12H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                <path d="M9 10l3-3-3-3M12 7H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Search bar */}
-        <div className="px-4 pb-2">
-          <div className="flex items-center gap-2 px-3 h-9 rounded-lg" style={{ background: 'rgba(201,162,39,0.07)', border: '1px solid rgba(201,162,39,0.22)' }}>
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style={{ color: 'var(--retro-muted)', flexShrink: 0 }}>
-              <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ color: '#cc7700', flexShrink: 0 }}>
+          <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search the catalog…"
+          style={{
+            flex: 1, background: 'transparent', border: 'none', outline: 'none',
+            fontSize: dw(13), color: '#2a1000',
+          }}
+        />
+        {query && (
+          <button onClick={() => setQuery('')} style={{ color: '#cc7700' }}>
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
+              <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search the catalog…"
-              className="flex-1 bg-transparent outline-none"
-              style={{ color: 'var(--retro-cream)', caretColor: 'var(--retro-gold)', fontSize: '13px' }}
-            />
-            {query && (
-              <button onClick={() => setQuery('')} style={{ color: 'var(--retro-muted)' }}>
-                <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
-                  <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </button>
-            )}
-          </div>
-        </div>
+          </button>
+        )}
+      </div>
 
-        {query ? (
-          /* ── Search results ── */
-          <div className="px-4 pb-4">
-            {isSearching ? (
-              <div className="flex flex-col gap-3 mt-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3">
-                    <div className="w-10 h-10 rounded skeleton flex-shrink-0" />
-                    <div className="flex-1">
-                      <div className="h-3 w-32 rounded skeleton mb-2" />
-                      <div className="h-2.5 w-20 rounded skeleton" />
-                    </div>
+      {/* ─────────────────────────────────────
+          SEARCH RESULTS OVERLAY
+          (replaces My Playlists + Recently Played when searching)
+      ───────────────────────────────────── */}
+      {query && (
+        <div style={{
+          position: 'absolute',
+          left: dw(202), top: dh(1010),
+          width: dw(681), height: dh(440),
+          background: '#260C01',
+          overflowY: 'auto',
+          padding: `${dh(12)} ${dw(20)}`,
+          zIndex: 7,
+        }}>
+          {isSearching ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} style={{ display: 'flex', gap: dw(12), padding: `${dh(8)} 0`, alignItems: 'center' }}>
+                <div style={{ width: dw(40), height: dw(40), borderRadius: dw(6), flexShrink: 0 }} className="skeleton" />
+                <div>
+                  <div style={{ width: dw(160), height: dh(10), borderRadius: 4, marginBottom: dh(6) }} className="skeleton" />
+                  <div style={{ width: dw(100), height: dh(8), borderRadius: 4 }} className="skeleton" />
+                </div>
+              </div>
+            ))
+          ) : (
+            <>
+              {artistResults.map((artist) => (
+                <button key={artist.id}
+                  onClick={() => { setActiveArtist({ id: artist.id, name: artist.name, imageUrl: artist.images[0]?.url }); setActiveView('artist') }}
+                  style={{ display: 'flex', alignItems: 'center', gap: dw(12), width: '100%', textAlign: 'left', padding: `${dh(8)} 0` }}
+                >
+                  <div style={{ width: dw(40), height: dw(40), borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.1)', flexShrink: 0 }}>
+                    {artist.images[0]?.url && <img src={artist.images[0].url} alt={artist.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <>
-                {artistResults.map((artist) => (
-                  <button key={artist.id}
-                    onClick={() => { setActiveArtist({ id: artist.id, name: artist.name, imageUrl: artist.images[0]?.url }); setActiveView('artist') }}
-                    className="flex items-center gap-3 p-3 rounded-lg w-full text-left mb-1 transition-colors hover:bg-white/5"
-                  >
-                    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-white/10">
-                      {artist.images[0]?.url && <img src={artist.images[0].url} alt={artist.name} className="w-full h-full object-cover" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium" style={{ color: 'var(--retro-cream)' }}>{artist.name}</p>
-                      <p className="text-xs" style={{ color: 'var(--retro-muted)' }}>Artist</p>
-                    </div>
-                  </button>
-                ))}
-                {trackResults.map((track, i) => <TrackRow key={track.id + i} track={track} />)}
-              </>
-            )}
+                  <div>
+                    <p style={{ fontSize: dw(14), color: '#fff', fontWeight: 500 }}>{artist.name}</p>
+                    <p style={{ fontSize: dw(11), color: 'rgba(255,255,255,0.4)' }}>Artist</p>
+                  </div>
+                </button>
+              ))}
+              {trackResults.map((track, i) => <TrackRow key={track.id + i} track={track} />)}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────
+          MY PLAYLISTS SECTION — y≈54.22vh
+      ───────────────────────────────────── */}
+      {!query && (
+        <div style={{
+          position: 'absolute',
+          left: dw(229), top: dh(1041),
+          width: dw(614), height: dh(170),
+          zIndex: 6,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: dh(21),
+        }}>
+          {/* Section header */}
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <SectionArrow />
+            <span style={{ fontSize: dw(14), color: '#FFA500', letterSpacing: '-0.04em', fontFamily: 'Inter, system-ui, sans-serif', whiteSpace: 'nowrap' }}>
+              My Playlists
+            </span>
+            <SectionArrow flip />
           </div>
-        ) : (
-          /* ── Browse: queue + releases + playlists ── */
-          <>
-            {/* Select a track divider */}
-            <div className="flex items-center gap-3 px-4 pb-2">
-              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(201,162,39,0.35))' }} />
-              <span className="font-retro text-xs uppercase" style={{ color: 'rgba(201,162,39,0.55)', letterSpacing: '0.2em' }}>Select a Track</span>
-              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(201,162,39,0.35), transparent)' }} />
-            </div>
 
-            {/* Queue */}
-            {queue.length > 0 && (
-              <div className="px-3 mb-4">
-                <p className="font-typewriter text-xs uppercase mb-2 px-1" style={{ color: 'var(--retro-muted)' }}>Up Next</p>
-                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(201,162,39,0.22)' }}>
-                  {queue.slice(0, 8).map((track, i) => (
-                    <div key={track.queueId}
-                      className="flex items-center gap-3 px-3 py-2.5 border-b last:border-b-0"
-                      style={{ borderColor: 'rgba(201,162,39,0.1)', background: i % 2 === 0 ? 'rgba(201,162,39,0.04)' : 'transparent' }}
-                    >
-                      <div className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 font-typewriter text-xs font-bold"
-                        style={{ background: 'rgba(201,162,39,0.14)', color: 'var(--retro-gold)', border: '1px solid rgba(201,162,39,0.28)' }}>
-                        {rowLabel(i)}
-                      </div>
-                      <img src={track.album.images[track.album.images.length - 1]?.url} alt=""
-                        className="w-8 h-8 rounded flex-shrink-0 object-cover" style={{ opacity: 0.85 }} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate" style={{ color: 'var(--retro-cream)' }}>{track.name}</p>
-                        <p className="text-xs truncate" style={{ color: 'var(--retro-muted)' }}>{track.artists.map(a => a.name).join(', ')}</p>
-                      </div>
-                      <span className="font-typewriter text-xs flex-shrink-0" style={{ color: 'var(--retro-muted)' }}>
-                        {formatDuration(track.duration_ms)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Recently Played */}
-            <div className="px-4 pb-3">
-              <p className="font-typewriter text-xs uppercase mb-3" style={{ color: 'var(--retro-muted)' }}>Recently Played</p>
-              {loading ? (
-                <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
-                  {Array.from({ length: 5 }).map((_, i) => <div key={i} className="flex-shrink-0 w-28 h-28 rounded-xl skeleton" />)}
-                </div>
-              ) : (
-                <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
-                  {recentTracks.map((track, i) => (
-                    <TrackRow key={track.id + i} track={track} cardMode />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Playlists */}
-            {playlists.length > 0 && (
-              <div className="px-4 pb-6">
-                <p className="font-typewriter text-xs uppercase mb-3" style={{ color: 'var(--retro-muted)' }}>Your Playlists</p>
-                <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
-                  {playlists.map((pl) => (
+          {/* Playlist cards row */}
+          <div style={{ width: '100%', overflowX: 'auto', display: 'flex', gap: dw(8), paddingBottom: dh(4) }}>
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} style={{ width: dw(90), height: dh(90), borderRadius: dw(6), flexShrink: 0 }} className="skeleton" />
+                ))
+              : playlists.length > 0
+                ? playlists.map((pl) => (
                     <button key={pl.id}
                       onClick={() => { setActivePlaylist(pl); setActiveView('playlist') }}
-                      className="flex-shrink-0 w-28 text-left active:scale-95 transition-transform"
+                      style={{ flexShrink: 0, width: dw(90), textAlign: 'left' }}
                     >
-                      <div className="w-28 h-28 rounded-xl overflow-hidden mb-2" style={{ background: 'rgba(201,162,39,0.1)', border: '1px solid rgba(201,162,39,0.2)' }}>
-                        {pl.images[0]?.url ? (
-                          <img src={pl.images[0].url} alt={pl.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style={{ opacity: 0.3, color: 'var(--retro-gold)' }}>
-                              <path d="M7 8H21M7 12H21M7 16H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                            </svg>
-                          </div>
-                        )}
+                      <div style={{ width: dw(90), height: dh(90), borderRadius: dw(6), overflow: 'hidden', background: 'rgba(255,255,255,0.15)', marginBottom: dh(4) }}>
+                        {pl.images[0]?.url
+                          ? <img src={pl.images[0].url} alt={pl.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <svg width="24" height="24" viewBox="0 0 28 28" fill="none" style={{ opacity: 0.4, color: '#FFA500' }}>
+                                <path d="M7 8H21M7 12H21M7 16H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                              </svg>
+                            </div>
+                        }
                       </div>
-                      <p className="text-xs font-medium truncate" style={{ color: 'var(--retro-cream)' }}>{pl.name}</p>
-                      <p className="text-xs truncate" style={{ color: 'var(--retro-muted)' }}>{pl.tracks?.total} songs</p>
+                      <p style={{ fontSize: dw(10), color: '#FFA500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.name}</p>
                     </button>
-                  ))}
-                </div>
+                  ))
+                : recentTracks.slice(0, 6).map((track, i) => {
+                    const art = track.album.images[0]?.url
+                    return (
+                      <button key={track.id + i}
+                        onClick={() => {
+                          if (!currentTrack && accessToken && deviceId) playTrack(accessToken, track.uri, deviceId)
+                          else useJukeboxStore.getState().addToQueue(track)
+                        }}
+                        style={{ flexShrink: 0, width: dw(90), textAlign: 'left' }}
+                      >
+                        <div style={{ width: dw(90), height: dh(90), borderRadius: dw(6), overflow: 'hidden', background: 'rgba(255,255,255,0.15)', marginBottom: dh(4) }}>
+                          {art && <img src={art} alt={track.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                        </div>
+                        <p style={{ fontSize: dw(10), color: '#FFA500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{track.name}</p>
+                      </button>
+                    )
+                  })
+            }
+          </div>
+
+          {/* Progress dots */}
+          <ProgressDots total={5} active={0} />
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────
+          RECENTLY PLAYED — y≈65.36vh
+          3-column × 2-row track selector grid
+      ───────────────────────────────────── */}
+      {!query && (
+        <div style={{
+          position: 'absolute',
+          left: dw(229), top: dh(1255),
+          width: dw(614), height: dh(171),
+          zIndex: 6,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: dh(21),
+        }}>
+          {/* Section header */}
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <SectionArrow />
+            <span style={{ fontSize: dw(14), color: '#FFA500', letterSpacing: '-0.04em', fontFamily: 'Inter, system-ui, sans-serif', whiteSpace: 'nowrap' }}>
+              Recently Played
+            </span>
+            <SectionArrow flip />
+          </div>
+
+          {/* 3×2 track selector grid */}
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', gap: dw(30) }}>
+            {[0, 1, 2].map((col) => (
+              <div key={col} style={{ display: 'flex', flexDirection: 'column', gap: dh(20), flex: 1 }}>
+                {[0, 1].map((row) => {
+                  const idx = col * 2 + row
+                  const track = gridTracks[idx]
+                  if (!track) return (
+                    <div key={row} style={{ display: 'flex', gap: dw(4), alignItems: 'flex-start', opacity: 0.3 }}>
+                      <div style={{ background: '#FFA500', borderRadius: dw(6), padding: `${dh(4)} ${dw(8)}`, fontSize: dw(14), color: '#000', fontFamily: 'Inter, system-ui', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                        {rowLabel(idx)}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ background: '#FFF', border: `${dw(2)} solid #FF0000`, padding: `${dh(4)} ${dw(8)}`, fontSize: dw(14), color: '#888' }}>—</div>
+                        <div style={{ background: '#FFF', border: `${dw(2)} solid #FF0000`, padding: `${dh(2)} ${dw(8)}`, fontSize: dw(7), color: '#aaa' }}>—</div>
+                      </div>
+                    </div>
+                  )
+                  return (
+                    <button key={row}
+                      onClick={() => {
+                        if (!currentTrack && accessToken && deviceId) playTrack(accessToken, (track as any).uri, deviceId)
+                        else useJukeboxStore.getState().addToQueue(track as any)
+                      }}
+                      style={{ display: 'flex', gap: dw(4), alignItems: 'flex-start', textAlign: 'left', width: '100%' }}
+                    >
+                      {/* Orange label badge */}
+                      <div style={{
+                        background: '#FFA500', borderRadius: dw(6),
+                        padding: `${dh(4)} ${dw(8)}`,
+                        fontSize: dw(14), color: '#000',
+                        fontFamily: 'Inter, system-ui, sans-serif',
+                        whiteSpace: 'nowrap', flexShrink: 0,
+                        lineHeight: 1.2,
+                      }}>
+                        {rowLabel(idx)}
+                      </div>
+                      {/* Track info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          background: '#FFFFFF', border: `${dw(2)} solid #FF0000`,
+                          padding: `${dh(4)} ${dw(8)}`,
+                          fontSize: dw(12), color: '#000',
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {(track as any).name || 'Track'}
+                        </div>
+                        <div style={{
+                          background: '#FFFFFF', border: `${dw(2)} solid #FF0000`,
+                          padding: `${dh(2)} ${dw(8)}`,
+                          fontSize: dw(7), color: '#000',
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {(track as any).artists?.map((a: {name: string}) => a.name).join(', ') || 'Artist'}
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
-            )}
-          </>
-        )}
-      </div>
+            ))}
+          </div>
+
+          {/* Progress dots */}
+          <ProgressDots total={5} active={0} />
+        </div>
+      )}
+
     </div>
   )
 }

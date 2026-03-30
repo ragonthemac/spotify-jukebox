@@ -15,7 +15,7 @@ export default function JukeboxMain() {
   const activeView = useJukeboxStore((s) => s.activeView)
 
   return (
-    <div className="h-full flex flex-col retro-bg overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden" style={{ background: 'transparent' }}>
       {/* Spotify Web Playback SDK (hidden) */}
       <SpotifyPlayer />
 

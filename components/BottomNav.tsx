@@ -39,7 +39,7 @@ export default function BottomNav() {
   const { activeView, setActiveView, queue } = useJukeboxStore()
 
   return (
-    <div className="flex-shrink-0 flex items-center justify-around px-4 pb-safe pt-2 pb-3 border-t" style={{ borderColor: 'rgba(201,162,39,0.15)', background: 'rgba(14,8,0,0.95)' }}>
+    <div className="flex-shrink-0 flex items-center justify-around px-4 pb-safe pt-2 pb-3" style={{ background: 'rgba(8,4,0,0.88)' }}>
       {tabs.map((tab) => {
         const active = activeView === tab.id
           || (tab.id === 'search' && activeView === 'artist')
