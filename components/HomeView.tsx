@@ -265,7 +265,7 @@ export default function HomeView() {
         <div className="flex-1 overflow-y-auto">
 
           <div style={{ marginTop: 20 }}>
-            <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={160} />
+            <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={100} />
           </div>
 
           <ChromeStrip height={8} opacity={0.5} />
