@@ -5,7 +5,7 @@ import { formatDuration } from '@/lib/spotify'
 import { globalPlayer } from './SpotifyPlayer'
 
 export default function NowPlayingHero() {
-  const { currentTrack, isPlaying, progressMs, durationMs, setIsPlaying } = useJukeboxStore()
+  const { currentTrack, isPlaying, progressMs, durationMs, setIsPlaying, setActiveView, setActiveArtist } = useJukeboxStore()
 
   const progress = durationMs > 0 ? (progressMs / durationMs) * 100 : 0
   const art = currentTrack?.album.images[0]?.url
@@ -109,7 +109,17 @@ export default function NowPlayingHero() {
               {currentTrack.name}
             </p>
             <p className="text-white/50 text-sm truncate">
-              {currentTrack.artists.map((a) => a.name).join(', ')}
+              {currentTrack.artists.map((a, i) => (
+                <span key={a.id}>
+                  {i > 0 && ', '}
+                  <button
+                    onClick={() => { setActiveArtist({ id: a.id, name: a.name }); setActiveView('artist') }}
+                    className="hover:text-white hover:underline transition-colors"
+                  >
+                    {a.name}
+                  </button>
+                </span>
+              ))}
             </p>
             <p className="text-white/25 text-xs truncate mt-0.5">
               {currentTrack.album.name}

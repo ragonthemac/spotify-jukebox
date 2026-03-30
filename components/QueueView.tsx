@@ -6,7 +6,7 @@ import { globalPlayer } from './SpotifyPlayer'
 import TrackRow from './TrackRow'
 
 export default function QueueView() {
-  const { queue, currentTrack, accessToken, deviceId, skipNext, clearQueue } = useJukeboxStore()
+  const { queue, currentTrack, accessToken, deviceId, skipNext, clearQueue, setActiveView, setActiveArtist } = useJukeboxStore()
 
   const handleSkip = () => {
     const next = skipNext()
@@ -65,7 +65,17 @@ export default function QueueView() {
               <div className="flex-1 min-w-0">
                 <p className="text-pink-300 text-sm font-semibold truncate">{currentTrack.name}</p>
                 <p className="text-pink-300/50 text-xs truncate">
-                  {currentTrack.artists.map((a) => a.name).join(', ')}
+                  {currentTrack.artists.map((a, i) => (
+                    <span key={a.id}>
+                      {i > 0 && ', '}
+                      <button
+                        onClick={() => { setActiveArtist({ id: a.id, name: a.name }); setActiveView('artist') }}
+                        className="hover:text-white hover:underline transition-colors"
+                      >
+                        {a.name}
+                      </button>
+                    </span>
+                  ))}
                 </p>
               </div>
               {queue.length > 0 && (

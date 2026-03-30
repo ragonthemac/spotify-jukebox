@@ -17,6 +17,7 @@ export default function BottomPlayer() {
     accessToken,
     deviceId,
     setActiveView,
+    setActiveArtist,
   } = useJukeboxStore()
 
   if (!currentTrack) return null
@@ -66,7 +67,17 @@ export default function BottomPlayer() {
         <div className="flex-1 min-w-0">
           <p className="text-white text-xs font-semibold truncate leading-tight">{currentTrack.name}</p>
           <p className="text-white/40 text-xs truncate">
-            {currentTrack.artists.map((a) => a.name).join(', ')}
+            {currentTrack.artists.map((a, i) => (
+              <span key={a.id}>
+                {i > 0 && ', '}
+                <button
+                  onClick={(e) => { e.stopPropagation(); setActiveArtist({ id: a.id, name: a.name }); setActiveView('artist') }}
+                  className="hover:text-white hover:underline transition-colors"
+                >
+                  {a.name}
+                </button>
+              </span>
+            ))}
             <span className="text-white/20 ml-1.5">{formatDuration(progressMs)}</span>
           </p>
         </div>
