@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
-import { getNewReleases, type SpotifyAlbum } from '@/lib/spotify'
+import { getNewReleases, clearToken, type SpotifyAlbum } from '@/lib/spotify'
 import NowPlayingHero from './NowPlayingHero'
 import AlbumCard from './AlbumCard'
 
@@ -19,8 +19,28 @@ export default function HomeView() {
       .finally(() => setLoading(false))
   }, [accessToken])
 
+  const handleLogout = () => {
+    clearToken()
+    window.location.reload()
+  }
+
   return (
     <div className="h-full flex flex-col overflow-y-auto">
+      {/* Header with logout */}
+      <div className="flex-shrink-0 flex items-center justify-between px-5 pt-4 pb-1">
+        <span className="text-xs font-semibold tracking-widest text-white/20 uppercase">Jukebox</span>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-1.5 text-white/30 hover:text-white/60 transition-colors text-xs"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M5 2H2.5A1.5 1.5 0 001 3.5v7A1.5 1.5 0 002.5 12H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+            <path d="M9 10l3-3-3-3M12 7H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Log out
+        </button>
+      </div>
+
       {/* Now Playing hero */}
       <NowPlayingHero />
 
