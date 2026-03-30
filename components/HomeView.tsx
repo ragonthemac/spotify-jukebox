@@ -14,12 +14,14 @@ export default function HomeView() {
 
   useEffect(() => {
     if (!accessToken) return
-    Promise.all([
+    Promise.allSettled([
       getNewReleases(accessToken),
       getUserPlaylists(accessToken),
     ])
-      .then(([a, p]) => { setAlbums(a); setPlaylists(p) })
-      .catch(console.error)
+      .then(([albumsResult, playlistsResult]) => {
+        if (albumsResult.status === 'fulfilled') setAlbums(albumsResult.value)
+        if (playlistsResult.status === 'fulfilled') setPlaylists(playlistsResult.value)
+      })
       .finally(() => setLoading(false))
   }, [accessToken])
 
