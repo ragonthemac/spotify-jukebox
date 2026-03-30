@@ -35,7 +35,7 @@ export default function SearchView() {
       }
       setIsSearching(true)
       setSearchError(null)
-      searchTracks(q, accessToken, 25)
+      searchTracks(q, accessToken)
         .then(setSearchResults)
         .catch((err) => {
           console.error(err)
