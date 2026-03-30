@@ -7,7 +7,7 @@ import NowPlayingHero from './NowPlayingHero'
 import AlbumCard from './AlbumCard'
 
 export default function HomeView() {
-  const { accessToken, setActiveView, setActivePlaylist } = useJukeboxStore()
+  const { accessToken, setActiveView, setActivePlaylist, setSearchQuery } = useJukeboxStore()
   const [albums, setAlbums] = useState<SpotifyAlbum[]>([])
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([])
   const [loading, setLoading] = useState(true)
@@ -44,6 +44,20 @@ export default function HomeView() {
             <path d="M9 10l3-3-3-3M12 7H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           Log out
+        </button>
+      </div>
+
+      {/* Search bar */}
+      <div className="flex-shrink-0 px-4 pt-2 pb-1">
+        <button
+          onClick={() => { setSearchQuery(''); setActiveView('search') }}
+          className="w-full flex items-center gap-3 glass rounded-2xl px-4 h-11 border border-white/8 text-white/30 text-sm hover:border-white/15 transition-colors"
+        >
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          Search songs, artists, albums…
         </button>
       </div>
 
