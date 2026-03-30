@@ -12,6 +12,8 @@ const SCOPES = [
   'user-read-playback-state',
   'user-modify-playback-state',
   'user-read-currently-playing',
+  'user-read-recently-played',
+  'user-top-read',
   'playlist-read-private',
   'playlist-read-collaborative',
 ].join(' ')
@@ -144,7 +146,10 @@ async function spotifyFetch<T>(path: string, token: string): Promise<T> {
   const res = await fetch(`${SPOTIFY_API_BASE}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  if (!res.ok) throw new Error(`Spotify API error: ${res.status}`)
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`Spotify API error: ${res.status} — ${body}`)
+  }
   return res.json()
 }
 
@@ -207,8 +212,9 @@ export async function getFeaturedPlaylists(token: string) {
 }
 
 export async function getNewReleases(token: string): Promise<SpotifyAlbum[]> {
+  const params = new URLSearchParams({ q: 'tag:new', type: 'album', limit: '10' })
   const data = await spotifyFetch<{ albums: { items: SpotifyAlbum[] } }>(
-    '/browse/new-releases?limit=10',
+    `/search?${params}`,
     token
   )
   return data.albums.items
