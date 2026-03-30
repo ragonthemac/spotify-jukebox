@@ -18,121 +18,52 @@ function rowLabel(i: number) {
 const chrome = 'linear-gradient(180deg, #e8d5b0 0%, #c9a460 20%, #f5e8c0 50%, #b8902a 80%, #e0c878 100%)'
 const chromeH = 'linear-gradient(90deg, #e8d5b0 0%, #c9a460 20%, #f5e8c0 50%, #b8902a 80%, #e0c878 100%)'
 
-/* ─── Side rail strips: match arch ring colours, run full viewport height ─── */
-const RAIL_RINGS = [
-  { w: 10, bg: chromeH,   opacity: 0.75 },
-  { w: 4,  bg: '#050200', opacity: 1 },
-  { w: 6,  bg: '#ff2d78', opacity: 0.65, shadow: '0 0 6px 1px #ff2d7866' },
-  { w: 4,  bg: '#050200', opacity: 1 },
-  { w: 4,  bg: '#c9a227', opacity: 0.65, shadow: '0 0 5px 1px #c9a22755' },
-  { w: 3,  bg: '#050200', opacity: 1 },
-  { w: 6,  bg: '#00d4ff', opacity: 0.65, shadow: '0 0 6px 1px #00d4ff55' },
-  { w: 3,  bg: '#050200', opacity: 1 },
-  { w: 6,  bg: chromeH,   opacity: 0.5 },
-]
-
-function SideRails() {
-  return (
-    <>
-      {(['left', 'right'] as const).map(side => {
-        let offset = 44
-        return RAIL_RINGS.map((ring, i) => {
-          const el = (
-            <div key={`${side}-${i}`} style={{
-              position: 'fixed', top: 0, bottom: 0,
-              [side]: offset, width: ring.w,
-              background: ring.bg, opacity: ring.opacity,
-              zIndex: 48, pointerEvents: 'none',
-              ...(ring.shadow ? { boxShadow: ring.shadow } : {}),
-            }} />
-          )
-          offset += ring.w
-          return el
-        })
-      })}
-    </>
-  )
-}
-
 /* ─── Arch crown ─── */
 function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 120 }: {
   albumArt?: string; isPlaying: boolean; vinylSize?: number; topPad?: number
 }) {
   const archH = topPad + Math.round(vinylSize / 2)
-
-  // Semi-circle border-radius: CSS scales overlapping radii down to exactly
-  // half the element width, producing a true semi-circle at the top.
   const r = '50% 50% 0 0'
 
   const layer = (inset: number, bg: string, extra?: React.CSSProperties) => ({
     position: 'absolute' as const,
     top: inset, left: inset, right: inset, bottom: 0,
-    borderRadius: r,
-    background: bg,
-    ...extra,
+    borderRadius: r, background: bg, ...extra,
   })
 
   return (
     <div style={{ position: 'relative', height: archH, flexShrink: 0, overflow: 'hidden' }}>
-
       {/* Chrome outer ring */}
       <div style={layer(0, chromeH)} />
-      {/* dark gap → 10px chrome ring visible */}
       <div style={layer(10, '#050200')} />
-      {/* pink neon */}
-      <div style={layer(14, '#ff2d78', { boxShadow: '0 0 14px 4px #ff2d7855', animation: 'neon-pulse 2.5s ease-in-out 0s infinite' })} />
-      {/* dark → 6px pink ring */}
+      {/* Inner chrome ring */}
+      <div style={layer(14, chromeH, { opacity: 0.85 })} />
       <div style={layer(20, '#050200')} />
-      {/* gold neon */}
-      <div style={layer(24, '#c9a227', { boxShadow: '0 0 12px 3px #c9a22744', animation: 'neon-pulse 3s ease-in-out 0.6s infinite' })} />
-      {/* dark → 4px gold ring */}
-      <div style={layer(28, '#050200')} />
-      {/* cyan neon */}
-      <div style={layer(32, '#00d4ff', { boxShadow: '0 0 12px 3px #00d4ff44', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' })} />
-      {/* dark → 4px cyan ring */}
-      <div style={layer(38, '#050200')} />
-      {/* inner chrome */}
-      <div style={layer(42, chromeH, { opacity: 0.85 })} />
-      {/* dark gap → 6px chrome ring */}
-      <div style={layer(48, '#050200')} />
-      {/* thin gold accent */}
-      <div style={layer(52, '#c9a227', { opacity: 0.55 })} />
-      {/* dark interior window */}
-      <div style={layer(56, '#030100')} />
+      {/* Gold accent */}
+      <div style={layer(24, '#c9a227', { opacity: 0.55 })} />
+      {/* Dark interior */}
+      <div style={layer(28, '#030100')} />
 
-      {/* Vinyl: top = topPad pushes it down, overflow:hidden clips bottom half */}
+      {/* Vinyl */}
       <div style={{ position: 'absolute', top: topPad, left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
         <SpinningVinyl albumArt={albumArt} isPlaying={isPlaying} size={vinylSize} />
       </div>
 
-      {/* Accent dot row at arch top */}
+      {/* Accent dot row */}
       <div style={{ position: 'absolute', top: 68, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 14, zIndex: 3 }}>
         {['#ff2d78', '#c9a227', '#00d4ff', '#a855f7', '#00d4ff', '#c9a227', '#ff2d78'].map((c, i) => (
-          <div key={i} style={{
-            width: 8, height: 8, borderRadius: '50%', background: c,
-            boxShadow: `0 0 7px 2px ${c}88`,
-            animation: `neon-pulse 2s ease-in-out ${i * 0.25}s infinite`,
-          }} />
+          <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: c, boxShadow: `0 0 7px 2px ${c}88`, animation: `neon-pulse 2s ease-in-out ${i * 0.25}s infinite` }} />
         ))}
       </div>
 
-      {/* Chrome top ornament */}
-      <div style={{
-        position: 'absolute', top: 56, left: '50%', transform: 'translateX(-50%)',
-        width: 60, height: 12,
-        background: chromeH, borderRadius: '0 0 30px 30px',
-        zIndex: 3, opacity: 0.7,
-      }} />
+      {/* Top chrome ornament */}
+      <div style={{ position: 'absolute', top: 56, left: '50%', transform: 'translateX(-50%)', width: 60, height: 12, background: chromeH, borderRadius: '0 0 30px 30px', zIndex: 3, opacity: 0.7 }} />
 
-      {/* Corner bolt clusters at arch base */}
+      {/* Corner bolt clusters */}
       {[{ left: 28, bottom: 14 }, { right: 28, bottom: 14 }].map((pos, i) => (
         <div key={i} style={{ position: 'absolute', ...pos, display: 'flex', flexDirection: 'column', gap: 6, zIndex: 3 }}>
           {[0, 1, 2].map(j => (
-            <div key={j} style={{
-              width: 14, height: 14, borderRadius: '50%',
-              background: 'radial-gradient(circle at 35% 30%, #fff8e0, #7a5810)',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.8)',
-            }} />
+            <div key={j} style={{ width: 14, height: 14, borderRadius: '50%', background: 'radial-gradient(circle at 35% 30%, #fff8e0, #7a5810)', boxShadow: '0 2px 4px rgba(0,0,0,0.8)' }} />
           ))}
         </div>
       ))}
@@ -174,37 +105,6 @@ function DecoEqualizer() {
     <div style={{ display: 'flex', gap: 3, alignItems: 'flex-end', height: 24, opacity: 0.55 }}>
       {[14, 8, 20, 10, 18, 6, 14].map((h, i) => (
         <div key={i} className="eq-bar" style={{ width: 5, height: h, borderRadius: 3, background: i % 3 === 0 ? '#ff2d78' : i % 3 === 1 ? '#c9a227' : '#00d4ff', animationDelay: `${i * 0.1}s` }} />
-      ))}
-    </div>
-  )
-}
-
-/* ─── Pilaster ─── */
-function Pilaster({ side }: { side: 'left' | 'right' }) {
-  const tubes = [
-    { color: '#ff2d78', h: 70, delay: '0s', flicker: true },
-    { color: '#c9a227', h: 50, delay: '0.5s', flicker: false },
-    { color: '#00d4ff', h: 90, delay: '1s', flicker: false },
-    { color: '#c9a227', h: 35, delay: '1.5s', flicker: true },
-    { color: '#ff2d78', h: 100, delay: '0.3s', flicker: false },
-    { color: '#a855f7', h: 60, delay: '2s', flicker: true },
-    { color: '#00d4ff', h: 45, delay: '0.8s', flicker: false },
-    { color: '#c9a227', h: 80, delay: '1.3s', flicker: false },
-    { color: '#ff2d78', h: 55, delay: '0.6s', flicker: true },
-  ]
-  return (
-    <div style={{ position: 'fixed', top: 0, [side]: 0, width: 44, height: '100%', zIndex: 50, pointerEvents: 'none', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ position: 'absolute', top: 0, bottom: 0, [side === 'left' ? 'right' : 'left']: 0, width: 6, background: chrome, opacity: 0.75 }} />
-      <div style={{ position: 'absolute', top: 0, bottom: 0, [side === 'left' ? 'left' : 'right']: 0, width: 3, background: chrome, opacity: 0.3 }} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '80px 0', background: 'rgba(8,4,0,0.88)' }}>
-        {tubes.map((t, i) => (
-          <div key={i} style={{ width: 8, height: t.h, borderRadius: 99, flexShrink: 0, background: `linear-gradient(180deg, ${t.color}cc 0%, ${t.color} 40%, ${t.color}cc 100%)`, boxShadow: `0 0 5px 1px ${t.color}88, 0 0 14px 3px ${t.color}44`, animation: t.flicker ? `neon-flicker 7s ease-in-out ${t.delay} infinite` : `neon-pulse 3s ease-in-out ${t.delay} infinite` }} />
-        ))}
-      </div>
-      {[true, false].map(top => (
-        <div key={String(top)} style={{ position: 'absolute', [top ? 'top' : 'bottom']: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {[0, 1, 2, 3].map(j => <div key={j} style={{ width: 12, height: 12, borderRadius: '50%', background: 'radial-gradient(circle at 35% 30%, #fff8e0, #8a6820)', boxShadow: '0 1px 3px rgba(0,0,0,0.7)' }} />)}
-        </div>
       ))}
     </div>
   )
@@ -274,13 +174,15 @@ export default function HomeView() {
   const progress = durationMs > 0 ? (progressMs / durationMs) * 100 : 0
   const albumArt = currentTrack?.album.images[0]?.url
 
+  // side padding accounts for chrome rail width (10px)
+  const pad = '16px'
+
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ color: 'var(--retro-cream)' }}>
 
-      {/* Fixed decorative layers */}
-      <Pilaster side="left" />
-      <Pilaster side="right" />
-      <SideRails />
+      {/* Arch side extension — single chrome rail matches outermost arch ring */}
+      <div style={{ position: 'fixed', top: 0, left: 0, width: 10, height: '100dvh', background: chrome, opacity: 0.75, zIndex: 49, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: 0, right: 0, width: 10, height: '100dvh', background: chrome, opacity: 0.75, zIndex: 49, pointerEvents: 'none' }} />
 
       {/* ── Top header ── */}
       <div style={{ flexShrink: 0 }}>
@@ -290,7 +192,7 @@ export default function HomeView() {
           <div style={{ flex: 1, background: 'linear-gradient(90deg, transparent, #c9a22777, transparent)' }} />
           <div style={{ flex: 1, background: 'linear-gradient(90deg, transparent, #00d4ff55, transparent)' }} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 100px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: `12px ${pad}` }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
             <div style={{ width: 44, height: 16, borderRadius: 4, background: 'linear-gradient(180deg, #1a0e04, #0a0500)', border: '1px solid rgba(201,162,39,0.45)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.9)' }} />
             <span style={{ fontSize: 9, color: 'rgba(201,162,39,0.3)', letterSpacing: '0.1em', fontFamily: 'monospace', textTransform: 'uppercase' }}>insert coin</span>
@@ -312,7 +214,7 @@ export default function HomeView() {
       </div>
 
       {query ? (
-        <div className="flex-1 overflow-y-auto" style={{ padding: '12px 100px 20px' }}>
+        <div className="flex-1 overflow-y-auto" style={{ padding: `12px ${pad} 20px` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
             <button onClick={() => setQuery('')} style={{ color: 'var(--retro-gold)', padding: 8 }}>
               <svg width="22" height="22" viewBox="0 0 16 16" fill="none">
@@ -355,22 +257,19 @@ export default function HomeView() {
       ) : (
         <div className="flex-1 overflow-y-auto">
 
-          {/* ── Arch crown ── */}
           <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={120} />
 
           <ChromeStrip height={8} opacity={0.5} />
 
           {/* ── Now playing ── */}
-          <div style={{ padding: '18px 100px 14px', background: 'linear-gradient(180deg, rgba(20,10,2,0.98), rgba(14,8,0,1))' }}>
+          <div style={{ padding: `18px ${pad} 14px`, background: 'linear-gradient(180deg, rgba(20,10,2,0.98), rgba(14,8,0,1))' }}>
             <div style={{ textAlign: 'center', marginBottom: 14 }}>
               {currentTrack ? (
                 <>
                   <h2 className="font-retro" style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, marginBottom: 6, color: 'var(--retro-cream)' }}>{currentTrack.name}</h2>
                   <p className="font-typewriter" style={{ fontSize: 17, color: 'var(--retro-gold)' }}>
                     {currentTrack.artists.map((a, i) => (
-                      <span key={a.id}>{i > 0 && ' & '}
-                        <button onClick={() => { setActiveArtist({ id: a.id, name: a.name }); setActiveView('artist') }} className="hover:underline transition-colors">{a.name}</button>
-                      </span>
+                      <span key={a.id}>{i > 0 && ' & '}<button onClick={() => { setActiveArtist({ id: a.id, name: a.name }); setActiveView('artist') }} className="hover:underline transition-colors">{a.name}</button></span>
                     ))}
                   </p>
                 </>
@@ -412,7 +311,7 @@ export default function HomeView() {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 52, width: '100%', maxWidth: 460, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 52, width: '100%', maxWidth: 500, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 6 }}>
                 <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ color: 'var(--retro-muted)', flexShrink: 0 }}>
                   <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" /><path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
@@ -426,9 +325,8 @@ export default function HomeView() {
             </div>
           </div>
 
-          {/* ── Speaker grille ── */}
           <ChromeStrip height={8} opacity={0.5} />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '10px 100px', background: 'rgba(8,4,0,0.95)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: `10px ${pad}`, background: 'rgba(8,4,0,0.95)' }}>
             <SpeakerGrille rows={3} cols={12} />
             <div style={{ padding: '6px 16px', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 3, background: 'rgba(201,162,39,0.04)', whiteSpace: 'nowrap' }}>
               <span className="font-typewriter" style={{ fontSize: 11, color: 'rgba(201,162,39,0.45)', letterSpacing: '0.22em', textTransform: 'uppercase' }}>stereo hi-fi</span>
@@ -437,15 +335,14 @@ export default function HomeView() {
           </div>
           <ChromeStrip height={8} opacity={0.5} />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 100px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: `14px ${pad} 0` }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(201,162,39,0.15)' }} />
             <span className="font-retro" style={{ fontSize: 15, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--retro-gold)', opacity: 0.5 }}>Select a Track</span>
             <div style={{ flex: 1, height: 1, background: 'rgba(201,162,39,0.15)' }} />
           </div>
 
-          {/* ── Queue ── */}
           {queue.length > 0 && (
-            <div style={{ padding: '12px 90px 16px' }}>
+            <div style={{ padding: `12px ${pad} 16px` }}>
               <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 10, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Up Next</p>
               <div style={{ borderRadius: 6, overflow: 'hidden', border: '1px solid rgba(201,162,39,0.2)' }}>
                 {queue.slice(0, 8).map((track, i) => (
@@ -463,15 +360,14 @@ export default function HomeView() {
             </div>
           )}
 
-          {/* ── Recently Played ── */}
-          <div style={{ padding: '12px 90px 14px' }}>
+          <div style={{ padding: `12px ${pad} 14px` }}>
             <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 14, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Recently Played</p>
             {loading ? (
               <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 8 }}>
                 {Array.from({ length: 5 }).map((_, i) => <div key={i} className="skeleton" style={{ width: 150, height: 150, borderRadius: 10, flexShrink: 0 }} />)}
               </div>
             ) : (
-              <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: '0 -90px', padding: '0 90px 8px' }}>
+              <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 -${pad}`, padding: `0 ${pad} 8px` }}>
                 {recentTracks.map(track => (
                   <button key={track.id} onClick={() => { if (!currentTrack && accessToken && deviceId) playTrack(accessToken, track.uri, deviceId); else useJukeboxStore.getState().addToQueue(track) }}
                     style={{ flexShrink: 0, width: 150, textAlign: 'left' }} className="active:scale-95 transition-transform">
@@ -486,11 +382,10 @@ export default function HomeView() {
             )}
           </div>
 
-          {/* ── Playlists ── */}
           {playlists.length > 0 && (
-            <div style={{ padding: '0 90px 32px' }}>
+            <div style={{ padding: `0 ${pad} 32px` }}>
               <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 14, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Your Playlists</p>
-              <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: '0 -90px', padding: '0 90px 8px' }}>
+              <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 -${pad}`, padding: `0 ${pad} 8px` }}>
                 {playlists.map(pl => (
                   <button key={pl.id} onClick={() => { setActivePlaylist(pl); setActiveView('playlist') }}
                     style={{ flexShrink: 0, width: 150, textAlign: 'left' }} className="active:scale-95 transition-transform">
