@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Special+Elite&display=swap');
 
 :root {
   --neon-pink: #ff2d78;
@@ -6,6 +7,16 @@
   --neon-purple: #a855f7;
   --glass-bg: rgba(255, 255, 255, 0.04);
   --glass-border: rgba(255, 255, 255, 0.08);
+
+  /* Retro palette */
+  --retro-bg: #0e0800;
+  --retro-panel: #1c1005;
+  --retro-gold: #c9a227;
+  --retro-gold-light: #f0c84a;
+  --retro-red: #cc1a1a;
+  --retro-cream: #f0e6c8;
+  --retro-muted: #7a6a4a;
+  --retro-chrome: #a89070;
 }
 
 * {
@@ -49,6 +60,7 @@ body {
 }
 
 @keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes vinyl-spin { to { transform: rotate(360deg); } }
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-8px); }
@@ -76,6 +88,23 @@ body {
 }
 
 .animate-spin-slow { animation: spin-slow 10s linear infinite; }
+.vinyl-playing { animation: vinyl-spin 2.5s linear infinite; }
+.vinyl-paused { animation: vinyl-spin 2.5s linear infinite; animation-play-state: paused; }
+
+.retro-bg {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(201,162,39,0.12) 0%, transparent 60%),
+    var(--retro-bg);
+}
+.retro-panel {
+  background: var(--retro-panel);
+  border: 1px solid rgba(201,162,39,0.2);
+}
+.retro-gold-glow {
+  box-shadow: 0 0 20px rgba(201,162,39,0.4), 0 0 60px rgba(201,162,39,0.15);
+}
+.font-retro { font-family: 'Playfair Display', Georgia, serif; }
+.font-typewriter { font-family: 'Special Elite', 'Courier New', monospace; }
 .animate-float { animation: float 3s ease-in-out infinite; }
 .animate-add-pop { animation: add-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .animate-slide-up { animation: slide-up 0.3s ease-out; }
