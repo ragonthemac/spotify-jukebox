@@ -266,6 +266,14 @@ export interface SpotifyPlaylist {
   owner: { display_name: string }
 }
 
+export async function getRecentlyPlayed(token: string): Promise<SpotifyTrack[]> {
+  const data = await spotifyFetch<{ items: { track: SpotifyTrack }[] }>(
+    '/me/player/recently-played?limit=20',
+    token
+  )
+  return data.items.map((i) => i.track).filter(Boolean)
+}
+
 export async function getUserPlaylists(token: string): Promise<SpotifyPlaylist[]> {
   const data = await spotifyFetch<{ items: SpotifyPlaylist[] }>(
     '/me/playlists?limit=20',
