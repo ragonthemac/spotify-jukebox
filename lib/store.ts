@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { SpotifyTrack } from './spotify'
+import type { SpotifyTrack, SpotifyAlbum, SpotifyPlaylist } from './spotify'
 
 export interface QueueTrack extends SpotifyTrack {
   queueId: string
@@ -39,12 +39,20 @@ interface JukeboxState {
   setIsSearching: (v: boolean) => void
 
   // View
-  activeView: 'home' | 'search' | 'queue' | 'artist'
-  setActiveView: (v: 'home' | 'search' | 'queue' | 'artist') => void
+  activeView: 'home' | 'search' | 'queue' | 'artist' | 'album' | 'playlist'
+  setActiveView: (v: 'home' | 'search' | 'queue' | 'artist' | 'album' | 'playlist') => void
 
   // Artist page
   activeArtist: { id: string; name: string; imageUrl?: string } | null
   setActiveArtist: (artist: { id: string; name: string; imageUrl?: string } | null) => void
+
+  // Album page
+  activeAlbum: SpotifyAlbum | null
+  setActiveAlbum: (album: SpotifyAlbum | null) => void
+
+  // Playlist page
+  activePlaylist: SpotifyPlaylist | null
+  setActivePlaylist: (playlist: SpotifyPlaylist | null) => void
 
   // Recently added (for animation)
   recentlyAdded: string | null
@@ -107,6 +115,14 @@ export const useJukeboxStore = create<JukeboxState>((set, get) => ({
   // Artist
   activeArtist: null,
   setActiveArtist: (artist) => set({ activeArtist: artist }),
+
+  // Album
+  activeAlbum: null,
+  setActiveAlbum: (album) => set({ activeAlbum: album }),
+
+  // Playlist
+  activePlaylist: null,
+  setActivePlaylist: (playlist) => set({ activePlaylist: playlist }),
 
   // Animation
   recentlyAdded: null,

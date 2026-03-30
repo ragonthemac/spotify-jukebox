@@ -41,7 +41,9 @@ export default function BottomNav() {
   return (
     <div className="flex-shrink-0 flex items-center justify-around px-4 pb-safe pt-2 pb-3 border-t border-white/5">
       {tabs.map((tab) => {
-        const active = activeView === tab.id || (tab.id === 'search' && activeView === 'artist')
+        const active = activeView === tab.id
+          || (tab.id === 'search' && activeView === 'artist')
+          || (tab.id === 'home' && (activeView === 'album' || activeView === 'playlist'))
         const accent = tab.id === 'home' ? '#ff2d78' : tab.id === 'search' ? '#00d4ff' : '#a855f7'
 
         return (

@@ -8,20 +8,14 @@ interface Props {
 }
 
 export default function AlbumCard({ album }: Props) {
-  const setActiveView = useJukeboxStore((s) => s.setActiveView)
-  const setSearchQuery = useJukeboxStore((s) => s.setSearchQuery)
+  const { setActiveView, setActiveAlbum } = useJukeboxStore()
 
   const art = album.images[0]?.url
   const artist = album.artists[0]?.name || 'Unknown'
 
-  const handleTap = () => {
-    setSearchQuery(album.name + ' ' + artist)
-    setActiveView('search')
-  }
-
   return (
     <button
-      onClick={handleTap}
+      onClick={() => { setActiveAlbum(album); setActiveView('album') }}
       className="flex-shrink-0 w-32 text-left active:scale-95 transition-transform duration-150"
     >
       <div className="w-32 h-32 rounded-xl overflow-hidden mb-2 bg-white/5">

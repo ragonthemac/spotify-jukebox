@@ -257,6 +257,31 @@ export async function getAlbumTracks(albumId: string, token: string): Promise<Sp
   return data.items
 }
 
+export interface SpotifyPlaylist {
+  id: string
+  name: string
+  description: string
+  images: { url: string }[]
+  tracks: { total: number }
+  owner: { display_name: string }
+}
+
+export async function getUserPlaylists(token: string): Promise<SpotifyPlaylist[]> {
+  const data = await spotifyFetch<{ items: SpotifyPlaylist[] }>(
+    '/me/playlists?limit=20',
+    token
+  )
+  return data.items
+}
+
+export async function getPlaylistTracks(playlistId: string, token: string): Promise<SpotifyTrack[]> {
+  const data = await spotifyFetch<{ items: { track: SpotifyTrack }[] }>(
+    `/playlists/${playlistId}/tracks?limit=50`,
+    token
+  )
+  return data.items.map((i) => i.track).filter(Boolean)
+}
+
 export async function getUserProfile(token: string) {
   return spotifyFetch<{ display_name: string; images: { url: string }[] }>(
     '/me',
