@@ -4,6 +4,7 @@ import { useJukeboxStore } from '@/lib/store'
 import HomeView from './HomeView'
 import SearchView from './SearchView'
 import QueueView from './QueueView'
+import ArtistView from './ArtistView'
 import BottomPlayer from './BottomPlayer'
 import BottomNav from './BottomNav'
 import SpotifyPlayer from './SpotifyPlayer'
@@ -21,6 +22,7 @@ export default function JukeboxMain() {
         {activeView === 'home' && <HomeView />}
         {activeView === 'search' && <SearchView />}
         {activeView === 'queue' && <QueueView />}
+        {activeView === 'artist' && <ArtistView />}
       </div>
 
       {/* Persistent bottom player */}

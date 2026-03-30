@@ -21,6 +21,7 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
     currentTrack,
     isPlaying,
     setActiveView,
+    setActiveArtist,
   } = useJukeboxStore()
 
   const [justAdded, setJustAdded] = useState(false)
@@ -84,7 +85,21 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
           )}
         </p>
         <p className="text-xs text-white/40 truncate mt-0.5">
-          {track.artists.map((a) => a.name).join(', ')}
+          {track.artists.map((a, i) => (
+            <span key={a.id}>
+              {i > 0 && ', '}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setActiveArtist({ id: a.id, name: a.name })
+                  setActiveView('artist')
+                }}
+                className="hover:text-white hover:underline transition-colors"
+              >
+                {a.name}
+              </button>
+            </span>
+          ))}
         </p>
       </div>
 

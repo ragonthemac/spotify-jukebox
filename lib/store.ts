@@ -39,8 +39,12 @@ interface JukeboxState {
   setIsSearching: (v: boolean) => void
 
   // View
-  activeView: 'home' | 'search' | 'queue'
-  setActiveView: (v: 'home' | 'search' | 'queue') => void
+  activeView: 'home' | 'search' | 'queue' | 'artist'
+  setActiveView: (v: 'home' | 'search' | 'queue' | 'artist') => void
+
+  // Artist page
+  activeArtist: { id: string; name: string; imageUrl?: string } | null
+  setActiveArtist: (artist: { id: string; name: string; imageUrl?: string } | null) => void
 
   // Recently added (for animation)
   recentlyAdded: string | null
@@ -99,6 +103,10 @@ export const useJukeboxStore = create<JukeboxState>((set, get) => ({
   // View
   activeView: 'home',
   setActiveView: (v) => set({ activeView: v }),
+
+  // Artist
+  activeArtist: null,
+  setActiveArtist: (artist) => set({ activeArtist: artist }),
 
   // Animation
   recentlyAdded: null,

@@ -153,10 +153,19 @@ async function spotifyFetch<T>(path: string, token: string): Promise<T> {
   return res.json()
 }
 
+export interface SpotifyArtist {
+  id: string
+  name: string
+  images: { url: string; width: number; height: number }[]
+  followers: { total: number }
+  genres: string[]
+  popularity: number
+}
+
 export interface SpotifyTrack {
   id: string
   name: string
-  artists: { name: string }[]
+  artists: { id: string; name: string }[]
   album: {
     name: string
     images: { url: string; width: number; height: number }[]
@@ -214,6 +223,22 @@ export async function getNewReleases(token: string): Promise<SpotifyAlbum[]> {
     token
   )
   return data.albums.items
+}
+
+export async function searchArtists(query: string, token: string): Promise<SpotifyArtist[]> {
+  const data = await spotifyFetch<{ artists: { items: SpotifyArtist[] } }>(
+    `/search?q=${encodeURIComponent(query)}&type=artist&limit=5`,
+    token
+  )
+  return data.artists.items
+}
+
+export async function getArtistTopTracks(artistId: string, token: string): Promise<SpotifyTrack[]> {
+  const data = await spotifyFetch<{ tracks: SpotifyTrack[] }>(
+    `/artists/${artistId}/top-tracks`,
+    token
+  )
+  return data.tracks
 }
 
 export async function getUserProfile(token: string) {

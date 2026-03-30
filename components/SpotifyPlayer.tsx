@@ -95,7 +95,10 @@ export default function SpotifyPlayer() {
         setCurrentTrack({
           id: track.id,
           name: track.name,
-          artists: track.artists,
+          artists: (track.artists as { uri: string; name: string }[]).map((a) => ({
+            id: a.uri.replace('spotify:artist:', ''),
+            name: a.name,
+          })),
           album: track.album as { name: string; images: { url: string; width: number; height: number }[] },
           duration_ms: track.duration_ms,
           preview_url: track.preview_url,

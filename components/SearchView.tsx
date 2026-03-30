@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
-import { searchTracks } from '@/lib/spotify'
+import { searchTracks, searchArtists, type SpotifyArtist } from '@/lib/spotify'
 import TrackRow from './TrackRow'
 
 export default function SearchView() {
@@ -15,9 +15,11 @@ export default function SearchView() {
     isSearching,
     setIsSearching,
     setActiveView,
+    setActiveArtist,
   } = useJukeboxStore()
 
   const [searchError, setSearchError] = useState<string | null>(null)
+  const [artistResults, setArtistResults] = useState<SpotifyArtist[]>([])
 
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -35,8 +37,14 @@ export default function SearchView() {
       }
       setIsSearching(true)
       setSearchError(null)
-      searchTracks(q, accessToken)
-        .then(setSearchResults)
+      Promise.all([
+        searchTracks(q, accessToken),
+        searchArtists(q, accessToken),
+      ])
+        .then(([tracks, artists]) => {
+          setSearchResults(tracks)
+          setArtistResults(artists)
+        })
         .catch((err) => {
           console.error(err)
           setSearchError(String(err?.message ?? err))
@@ -109,12 +117,53 @@ export default function SearchView() {
           </div>
         )}
 
-        {!isSearching && searchResults.length > 0 && (
+        {!isSearching && (artistResults.length > 0 || searchResults.length > 0) && (
           <div className="flex flex-col gap-1 mt-1">
-            <p className="text-white/30 text-xs mb-2">{searchResults.length} results</p>
-            {searchResults.map((track, idx) => (
-              <TrackRow key={track.id + idx} track={track} />
-            ))}
+            {/* Artists */}
+            {artistResults.length > 0 && (
+              <div className="mb-4">
+                <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Artists</p>
+                <div className="flex flex-col gap-1">
+                  {artistResults.map((artist) => (
+                    <button
+                      key={artist.id}
+                      onClick={() => {
+                        setActiveArtist({
+                          id: artist.id,
+                          name: artist.name,
+                          imageUrl: artist.images[0]?.url,
+                        })
+                        setActiveView('artist')
+                      }}
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 active:bg-white/8 transition-all text-left w-full"
+                    >
+                      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-white/10">
+                        {artist.images[0]?.url && (
+                          <img src={artist.images[0].url} alt={artist.name} className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-medium truncate">{artist.name}</p>
+                        <p className="text-white/40 text-xs mt-0.5">Artist</p>
+                      </div>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white/20 flex-shrink-0">
+                        <path d="M4 3L9 7L4 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tracks */}
+            {searchResults.length > 0 && (
+              <div>
+                <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Songs</p>
+                {searchResults.map((track, idx) => (
+                  <TrackRow key={track.id + idx} track={track} />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
