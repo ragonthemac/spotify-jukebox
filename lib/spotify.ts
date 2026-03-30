@@ -182,9 +182,8 @@ export async function searchTracks(
   token: string,
   limit = 20
 ): Promise<SpotifyTrack[]> {
-  const params = new URLSearchParams({ q: query, type: 'track', limit: String(limit) })
   const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
-    `/search?${params}`,
+    `/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
     token
   )
   return data.tracks.items
@@ -195,9 +194,8 @@ export async function searchAlbums(
   token: string,
   limit = 6
 ): Promise<SpotifyAlbum[]> {
-  const params = new URLSearchParams({ q: query, type: 'album', limit: String(limit) })
   const data = await spotifyFetch<{ albums: { items: SpotifyAlbum[] } }>(
-    `/search?${params}`,
+    `/search?q=${encodeURIComponent(query)}&type=album&limit=6`,
     token
   )
   return data.albums.items
@@ -212,9 +210,8 @@ export async function getFeaturedPlaylists(token: string) {
 }
 
 export async function getNewReleases(token: string): Promise<SpotifyAlbum[]> {
-  const params = new URLSearchParams({ q: 'tag:new', type: 'album', limit: '10' })
   const data = await spotifyFetch<{ albums: { items: SpotifyAlbum[] } }>(
-    `/search?${params}`,
+    `/search?q=tag%3Anew&type=album&limit=10`,
     token
   )
   return data.albums.items
