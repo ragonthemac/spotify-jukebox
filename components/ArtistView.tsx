@@ -15,7 +15,7 @@ export default function ArtistView() {
     if (!activeArtist || !accessToken) return
     setLoading(true)
     setError(null)
-    getArtistTopTracks(activeArtist.id, accessToken)
+    getArtistTopTracks(activeArtist.name, accessToken)
       .then(setTracks)
       .catch((err) => {
         console.error(err)

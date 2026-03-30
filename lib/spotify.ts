@@ -233,12 +233,12 @@ export async function searchArtists(query: string, token: string): Promise<Spoti
   return data.artists.items
 }
 
-export async function getArtistTopTracks(artistId: string, token: string): Promise<SpotifyTrack[]> {
-  const data = await spotifyFetch<{ tracks: SpotifyTrack[] }>(
-    `/artists/${artistId}/top-tracks?market=US`,
+export async function getArtistTopTracks(artistName: string, token: string): Promise<SpotifyTrack[]> {
+  const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
+    `/search?q=artist:${encodeURIComponent(artistName)}&type=track`,
     token
   )
-  return data.tracks
+  return data.tracks.items
 }
 
 export async function getUserProfile(token: string) {
