@@ -14,7 +14,7 @@ function AlbumCard({ album, token }: { album: SpotifyAlbum; token: string }) {
     if (!expanded && tracks.length === 0) {
       setLoading(true)
       getAlbumTracks(album.id, token)
-        .then(setTracks)
+        .then((fetched) => setTracks(fetched.map((t) => ({ ...t, album: { name: album.name, images: album.images } }))))
         .catch(console.error)
         .finally(() => setLoading(false))
     }
