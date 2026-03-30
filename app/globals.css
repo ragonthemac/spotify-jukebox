@@ -31,7 +31,7 @@ html, body {
 
 body {
   background: #8B4030;
-  background-image: url('/brick.jpg');
+  background-image: url('/spotify-jukebox/brick.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

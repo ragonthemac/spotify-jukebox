@@ -127,7 +127,7 @@ export default function HomeView() {
       {/* ── Jukebox photo overlay (mix-blend-mode: lighten removes black bg) ── */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/jukebox.png"
+        src="/spotify-jukebox/jukebox.png"
         alt=""
         style={{
           position: 'absolute',
