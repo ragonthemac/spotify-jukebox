@@ -6,7 +6,7 @@ import { getAlbumTracks, type SpotifyTrack } from '@/lib/spotify'
 import TrackRow from './TrackRow'
 
 export default function AlbumView() {
-  const { activeAlbum, accessToken, setActiveView } = useJukeboxStore()
+  const { activeAlbum, accessToken, setActiveView, addToQueue } = useJukeboxStore()
   const [tracks, setTracks] = useState<SpotifyTrack[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -48,13 +48,24 @@ export default function AlbumView() {
               <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <div className="px-4 pb-4 flex items-end gap-4">
+          <div className="px-4 pb-4 flex items-end gap-4 w-full">
             {art && <img src={art} alt={activeAlbum.name} className="w-20 h-20 rounded-xl object-cover shadow-lg flex-shrink-0" />}
-            <div className="min-w-0">
+            <div className="flex-1 min-w-0">
               <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Album</p>
               <h1 className="text-white font-bold text-xl leading-tight truncate">{activeAlbum.name}</h1>
               <p className="text-white/50 text-sm mt-0.5">{artist} · {activeAlbum.release_date?.slice(0, 4)}</p>
             </div>
+            {tracks.length > 0 && (
+              <button
+                onClick={() => tracks.forEach((t) => addToQueue(t))}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl glass border border-white/10 text-white/70 hover:text-white text-xs font-medium transition-all active:scale-95"
+              >
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                  <path d="M4 7H10M7 4V10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                Add all
+              </button>
+            )}
           </div>
         </div>
       </div>
