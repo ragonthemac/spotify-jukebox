@@ -161,9 +161,9 @@ export default function NowPlayingHero() {
             onChange={handleScrubChange}
             onMouseUp={handleScrubEnd}
             onTouchEnd={handleScrubEnd}
-            className="w-full"
+            className="w-full scrubber-gold"
             style={{
-              background: `linear-gradient(to right, #ff2d78 ${progress}%, rgba(255,255,255,0.15) ${progress}%)`,
+              background: `linear-gradient(to right, #c9a227 ${progress}%, rgba(201,162,39,0.15) ${progress}%)`,
             }}
           />
           <div className="flex justify-between">
