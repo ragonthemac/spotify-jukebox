@@ -476,8 +476,9 @@ export default function HomeView() {
             <div style={{ flexShrink: 0 }}>
               <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
               <div style={{ padding: `10px ${pad}`, background: 'rgba(8,4,0,0.97)', position: 'relative' }}>
+                <div style={{ padding: 2, borderRadius: (inlineDropdown.length > 0 || searchError || searchLoading) ? '10px 10px 0 0' : 10, background: chromeH, boxShadow: '0 0 8px rgba(201,162,39,0.18)' }}>
                 <div style={{ position: 'relative' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 56, background: 'rgba(201,162,39,0.07)', border: '2px solid rgba(201,162,39,0.55)', borderRadius: (inlineDropdown.length > 0 || searchError || searchLoading) ? '8px 8px 0 0' : 8, boxShadow: '0 0 18px rgba(201,162,39,0.12), inset 0 0 10px rgba(201,162,39,0.03)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 56, background: 'rgba(10,5,0,0.97)', border: 'none', borderRadius: (inlineDropdown.length > 0 || searchError || searchLoading) ? '8px 8px 0 0' : 8 }}>
                     <svg width="20" height="20" viewBox="0 0 16 16" fill="none" style={{ color: searchLoading ? 'var(--retro-gold)' : 'rgba(201,162,39,0.55)', flexShrink: 0 }}>
                       <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" /><path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
@@ -537,6 +538,7 @@ export default function HomeView() {
                     </div>
                   )}
                 </div>
+                </div>{/* end chrome gradient wrapper */}
               </div>
               <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
             </div>
@@ -548,7 +550,8 @@ export default function HomeView() {
           {queue.length > 0 && (
             <div style={{ padding: `12px ${pad} 16px` }}>
               <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 10, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Up Next</p>
-              <div style={{ borderRadius: 6, overflow: 'hidden', border: '1px solid rgba(201,162,39,0.2)' }}>
+              <div style={{ padding: 2, borderRadius: 8, background: chromeH, boxShadow: '0 0 8px rgba(201,162,39,0.15)' }}>
+              <div style={{ borderRadius: 6, overflow: 'hidden' }}>
                 {queue.slice(0, 1).map((track, i) => (
                   <div key={track.queueId} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderBottom: i < queue.length - 1 ? '1px solid rgba(201,162,39,0.1)' : 'none', background: i % 2 === 0 ? 'rgba(201,162,39,0.03)' : 'transparent' }}>
                     <div style={{ width: 40, height: 40, borderRadius: 6, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(201,162,39,0.12)', border: '1px solid rgba(201,162,39,0.25)', fontSize: 13, fontWeight: 700, fontFamily: 'monospace', color: 'var(--retro-gold)' }}>{rowLabel(i)}</div>
@@ -561,6 +564,7 @@ export default function HomeView() {
                   </div>
                 ))}
               </div>
+              </div>{/* end chrome gradient wrapper */}
             </div>
           )}
 
