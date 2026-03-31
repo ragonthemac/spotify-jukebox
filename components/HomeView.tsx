@@ -153,7 +153,7 @@ export default function HomeView() {
   const {
     accessToken, deviceId, setActiveView, setActivePlaylist, setActiveArtist, setActiveAlbum,
     currentTrack, isPlaying, setIsPlaying, progressMs, durationMs, queue, skipNext, addToQueue,
-    playHistory, addToHistory,
+    playHistory, addToHistory, setKeyboardVisible, setOnKeyPress,
   } = useJukeboxStore()
 
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([])
@@ -413,9 +413,23 @@ export default function HomeView() {
                     <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ color: searchLoading ? 'var(--retro-gold)' : 'var(--retro-muted)', flexShrink: 0 }}>
                       <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" /><path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
-                    <input type="text" value={inlineQuery} onChange={e => setInlineQuery(e.target.value)} placeholder="Search the catalog…"
+                    <input
+                      type="text"
+                      value={inlineQuery}
+                      onChange={e => setInlineQuery(e.target.value)}
+                      onFocus={() => {
+                        setOnKeyPress((key) => {
+                          if (key === 'BACKSPACE') setInlineQuery(q => q.slice(0, -1))
+                          else if (key === 'CLEAR') { setInlineQuery(''); setInlineDropdown([]); setSearchError('') }
+                          else setInlineQuery(q => q + key)
+                        })
+                        setKeyboardVisible(true)
+                      }}
+                      placeholder="Search the catalog…"
+                      inputMode="none"
                       className="flex-1 bg-transparent outline-none font-typewriter"
-                      style={{ fontSize: 16, color: 'var(--retro-cream)', caretColor: 'var(--retro-gold)' }} />
+                      style={{ fontSize: 16, color: 'var(--retro-cream)', caretColor: 'var(--retro-gold)' }}
+                    />
                     {inlineQuery && <button onClick={() => { setInlineQuery(''); setInlineDropdown([]); setSearchError('') }} style={{ color: 'var(--retro-muted)', padding: 4 }}>
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
                     </button>}

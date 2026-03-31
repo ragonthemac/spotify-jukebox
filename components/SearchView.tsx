@@ -30,6 +30,8 @@ export default function SearchView() {
     setIsSearching,
     setActiveView,
     setActiveArtist,
+    setKeyboardVisible,
+    setOnKeyPress,
   } = useJukeboxStore()
 
   const [searchError, setSearchError] = useState<string | null>(null)
@@ -109,7 +111,16 @@ export default function SearchView() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => {
+              setOnKeyPress((key) => {
+                if (key === 'BACKSPACE') setSearchQuery(q => q.slice(0, -1))
+                else if (key === 'CLEAR') setSearchQuery('')
+                else setSearchQuery(q => q + key)
+              })
+              setKeyboardVisible(true)
+            }}
             placeholder="Search songs, artists, albums…"
+            inputMode="none"
             className="flex-1 bg-transparent text-white placeholder-white/30 text-base outline-none"
           />
           {searchQuery && (

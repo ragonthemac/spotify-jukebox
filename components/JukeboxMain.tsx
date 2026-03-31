@@ -10,6 +10,7 @@ import PlaylistView from './PlaylistView'
 import BottomPlayer from './BottomPlayer'
 import BottomNav from './BottomNav'
 import SpotifyPlayer from './SpotifyPlayer'
+import OnScreenKeyboard from './OnScreenKeyboard'
 
 export default function JukeboxMain() {
   const activeView = useJukeboxStore((s) => s.activeView)
@@ -31,6 +32,9 @@ export default function JukeboxMain() {
 
       {/* Bottom nav */}
       <BottomNav />
+
+      {/* On-screen keyboard */}
+      <OnScreenKeyboard />
     </div>
   )
 }

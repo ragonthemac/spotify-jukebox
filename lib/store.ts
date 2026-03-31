@@ -61,6 +61,12 @@ interface JukeboxState {
   // Recently added (for animation)
   recentlyAdded: string | null
   setRecentlyAdded: (id: string | null) => void
+
+  // On-screen keyboard
+  keyboardVisible: boolean
+  setKeyboardVisible: (v: boolean) => void
+  onKeyPress: ((key: string) => void) | null
+  setOnKeyPress: (cb: ((key: string) => void) | null) => void
 }
 
 export const useJukeboxStore = create<JukeboxState>((set, get) => ({
@@ -138,4 +144,10 @@ export const useJukeboxStore = create<JukeboxState>((set, get) => ({
   // Animation
   recentlyAdded: null,
   setRecentlyAdded: (id) => set({ recentlyAdded: id }),
+
+  // On-screen keyboard
+  keyboardVisible: false,
+  setKeyboardVisible: (v) => set({ keyboardVisible: v }),
+  onKeyPress: null,
+  setOnKeyPress: (cb) => set({ onKeyPress: cb }),
 }))
