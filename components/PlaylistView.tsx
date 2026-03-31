@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
-import { getPlaylistTracks, playTrack, type SpotifyTrack } from '@/lib/spotify'
+import { getPlaylistTracks, searchTracks, playTrack, type SpotifyTrack } from '@/lib/spotify'
 import TrackRow from './TrackRow'
 
 export default function PlaylistView() {
@@ -16,8 +16,13 @@ export default function PlaylistView() {
     setLoading(true)
     setError(null)
     getPlaylistTracks(activePlaylist.id, accessToken)
-      .then(setTracks)
-      .catch(() => setError('restricted'))
+      .then((t) => { if (t.length > 0) setTracks(t); else throw new Error('empty') })
+      .catch(() =>
+        // Fallback: search for tracks using playlist name as query
+        searchTracks(activePlaylist.name, accessToken)
+          .then((t) => { setTracks(t); setError('fallback') })
+          .catch(() => setError('restricted'))
+      )
       .finally(() => setLoading(false))
   }, [activePlaylist, accessToken])
 
@@ -82,7 +87,12 @@ export default function PlaylistView() {
 
       {/* Track list */}
       <div className="flex-1 overflow-y-auto px-4 pb-6 pt-3">
-        {error && (
+        {error === 'fallback' && (
+          <p className="text-white/25 text-xs text-center py-2 mb-1">
+            Showing similar tracks — playlist requires Spotify Extended Access
+          </p>
+        )}
+        {error === 'restricted' && (
           <div className="flex flex-col items-center justify-center py-12 gap-4 text-center px-4">
             <div className="w-14 h-14 rounded-2xl glass flex items-center justify-center">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" opacity="0.4">

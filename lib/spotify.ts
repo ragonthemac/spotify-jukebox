@@ -336,11 +336,11 @@ export async function getUserPlaylists(token: string): Promise<SpotifyPlaylist[]
 }
 
 export async function getPlaylistTracks(playlistId: string, token: string): Promise<SpotifyTrack[]> {
-  const data = await spotifyFetch<{ items: { track: SpotifyTrack }[] }>(
-    `/playlists/${playlistId}/tracks?limit=50`,
+  const data = await spotifyFetch<{ items: { track: SpotifyTrack | null }[] }>(
+    `/playlists/${playlistId}/tracks?limit=50&market=from_token&fields=items(track(id,name,artists,album,duration_ms,uri,explicit,preview_url))`,
     token
   )
-  return data.items.map((i) => i.track).filter(Boolean)
+  return data.items.map((i) => i.track).filter((t): t is SpotifyTrack => t !== null)
 }
 
 export async function getUserProfile(token: string) {
