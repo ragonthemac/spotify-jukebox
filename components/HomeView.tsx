@@ -210,6 +210,14 @@ export default function HomeView() {
     if (next && accessToken && deviceId) playTrack(accessToken, next.uri, deviceId)
     else if (next) globalPlayer?.nextTrack()
   }
+  const handlePrev = () => {
+    if (accessToken) {
+      prevTrackApi(accessToken, deviceId ?? undefined)
+        .catch(() => globalPlayer?.previousTrack())
+    } else {
+      globalPlayer?.previousTrack()
+    }
+  }
 
   const progress = durationMs > 0 ? (progressMs / durationMs) * 100 : 0
   const albumArt = currentTrack?.album.images[0]?.url
@@ -330,7 +338,7 @@ export default function HomeView() {
                 <div style={{ display: 'flex', gap: 12 }}><Knob label="vol" /><Knob label="tone" color="#00d4ff" /></div>
                 <DecoEqualizer />
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <button onClick={() => accessToken && prevTrackApi(accessToken, deviceId ?? undefined)} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <button onClick={handlePrev} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="22" height="22" viewBox="0 0 14 14" fill="none"><rect x="2" y="2.5" width="3" height="9" rx="1" fill="currentColor" /><path d="M12 2.5L6 7L12 11.5V2.5Z" fill="currentColor" opacity="0.7" /></svg>
                   </button>
                   <button onClick={togglePlay} className="active:scale-95" style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--retro-gold)', color: '#0e0800', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 16px rgba(201,162,39,0.45), 0 3px 10px rgba(0,0,0,0.7)', border: '3px solid rgba(255,240,180,0.3)', transition: 'transform 0.1s' }}>
