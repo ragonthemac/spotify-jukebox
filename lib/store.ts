@@ -29,6 +29,7 @@ interface JukeboxState {
   removeFromQueue: (queueId: string) => void
   reorderQueue: (fromIndex: number, toIndex: number) => void
   importQueue: (tracks: SpotifyTrack[]) => void
+  setQueue: (tracks: SpotifyTrack[]) => void
   skipNext: () => QueueTrack | null
   clearQueue: () => void
 
@@ -116,6 +117,14 @@ export const useJukeboxStore = create<JukeboxState>((set, get) => ({
     const queueTracks: QueueTrack[] = tracks.map((t, i) => ({
       ...t,
       queueId: `${t.id}-import-${i}-${Date.now()}`,
+      addedAt: Date.now() + i,
+    }))
+    set({ queue: queueTracks })
+  },
+  setQueue: (tracks) => {
+    const queueTracks: QueueTrack[] = tracks.map((t, i) => ({
+      ...t,
+      queueId: `${t.id}-set-${i}-${Date.now()}`,
       addedAt: Date.now() + i,
     }))
     set({ queue: queueTracks })

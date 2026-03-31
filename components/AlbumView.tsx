@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
-import { getAlbumTracks, type SpotifyTrack } from '@/lib/spotify'
+import { getAlbumTracks, playTrack, type SpotifyTrack } from '@/lib/spotify'
 import TrackRow from './TrackRow'
 
 export default function AlbumView() {
-  const { activeAlbum, accessToken, setActiveView } = useJukeboxStore()
+  const { activeAlbum, accessToken, deviceId, setActiveView, setQueue } = useJukeboxStore()
   const [tracks, setTracks] = useState<SpotifyTrack[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -22,6 +22,12 @@ export default function AlbumView() {
       .catch((err) => setError(String(err?.message ?? err)))
       .finally(() => setLoading(false))
   }, [activeAlbum, accessToken])
+
+  const handlePlayAll = () => {
+    if (!tracks.length || !accessToken || !deviceId) return
+    setQueue(tracks.slice(1))
+    playTrack(accessToken, tracks[0].uri, deviceId)
+  }
 
   if (!activeAlbum) return null
 
@@ -50,13 +56,23 @@ export default function AlbumView() {
             </svg>
             Back
           </button>
-          <div className="px-4 pb-4 flex items-end gap-4">
+          <div className="px-4 pb-4 flex items-end gap-4 w-full">
             {art && <img src={art} alt={activeAlbum.name} className="w-20 h-20 rounded-xl object-cover shadow-lg flex-shrink-0" />}
-            <div className="min-w-0">
+            <div className="flex-1 min-w-0">
               <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Album</p>
               <h1 className="text-white font-bold text-xl leading-tight truncate">{activeAlbum.name}</h1>
               <p className="text-white/50 text-sm mt-0.5">{artist} · {activeAlbum.release_date?.slice(0, 4)}</p>
             </div>
+            {!loading && tracks.length > 0 && (
+              <button
+                onClick={handlePlayAll}
+                className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center bg-pink-500 hover:bg-pink-400 active:scale-90 transition-all duration-200 glow-pink"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
+                  <path d="M5 4L17 10L5 16V4Z" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       </div>
