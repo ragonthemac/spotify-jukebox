@@ -142,9 +142,9 @@ function DecoEqualizer() {
 function JukeboxLogo() {
   return (
     <div style={{ textAlign: 'center', lineHeight: 1 }}>
-      <div style={{ fontSize: 14, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(201,162,39,0.55)', fontFamily: 'monospace', marginBottom: 6 }}>♪ welcome to ♪</div>
+      <div style={{ fontSize: 20, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(201,162,39,0.55)', fontFamily: 'monospace', marginBottom: 6 }}>♪ welcome to ♪</div>
       <div className="font-retro" style={{ fontSize: 56, fontWeight: 900, background: chromeH, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.01em', lineHeight: 1.05 }}>The Outside Inn</div>
-      <div style={{ fontSize: 12, letterSpacing: '0.45em', textTransform: 'uppercase', color: 'rgba(201,162,39,0.4)', fontFamily: 'monospace', marginTop: 7 }}>── jukebox ──</div>
+      <div style={{ fontSize: 20, letterSpacing: '0.45em', textTransform: 'uppercase', color: 'rgba(201,162,39,0.4)', fontFamily: 'monospace', marginTop: 7 }}>── jukebox ──</div>
     </div>
   )
 }
