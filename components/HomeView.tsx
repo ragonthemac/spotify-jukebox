@@ -273,11 +273,22 @@ export default function HomeView() {
           <div style={{ flexShrink: 0, marginTop: 20 }}>
             <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={100} />
           </div>
-          <ChromeStrip height={8} opacity={0.5} />
+          {/* Neon separator under arch — same ring layers as sides, constrained to content width */}
+          <div style={{ margin: `0 ${pad}`, flexShrink: 0 }}>
+            <div style={{ height: 3, background: chromeH, opacity: 0.75 }} />
+            <div style={{ height: 2, background: '#050200' }} />
+            <div style={{ height: 3, background: '#ff2d78', opacity: 0.6, boxShadow: '0 0 8px 2px #ff2d7866', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
+            <div style={{ height: 2, background: '#050200' }} />
+            <div style={{ height: 3, background: '#00d4ff', opacity: 0.6, boxShadow: '0 0 8px 2px #00d4ff66', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
+            <div style={{ height: 2, background: '#050200' }} />
+            <div style={{ height: 3, background: chromeH, opacity: 0.65 }} />
+            <div style={{ height: 2, background: '#050200' }} />
+            <div style={{ height: 3, background: '#c9a227', opacity: 0.45 }} />
+          </div>
 
           {/* Jukebox body — bordered section aligned with arch curve sides */}
           {/* Strip positions use calc(50% - Xpx) matching arch ring radii at equator (vR=440) */}
-          <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+          <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {/* Left border strips — gap values: 60,50,44,38,32,26,20,14,8,2 → radii 500,490,484,478,472,466,460,454,448,442 */}
             <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 500px)', bottom: 0, width: 10, background: chrome,    opacity: 0.75, zIndex: 10, pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 490px)', bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
@@ -301,74 +312,84 @@ export default function HomeView() {
             <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 448px)', bottom: 0, width: 6,  background: '#c9a227', opacity: 0.45, zIndex: 10, pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 442px)', bottom: 0, width: 2,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
 
+            {/* ── Now playing — fixed, does not scroll ── */}
+            <div style={{ flexShrink: 0, position: 'relative', padding: `18px ${pad} 14px`, background: 'linear-gradient(180deg, rgba(20,10,2,0.98), rgba(14,8,0,1))' }}>
+
+              {/* 3D bolt clusters on each side */}
+              {[{ left: 'calc(50% - 500px + 10px)' }, { right: 'calc(50% - 500px + 10px)' }].map((pos, i) => (
+                <div key={i} style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', ...pos, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {[0, 1, 2].map(j => (
+                    <div key={j} style={{ width: 22, height: 22, borderRadius: '50%', background: 'radial-gradient(circle at 35% 30%, #fff8e0, #7a5810)', boxShadow: '0 3px 6px rgba(0,0,0,0.9), 0 1px 2px rgba(255,248,224,0.3)' }} />
+                  ))}
+                </div>
+              ))}
+
+              <div style={{ textAlign: 'center', marginBottom: 14 }}>
+                {currentTrack ? (
+                  <>
+                    <h2 className="font-retro" style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, marginBottom: 6, color: 'var(--retro-cream)' }}>{currentTrack.name}</h2>
+                    <p className="font-typewriter" style={{ fontSize: 17, color: 'var(--retro-gold)' }}>
+                      {currentTrack.artists.map((a, i) => (
+                        <span key={a.id}>{i > 0 && ' & '}<button onClick={() => { setActiveArtist({ id: a.id, name: a.name }); setActiveView('artist') }} className="hover:underline transition-colors">{a.name}</button></span>
+                      ))}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="font-retro" style={{ fontSize: 26, fontWeight: 700, color: 'var(--retro-muted)' }}>No track playing</h2>
+                    <p className="font-typewriter" style={{ fontSize: 16, marginTop: 6, color: 'var(--retro-muted)' }}>Select a song below</p>
+                  </>
+                )}
+              </div>
+
+              {currentTrack && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ height: 6, background: 'rgba(201,162,39,0.12)', borderRadius: 99, overflow: 'hidden', marginBottom: 6 }}>
+                    <div style={{ width: `${progress}%`, height: '100%', background: 'var(--retro-gold)', borderRadius: 99, transition: 'width 0.5s linear' }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span className="font-typewriter" style={{ fontSize: 14, color: 'var(--retro-muted)' }}>{formatDuration(progressMs)}</span>
+                    <span className="font-typewriter" style={{ fontSize: 14, color: 'var(--retro-muted)' }}>{formatDuration(durationMs)}</span>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
+                <div style={{ display: 'flex', gap: 12 }}><Knob label="vol" /><Knob label="tone" color="#00d4ff" /></div>
+                <DecoEqualizer />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button onClick={togglePlay} className="active:scale-95" style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--retro-gold)', color: '#0e0800', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 16px rgba(201,162,39,0.45), 0 3px 10px rgba(0,0,0,0.7)', border: '3px solid rgba(255,240,180,0.3)', transition: 'transform 0.1s' }}>
+                    {isPlaying
+                      ? <svg width="26" height="26" viewBox="0 0 18 18" fill="currentColor"><rect x="3" y="2" width="4" height="14" rx="1.5" /><rect x="11" y="2" width="4" height="14" rx="1.5" /></svg>
+                      : <svg width="26" height="26" viewBox="0 0 18 18" fill="currentColor"><path d="M4 3L16 9L4 15V3Z" /></svg>}
+                  </button>
+                  <button onClick={handleSkip} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="22" height="22" viewBox="0 0 14 14" fill="none"><path d="M2 2.5L8 7L2 11.5V2.5Z" fill="currentColor" opacity="0.7" /><rect x="9" y="2.5" width="3" height="9" rx="1" fill="currentColor" /></svg>
+                  </button>
+                </div>
+                <DecoEqualizer />
+                <div style={{ display: 'flex', gap: 12 }}><Knob label="bass" color="#ff2d78" /><Knob label="treb" color="#a855f7" /></div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 52, width: '100%', maxWidth: 500, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 6 }}>
+                  <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ color: 'var(--retro-muted)', flexShrink: 0 }}>
+                    <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" /><path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                  <input type="text" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search the catalog…"
+                    className="flex-1 bg-transparent outline-none font-typewriter"
+                    style={{ fontSize: 16, color: 'var(--retro-cream)', caretColor: 'var(--retro-gold)' }} />
+                  {query && <button onClick={() => setQuery('')} style={{ color: 'var(--retro-muted)', padding: 4 }}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                  </button>}
+                </div>
+              </div>
+            </div>
+
             {/* Scrollable content inside the bordered body */}
-            <div className="overflow-y-auto" style={{ height: '100%' }}>
+            <div className="overflow-y-auto" style={{ flex: 1 }}>
 
-          {/* ── Now playing ── */}
-          <div style={{ padding: `18px ${pad} 14px`, background: 'linear-gradient(180deg, rgba(20,10,2,0.98), rgba(14,8,0,1))' }}>
-            <div style={{ textAlign: 'center', marginBottom: 14 }}>
-              {currentTrack ? (
-                <>
-                  <h2 className="font-retro" style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, marginBottom: 6, color: 'var(--retro-cream)' }}>{currentTrack.name}</h2>
-                  <p className="font-typewriter" style={{ fontSize: 17, color: 'var(--retro-gold)' }}>
-                    {currentTrack.artists.map((a, i) => (
-                      <span key={a.id}>{i > 0 && ' & '}<button onClick={() => { setActiveArtist({ id: a.id, name: a.name }); setActiveView('artist') }} className="hover:underline transition-colors">{a.name}</button></span>
-                    ))}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <h2 className="font-retro" style={{ fontSize: 26, fontWeight: 700, color: 'var(--retro-muted)' }}>No track playing</h2>
-                  <p className="font-typewriter" style={{ fontSize: 16, marginTop: 6, color: 'var(--retro-muted)' }}>Select a song below</p>
-                </>
-              )}
-            </div>
-
-            {currentTrack && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ height: 6, background: 'rgba(201,162,39,0.12)', borderRadius: 99, overflow: 'hidden', marginBottom: 6 }}>
-                  <div style={{ width: `${progress}%`, height: '100%', background: 'var(--retro-gold)', borderRadius: 99, transition: 'width 0.5s linear' }} />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span className="font-typewriter" style={{ fontSize: 14, color: 'var(--retro-muted)' }}>{formatDuration(progressMs)}</span>
-                  <span className="font-typewriter" style={{ fontSize: 14, color: 'var(--retro-muted)' }}>{formatDuration(durationMs)}</span>
-                </div>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, marginBottom: 16 }}>
-              <div style={{ display: 'flex', gap: 12 }}><Knob label="vol" /><Knob label="tone" color="#00d4ff" /></div>
-              <DecoEqualizer />
-              <button onClick={togglePlay} className="active:scale-95" style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--retro-gold)', color: '#0e0800', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 16px rgba(201,162,39,0.45), 0 3px 10px rgba(0,0,0,0.7)', border: '3px solid rgba(255,240,180,0.3)', transition: 'transform 0.1s' }}>
-                {isPlaying
-                  ? <svg width="26" height="26" viewBox="0 0 18 18" fill="currentColor"><rect x="3" y="2" width="4" height="14" rx="1.5" /><rect x="11" y="2" width="4" height="14" rx="1.5" /></svg>
-                  : <svg width="26" height="26" viewBox="0 0 18 18" fill="currentColor"><path d="M4 3L16 9L4 15V3Z" /></svg>}
-              </button>
-              {queue.length > 0 && (
-                <button onClick={handleSkip} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="22" height="22" viewBox="0 0 14 14" fill="none"><path d="M2 2.5L8 7L2 11.5V2.5Z" fill="currentColor" opacity="0.7" /><rect x="9" y="2.5" width="3" height="9" rx="1" fill="currentColor" /></svg>
-                </button>
-              )}
-              <DecoEqualizer />
-              <div style={{ display: 'flex', gap: 12 }}><Knob label="bass" color="#ff2d78" /><Knob label="treb" color="#a855f7" /></div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 52, width: '100%', maxWidth: 500, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 6 }}>
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ color: 'var(--retro-muted)', flexShrink: 0 }}>
-                  <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" /><path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-                <input type="text" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search the catalog…"
-                  className="flex-1 bg-transparent outline-none font-typewriter"
-                  style={{ fontSize: 16, color: 'var(--retro-cream)', caretColor: 'var(--retro-gold)' }} />
-                {query && <button onClick={() => setQuery('')} style={{ color: 'var(--retro-muted)', padding: 4 }}>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                </button>}
-              </div>
-            </div>
-          </div>
-
-          <ChromeStrip height={8} opacity={0.5} />
+          <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: `10px ${pad}`, background: 'rgba(8,4,0,0.95)' }}>
             <SpeakerGrille rows={3} cols={12} />
             <div style={{ padding: '6px 16px', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 3, background: 'rgba(201,162,39,0.04)', whiteSpace: 'nowrap' }}>
@@ -376,7 +397,7 @@ export default function HomeView() {
             </div>
             <SpeakerGrille rows={3} cols={12} />
           </div>
-          <ChromeStrip height={8} opacity={0.5} />
+          <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: `14px ${pad} 0` }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(201,162,39,0.15)' }} />

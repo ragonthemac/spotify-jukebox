@@ -29,9 +29,6 @@ export default function JukeboxMain() {
         {activeView === 'playlist' && <PlaylistView />}
       </div>
 
-      {/* Persistent bottom player */}
-      <BottomPlayer />
-
       {/* Bottom nav */}
       <BottomNav />
     </div>
