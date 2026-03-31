@@ -354,6 +354,19 @@ export async function findOrCreateJukeboxPlaylist(token: string): Promise<string
   return created.id
 }
 
+export async function getPlaylistTrackUris(token: string, playlistId: string): Promise<Set<string>> {
+  const uris = new Set<string>()
+  let url = `/playlists/${playlistId}/tracks?fields=items(track(uri)),next&limit=100`
+  while (url) {
+    const data = await spotifyFetch<{ items: { track: { uri: string } | null }[]; next: string | null }>(url, token)
+    for (const item of data.items) {
+      if (item.track?.uri) uris.add(item.track.uri)
+    }
+    url = data.next ? data.next.replace('https://api.spotify.com/v1', '') : ''
+  }
+  return uris
+}
+
 export async function addTrackToJukeboxPlaylist(token: string, playlistId: string, trackUri: string) {
   await spotifyFetch(
     `/playlists/${playlistId}/tracks`,

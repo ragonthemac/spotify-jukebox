@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import {
   getRecentlyPlayed, getUserPlaylists, searchAll, clearToken, formatDuration,
-  previousTrack as prevTrackApi, findOrCreateJukeboxPlaylist, addTrackToJukeboxPlaylist,
+  previousTrack as prevTrackApi, findOrCreateJukeboxPlaylist, addTrackToJukeboxPlaylist, getPlaylistTrackUris,
   type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
 } from '@/lib/spotify'
 import { globalPlayer } from './SpotifyPlayer'
@@ -139,6 +139,7 @@ export default function HomeView() {
   const inlineDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
   const didLoad = useRef(false)
   const jukeboxPlaylistId = useRef<string | null>(null)
+  const jukeboxPlaylistUris = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     if (!accessToken || didLoad.current) return
@@ -158,9 +159,13 @@ export default function HomeView() {
     const addToYearlyPlaylist = async () => {
       if (!jukeboxPlaylistId.current) {
         jukeboxPlaylistId.current = await findOrCreateJukeboxPlaylist(accessToken).catch(() => null)
+        if (jukeboxPlaylistId.current) {
+          jukeboxPlaylistUris.current = await getPlaylistTrackUris(accessToken, jukeboxPlaylistId.current).catch(() => new Set())
+        }
       }
-      if (jukeboxPlaylistId.current) {
-        addTrackToJukeboxPlaylist(accessToken, jukeboxPlaylistId.current, uri).catch(() => {})
+      if (jukeboxPlaylistId.current && !jukeboxPlaylistUris.current.has(uri)) {
+        await addTrackToJukeboxPlaylist(accessToken, jukeboxPlaylistId.current, uri).catch(() => {})
+        jukeboxPlaylistUris.current.add(uri)
       }
     }
     addToYearlyPlaylist()
