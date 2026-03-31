@@ -42,16 +42,6 @@ export default function BottomNav() {
 
   return (
     <div className="flex-shrink-0" style={{ background: 'rgba(14,8,0,0.97)' }}>
-      {/* Neon separator — mirrors the top header bar */}
-      <div style={{ margin: '0 max(0px, calc(50% - 500px))' }}>
-        <div style={{ height: 3, background: chromeH, opacity: 0.75 }} />
-        <div style={{ height: 2, background: '#050200' }} />
-        <div style={{ height: 3, background: '#ff2d78', opacity: 0.6, boxShadow: '0 0 8px 2px #ff2d7866', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
-        <div style={{ height: 2, background: '#050200' }} />
-        <div style={{ height: 3, background: '#00d4ff', opacity: 0.6, boxShadow: '0 0 8px 2px #00d4ff66', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
-        <div style={{ height: 2, background: '#050200' }} />
-        <div style={{ height: 3, background: chromeH, opacity: 0.65 }} />
-      </div>
 
       {/* Tri-colour glow diffusion — flipped to glow downward */}
       <div style={{ display: 'flex', height: 14 }}>
