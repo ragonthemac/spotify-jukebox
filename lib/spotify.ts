@@ -142,14 +142,15 @@ export async function getValidAccessToken(): Promise<string | null> {
 
 // ─── API calls ────────────────────────────────────────────────────────────────
 
-async function spotifyFetch<T>(path: string, token: string, retries = 2): Promise<T> {
+async function spotifyFetch<T>(path: string, token: string, retries = 2, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${SPOTIFY_API_BASE}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    ...options,
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...options.headers },
   })
   if (res.status === 429 && retries > 0) {
     const wait = parseInt(res.headers.get('Retry-After') || '2', 10)
     await new Promise(r => setTimeout(r, wait * 1000))
-    return spotifyFetch(path, token, retries - 1)
+    return spotifyFetch(path, token, retries - 1, options)
   }
   if (!res.ok) {
     const body = await res.text().catch(() => '')
@@ -313,9 +314,52 @@ export async function getPlaylistTracks(playlistId: string, token: string): Prom
 }
 
 export async function getUserProfile(token: string) {
-  return spotifyFetch<{ display_name: string; images: { url: string }[] }>(
+  return spotifyFetch<{ display_name: string; id: string; images: { url: string }[] }>(
     '/me',
     token
+  )
+}
+
+// ─── Jukebox playlist ─────────────────────────────────────────────────────────
+
+const jukeboxPlaylistName = (year: number) => `The Outside Inn Playlist ${year}`
+
+export async function findOrCreateJukeboxPlaylist(token: string): Promise<string> {
+  const year = new Date().getFullYear()
+  const name = jukeboxPlaylistName(year)
+
+  // Search through user's playlists (up to 50) for existing playlist
+  const data = await spotifyFetch<{ items: { id: string; name: string }[] }>(
+    '/me/playlists?limit=50',
+    token
+  )
+  const existing = data.items.find(p => p.name === name)
+  if (existing) return existing.id
+
+  // Create it
+  const profile = await getUserProfile(token)
+  const created = await spotifyFetch<{ id: string }>(
+    `/users/${profile.id}/playlists`,
+    token,
+    2,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        name,
+        description: `Every track played at The Outside Inn in ${year}. Runs Jan–Jan.`,
+        public: false,
+      }),
+    }
+  )
+  return created.id
+}
+
+export async function addTrackToJukeboxPlaylist(token: string, playlistId: string, trackUri: string) {
+  await spotifyFetch(
+    `/playlists/${playlistId}/tracks`,
+    token,
+    2,
+    { method: 'POST', body: JSON.stringify({ uris: [trackUri] }) }
   )
 }
 

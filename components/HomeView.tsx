@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import {
   getRecentlyPlayed, getUserPlaylists, searchAll, clearToken, formatDuration,
-  previousTrack as prevTrackApi,
+  previousTrack as prevTrackApi, findOrCreateJukeboxPlaylist, addTrackToJukeboxPlaylist,
   type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
 } from '@/lib/spotify'
 import { globalPlayer } from './SpotifyPlayer'
@@ -138,6 +138,7 @@ export default function HomeView() {
   const [searchLoading, setSearchLoading] = useState(false)
   const inlineDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
   const didLoad = useRef(false)
+  const jukeboxPlaylistId = useRef<string | null>(null)
 
   useEffect(() => {
     if (!accessToken || didLoad.current) return
@@ -149,6 +150,21 @@ export default function HomeView() {
       })
       .finally(() => setLoading(false))
   }, [accessToken])
+
+  // Auto-add every played track to the yearly jukebox playlist
+  useEffect(() => {
+    if (!currentTrack || !accessToken) return
+    const uri = currentTrack.uri
+    const addToYearlyPlaylist = async () => {
+      if (!jukeboxPlaylistId.current) {
+        jukeboxPlaylistId.current = await findOrCreateJukeboxPlaylist(accessToken).catch(() => null)
+      }
+      if (jukeboxPlaylistId.current) {
+        addTrackToJukeboxPlaylist(accessToken, jukeboxPlaylistId.current, uri).catch(() => {})
+      }
+    }
+    addToYearlyPlaylist()
+  }, [currentTrack?.id, accessToken])
 
   useEffect(() => {
     if (inlineDebounce.current) clearTimeout(inlineDebounce.current)
@@ -171,7 +187,7 @@ export default function HomeView() {
           if (albums[i])  pool.push({ type: 'album',  item: albums[i] })
         }
         setInlineDropdown(pool.slice(0, 3))
-        setSearchError(results.length === 0 ? 'No results found' : '')
+        setSearchError(pool.length === 0 ? 'No results found' : '')
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Search failed'
         setSearchError(msg.includes('429') ? 'Too many requests — wait a moment' : 'Search failed')
