@@ -1,31 +1,30 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { exchangeCodeForToken, storeToken } from '@/lib/spotify'
 
-export default function CallbackPage() {
-  const router = useRouter()
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH || ''
 
+export default function CallbackPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const code = params.get('code')
     const error = params.get('error')
 
     if (error || !code) {
-      router.replace('/?error=' + (error || 'no_code'))
+      window.location.replace(`${BASE}/?error=${error || 'no_code'}`)
       return
     }
 
     exchangeCodeForToken(code)
       .then((token) => {
         storeToken(token)
-        router.replace('/')
+        window.location.replace(`${BASE}/`)
       })
       .catch(() => {
-        router.replace('/?error=token_failed')
+        window.location.replace(`${BASE}/?error=token_failed`)
       })
-  }, [router])
+  }, [])
 
   return (
     <div className="h-full flex items-center justify-center bg-jukebox">
