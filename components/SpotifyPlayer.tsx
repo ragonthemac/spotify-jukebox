@@ -56,6 +56,7 @@ export default function SpotifyPlayer() {
     useJukeboxStore()
   const playerRef = useRef<SpotifyPlayerInstance | null>(null)
   const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null)
+  const prevPausedRef = useRef<boolean>(true)
 
   useEffect(() => {
     if (!accessToken) return
@@ -78,6 +79,15 @@ export default function SpotifyPlayer() {
       player.addListener('ready', (state) => {
         const { device_id } = state as { device_id: string }
         setDeviceId(device_id)
+        // Import Spotify's queue if our queue is empty
+        import('@/lib/spotify').then(({ getSpotifyCurrentQueue }) => {
+          const { accessToken: tok, importQueue } = useJukeboxStore.getState()
+          if (tok) {
+            getSpotifyCurrentQueue(tok).then((tracks) => {
+              if (tracks.length > 0) importQueue(tracks)
+            }).catch(() => {})
+          }
+        })
       })
 
       player.addListener('not_ready', () => {
@@ -88,6 +98,19 @@ export default function SpotifyPlayer() {
         if (!state) return
         const s = state as SpotifyPlaybackState
         const track = s.track_window.current_track
+
+        // Auto-play next queued song when track ends naturally
+        const wasPaused = prevPausedRef.current
+        prevPausedRef.current = s.paused
+        if (s.paused && s.position < 500 && !wasPaused) {
+          const { queue: q, skipNext: skip, accessToken: tok, deviceId: did } = useJukeboxStore.getState()
+          if (q.length > 0) {
+            const next = skip()
+            if (next && tok && did) {
+              import('@/lib/spotify').then(({ playTrack }) => playTrack(tok, next.uri, did))
+            }
+          }
+        }
 
         setIsPlaying(!s.paused)
         setProgressMs(s.position)
@@ -126,20 +149,35 @@ export default function SpotifyPlayer() {
     }
   }, [accessToken, setDeviceId, setIsPlaying, setCurrentTrack, setProgressMs, setDurationMs, skipNext])
 
-  // Tick progress
+  // Tick progress — subscribe to isPlaying so the interval starts/stops correctly
   useEffect(() => {
-    const { isPlaying } = useJukeboxStore.getState()
-    if (isPlaying) {
+    const startInterval = () => {
+      if (progressInterval.current) return
       progressInterval.current = setInterval(() => {
         useJukeboxStore.setState((s) => ({
-          progressMs: Math.min(s.progressMs + 500, s.durationMs),
+          progressMs: Math.min(s.progressMs + 250, s.durationMs),
         }))
-      }, 500)
-    } else {
-      if (progressInterval.current) clearInterval(progressInterval.current)
+      }, 250)
     }
+    const stopInterval = () => {
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current)
+        progressInterval.current = null
+      }
+    }
+
+    const unsub = useJukeboxStore.subscribe((state, prev) => {
+      if (state.isPlaying === prev.isPlaying) return
+      if (state.isPlaying) startInterval()
+      else stopInterval()
+    })
+
+    // Kick off if already playing when this effect runs
+    if (useJukeboxStore.getState().isPlaying) startInterval()
+
     return () => {
-      if (progressInterval.current) clearInterval(progressInterval.current)
+      unsub()
+      stopInterval()
     }
   }, [])
 

@@ -2,11 +2,16 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
-import { searchTracks, searchArtists, getRecentlyPlayed, type SpotifyArtist, type SpotifyTrack } from '@/lib/spotify'
+import { searchAll, type SpotifyArtist, type SpotifyTrack, type SpotifyAlbum, type SpotifyPlaylist } from '@/lib/spotify'
 import TrackRow from './TrackRow'
 
 const RECENT_SEARCHES_KEY = 'jukebox_recent_searches'
 const MAX_RECENT = 8
+
+const GENRES = [
+  'Rock', 'Pop', 'Hip-Hop', 'R&B', 'Soul', 'Country', 'Electronic',
+  'Dance', 'Jazz', 'Blues', 'Classical', 'Reggae', 'Punk', 'Metal', 'Folk', 'Indie', 'Latin',
+]
 
 function getRecentSearches(): string[] {
   try { return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]') } catch { return [] }
@@ -30,16 +35,18 @@ export default function SearchView() {
     setIsSearching,
     setActiveView,
     setActiveArtist,
+    setActiveAlbum,
+    setActivePlaylist,
     setKeyboardVisible,
     setOnKeyPress,
   } = useJukeboxStore()
 
   const [searchError, setSearchError] = useState<string | null>(null)
   const [artistResults, setArtistResults] = useState<SpotifyArtist[]>([])
+  const [albumResults, setAlbumResults] = useState<SpotifyAlbum[]>([])
+  const [playlistResults, setPlaylistResults] = useState<SpotifyPlaylist[]>([])
   const [tab, setTab] = useState<'recent' | 'played'>('recent')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
-  const [recentlyPlayed, setRecentlyPlayed] = useState<SpotifyTrack[]>([])
-  const [loadingPlayed, setLoadingPlayed] = useState(false)
 
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -49,36 +56,27 @@ export default function SearchView() {
     setRecentSearches(getRecentSearches())
   }, [])
 
-  // Load recently played when that tab is selected
-  useEffect(() => {
-    if (tab !== 'played' || !accessToken || recentlyPlayed.length > 0) return
-    setLoadingPlayed(true)
-    getRecentlyPlayed(accessToken)
-      .then(setRecentlyPlayed)
-      .catch(console.error)
-      .finally(() => setLoadingPlayed(false))
-  }, [tab, accessToken, recentlyPlayed.length])
-
   const doSearch = useCallback(
     (q: string) => {
       if (!q.trim() || !accessToken) {
         setSearchResults([])
+        setArtistResults([])
+        setAlbumResults([])
+        setPlaylistResults([])
         return
       }
       setIsSearching(true)
       setSearchError(null)
-      Promise.all([
-        searchTracks(q, accessToken),
-        searchArtists(q, accessToken),
-      ])
-        .then(([tracks, artists]) => {
+      searchAll(q, accessToken)
+        .then(({ tracks, artists, albums, playlists }) => {
           setSearchResults(tracks)
           setArtistResults(artists)
+          setAlbumResults(albums)
+          setPlaylistResults(playlists)
           saveRecentSearch(q.trim())
           setRecentSearches(getRecentSearches())
         })
         .catch((err) => {
-          console.error(err)
           setSearchError(String(err?.message ?? err))
         })
         .finally(() => setIsSearching(false))
@@ -97,12 +95,15 @@ export default function SearchView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const hasResults = artistResults.length > 0 || searchResults.length > 0 || albumResults.length > 0 || playlistResults.length > 0
+
   return (
     <div className="h-full flex flex-col">
-      {/* Search bar */}
+      {/* Gold search bar */}
       <div className="flex-shrink-0 px-4 pt-4 pb-3 flex items-center gap-3">
-        <div className="flex-1 flex items-center gap-3 glass rounded-2xl px-4 h-14 border border-white/10">
-          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 text-white/40">
+        <div className="flex-1 flex items-center gap-3 rounded-xl px-4 h-[72px] border-2"
+          style={{ background: 'rgba(201,162,39,0.10)', borderColor: 'rgba(201,162,39,0.75)', boxShadow: '0 0 24px rgba(201,162,39,0.20), inset 0 0 12px rgba(201,162,39,0.04)' }}>
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none" className="flex-shrink-0" style={{ color: 'rgba(201,162,39,0.6)' }}>
             <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
             <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
@@ -120,12 +121,13 @@ export default function SearchView() {
               })
               setKeyboardVisible(true)
             }}
-            placeholder="Search songs, artists, albums…"
+            placeholder="Search songs, artists, albums, playlists…"
             inputMode="none"
-            className="flex-1 bg-transparent text-white placeholder-white/30 text-base outline-none"
+            className="flex-1 bg-transparent placeholder-white/30 text-base outline-none"
+            style={{ color: 'var(--retro-cream)' }}
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="text-white/40 hover:text-white/70 transition-colors p-1">
+            <button onClick={() => setSearchQuery('')} className="p-1" style={{ color: 'rgba(201,162,39,0.5)' }}>
               <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
                 <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
@@ -135,6 +137,27 @@ export default function SearchView() {
         <button onClick={() => setActiveView('home')} className="text-white/50 text-base hover:text-white transition-colors px-2 py-3">
           Cancel
         </button>
+      </div>
+
+      {/* Genre quick buttons — always visible */}
+      <div className="flex-shrink-0 px-4 pb-3">
+        <div className="scrollbar-none flex gap-2 overflow-x-auto pb-1">
+          {GENRES.map((genre) => (
+            <button
+              key={genre}
+              onClick={() => setSearchQuery(genre)}
+              className="flex-shrink-0 px-4 py-2.5 rounded-full text-sm font-medium transition-all active:scale-95"
+              style={{
+                background: searchQuery === genre ? 'rgba(201,162,39,0.25)' : 'rgba(201,162,39,0.08)',
+                border: searchQuery === genre ? '1px solid rgba(201,162,39,0.7)' : '1px solid rgba(201,162,39,0.3)',
+                color: searchQuery === genre ? 'rgba(201,162,39,1)' : 'rgba(201,162,39,0.85)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {genre}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-4">
@@ -154,7 +177,7 @@ export default function SearchView() {
         )}
 
         {/* Search results */}
-        {!isSearching && (artistResults.length > 0 || searchResults.length > 0) && (
+        {!isSearching && hasResults && (
           <div className="flex flex-col gap-1 mt-1">
             {artistResults.length > 0 && (
               <div className="mb-4">
@@ -181,6 +204,59 @@ export default function SearchView() {
                 </div>
               </div>
             )}
+
+            {playlistResults.length > 0 && (
+              <div className="mb-4">
+                <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Playlists</p>
+                <div className="flex flex-col gap-1">
+                  {playlistResults.map((pl) => (
+                    <button
+                      key={pl.id}
+                      onClick={() => { setActivePlaylist(pl); setActiveView('playlist') }}
+                      className="flex items-center gap-3 p-4 rounded-xl hover:bg-white/5 transition-all text-left w-full"
+                    >
+                      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
+                        {pl.images?.[0]?.url && <img src={pl.images[0].url} alt={pl.name} className="w-full h-full object-cover" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-base font-medium truncate">{pl.name}</p>
+                        <p className="text-white/40 text-sm mt-0.5">{pl.tracks?.total} songs · {pl.owner?.display_name}</p>
+                      </div>
+                      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" className="text-white/20 flex-shrink-0">
+                        <path d="M4 3L9 7L4 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {albumResults.length > 0 && (
+              <div className="mb-4">
+                <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Albums</p>
+                <div className="flex flex-col gap-1">
+                  {albumResults.map((album) => (
+                    <button
+                      key={album.id}
+                      onClick={() => { setActiveAlbum(album); setActiveView('album') }}
+                      className="flex items-center gap-3 p-4 rounded-xl hover:bg-white/5 transition-all text-left w-full"
+                    >
+                      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
+                        {album.images?.[0]?.url && <img src={album.images[0].url} alt={album.name} className="w-full h-full object-cover" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-base font-medium truncate">{album.name}</p>
+                        <p className="text-white/40 text-sm mt-0.5">{album.artists[0]?.name} · {album.release_date?.slice(0, 4)}</p>
+                      </div>
+                      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" className="text-white/20 flex-shrink-0">
+                        <path d="M4 3L9 7L4 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {searchResults.length > 0 && (
               <div>
                 <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Songs</p>
@@ -196,17 +272,16 @@ export default function SearchView() {
           </div>
         )}
 
-        {!isSearching && !searchError && searchQuery && searchResults.length === 0 && (
+        {!isSearching && !searchError && searchQuery && !hasResults && (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <div className="text-4xl opacity-20">🎵</div>
             <p className="text-white/40 text-sm">No results for &ldquo;{searchQuery}&rdquo;</p>
           </div>
         )}
 
-        {/* Empty state — tabs */}
+        {/* Empty state — recent searches */}
         {!searchQuery && !isSearching && (
           <div className="mt-1">
-            {/* Tabs */}
             <div className="flex gap-1 mb-4 glass rounded-xl p-1 border border-white/5">
               <button
                 onClick={() => setTab('recent')}
@@ -224,7 +299,6 @@ export default function SearchView() {
               </button>
             </div>
 
-            {/* Recent Searches */}
             {tab === 'recent' && (
               recentSearches.length === 0 ? (
                 <p className="text-white/20 text-xs text-center py-8">No recent searches</p>
@@ -255,27 +329,8 @@ export default function SearchView() {
               )
             )}
 
-            {/* Recently Played */}
             {tab === 'played' && (
-              loadingPlayed ? (
-                <div className="flex flex-col gap-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3">
-                      <div className="w-12 h-12 rounded-lg skeleton flex-shrink-0" />
-                      <div className="flex-1">
-                        <div className="h-3.5 w-36 rounded skeleton mb-2" />
-                        <div className="h-3 w-24 rounded skeleton" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : recentlyPlayed.length === 0 ? (
-                <p className="text-white/20 text-xs text-center py-8">No recently played tracks</p>
-              ) : (
-                <div className="flex flex-col gap-1">
-                  {recentlyPlayed.map((track, i) => <TrackRow key={track.id + i} track={track} />)}
-                </div>
-              )
+              <p className="text-white/20 text-xs text-center py-8">Play some songs to see them here</p>
             )}
           </div>
         )}

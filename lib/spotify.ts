@@ -219,17 +219,42 @@ export async function searchAll(query: string, token: string): Promise<{
   tracks: SpotifyTrack[]
   artists: SpotifyArtist[]
   albums: SpotifyAlbum[]
+  playlists: SpotifyPlaylist[]
 }> {
   const data = await spotifyFetch<{
     tracks: { items: SpotifyTrack[] }
     artists: { items: SpotifyArtist[] }
     albums: { items: SpotifyAlbum[] }
-  }>(`/search?q=${encodeURIComponent(query)}&type=track,artist,album&limit=5`, token)
+    playlists: { items: SpotifyPlaylist[] }
+  }>(`/search?q=${encodeURIComponent(query)}&type=track,artist,album,playlist&limit=5`, token)
   return {
     tracks: data.tracks.items,
     artists: data.artists.items,
     albums: data.albums.items,
+    playlists: data.playlists.items,
   }
+}
+
+export async function getDecadePlaylists(token: string): Promise<{ label: string; playlist: SpotifyPlaylist }[]> {
+  const decades = [
+    { label: '60s', q: 'greatest hits 1960s' },
+    { label: '70s', q: 'greatest hits 1970s' },
+    { label: '80s', q: 'greatest hits 1980s' },
+    { label: '90s', q: 'greatest hits 1990s' },
+    { label: '00s', q: 'greatest hits 2000s' },
+    { label: '2010s', q: 'greatest hits 2010s' },
+  ]
+  const results = await Promise.all(
+    decades.map(({ label, q }) =>
+      spotifyFetch<{ playlists: { items: SpotifyPlaylist[] } }>(
+        `/search?q=${encodeURIComponent(q)}&type=playlist&limit=1`,
+        token
+      )
+        .then(d => d.playlists.items[0] ? { label, playlist: d.playlists.items[0] } : null)
+        .catch(() => null)
+    )
+  )
+  return results.filter(Boolean) as { label: string; playlist: SpotifyPlaylist }[]
 }
 
 export async function getFeaturedPlaylists(token: string) {
@@ -287,6 +312,11 @@ export interface SpotifyPlaylist {
   images: { url: string }[]
   tracks: { total: number }
   owner: { display_name: string }
+}
+
+export async function getSpotifyCurrentQueue(token: string): Promise<SpotifyTrack[]> {
+  const data = await spotifyFetch<{ queue: SpotifyTrack[] }>('/me/player/queue', token)
+  return (data.queue || []).filter(Boolean)
 }
 
 export async function getRecentlyPlayed(token: string): Promise<SpotifyTrack[]> {

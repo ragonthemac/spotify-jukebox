@@ -1,12 +1,15 @@
 'use client'
 
+import { useRef, useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import { playTrack } from '@/lib/spotify'
 import { globalPlayer } from './SpotifyPlayer'
 import TrackRow from './TrackRow'
 
 export default function QueueView() {
-  const { queue, currentTrack, accessToken, deviceId, skipNext, clearQueue, setActiveView, setActiveArtist } = useJukeboxStore()
+  const { queue, currentTrack, accessToken, deviceId, skipNext, clearQueue, reorderQueue, setActiveView, setActiveArtist } = useJukeboxStore()
+  const dragIndexRef = useRef<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   const handleSkip = () => {
     const next = skipNext()
@@ -97,7 +100,32 @@ export default function QueueView() {
         {queue.length > 0 ? (
           <div className="flex flex-col gap-1">
             {queue.map((track, idx) => (
-              <div key={track.queueId} className="flex items-center gap-2">
+              <div
+                key={track.queueId}
+                className={`flex items-center gap-2 rounded-xl transition-all duration-150 ${dragOverIndex === idx ? 'bg-white/8 scale-[1.01]' : ''}`}
+                draggable
+                onDragStart={() => { dragIndexRef.current = idx }}
+                onDragOver={(e) => { e.preventDefault(); setDragOverIndex(idx) }}
+                onDragLeave={() => setDragOverIndex(null)}
+                onDrop={() => {
+                  if (dragIndexRef.current !== null && dragIndexRef.current !== idx) {
+                    reorderQueue(dragIndexRef.current, idx)
+                  }
+                  dragIndexRef.current = null
+                  setDragOverIndex(null)
+                }}
+                onDragEnd={() => { dragIndexRef.current = null; setDragOverIndex(null) }}
+              >
+                <div className="flex flex-col items-center gap-0.5 w-5 flex-shrink-0 cursor-grab active:cursor-grabbing">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/20">
+                    <circle cx="4" cy="3" r="1" fill="currentColor" />
+                    <circle cx="8" cy="3" r="1" fill="currentColor" />
+                    <circle cx="4" cy="6" r="1" fill="currentColor" />
+                    <circle cx="8" cy="6" r="1" fill="currentColor" />
+                    <circle cx="4" cy="9" r="1" fill="currentColor" />
+                    <circle cx="8" cy="9" r="1" fill="currentColor" />
+                  </svg>
+                </div>
                 <span className="text-white/20 text-xs w-4 text-right flex-shrink-0">{idx + 1}</span>
                 <div className="flex-1">
                   <TrackRow

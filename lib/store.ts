@@ -27,6 +27,8 @@ interface JukeboxState {
   queue: QueueTrack[]
   addToQueue: (track: SpotifyTrack) => void
   removeFromQueue: (queueId: string) => void
+  reorderQueue: (fromIndex: number, toIndex: number) => void
+  importQueue: (tracks: SpotifyTrack[]) => void
   skipNext: () => QueueTrack | null
   clearQueue: () => void
 
@@ -94,13 +96,30 @@ export const useJukeboxStore = create<JukeboxState>((set, get) => ({
       queueId: `${track.id}-${Date.now()}-${Math.random()}`,
       addedAt: Date.now(),
     }
-    set((s) => ({ queue: [...s.queue, queueTrack] }))
+    set((s) => ({ queue: [queueTrack, ...s.queue] }))
     // Flash recently added
     set({ recentlyAdded: track.id })
     setTimeout(() => set({ recentlyAdded: null }), 1500)
   },
   removeFromQueue: (queueId) =>
     set((s) => ({ queue: s.queue.filter((t) => t.queueId !== queueId) })),
+  reorderQueue: (fromIndex, toIndex) => {
+    const { queue } = get()
+    const newQueue = [...queue]
+    const [item] = newQueue.splice(fromIndex, 1)
+    newQueue.splice(toIndex, 0, item)
+    set({ queue: newQueue })
+  },
+  importQueue: (tracks) => {
+    const { queue } = get()
+    if (queue.length > 0) return
+    const queueTracks: QueueTrack[] = tracks.map((t, i) => ({
+      ...t,
+      queueId: `${t.id}-import-${i}-${Date.now()}`,
+      addedAt: Date.now() + i,
+    }))
+    set({ queue: queueTracks })
+  },
   skipNext: () => {
     const { queue } = get()
     if (!queue.length) return null

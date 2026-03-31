@@ -1,19 +1,33 @@
 'use client'
 
+import { useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import { formatDuration } from '@/lib/spotify'
 import { globalPlayer } from './SpotifyPlayer'
 
 export default function NowPlayingHero() {
   const { currentTrack, isPlaying, progressMs, durationMs, setIsPlaying, setActiveView, setActiveArtist } = useJukeboxStore()
+  const [scrubbing, setScrubbing] = useState(false)
+  const [scrubValue, setScrubValue] = useState(0)
 
-  const progress = durationMs > 0 ? (progressMs / durationMs) * 100 : 0
+  const displayMs = scrubbing ? scrubValue : progressMs
+  const progress = durationMs > 0 ? (displayMs / durationMs) * 100 : 0
   const art = currentTrack?.album.images?.[0]?.url
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleScrubStart = () => {
+    setScrubbing(true)
+    setScrubValue(progressMs)
+  }
+
+  const handleScrubChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setScrubValue(Number(e.target.value))
+  }
+
+  const handleScrubEnd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const ms = Number(e.target.value)
     globalPlayer?.seek(ms)
     useJukeboxStore.setState({ progressMs: ms })
+    setScrubbing(false)
   }
 
   const togglePlay = () => {
@@ -151,16 +165,20 @@ export default function NowPlayingHero() {
           <input
             type="range"
             min={0}
-            max={durationMs}
-            value={progressMs}
-            onChange={handleSeek}
+            max={durationMs || 1}
+            value={displayMs}
+            onMouseDown={handleScrubStart}
+            onTouchStart={handleScrubStart}
+            onChange={handleScrubChange}
+            onMouseUp={handleScrubEnd}
+            onTouchEnd={handleScrubEnd as unknown as React.TouchEventHandler}
             className="w-full"
             style={{
               background: `linear-gradient(to right, #ff2d78 ${progress}%, rgba(255,255,255,0.15) ${progress}%)`,
             }}
           />
           <div className="flex justify-between">
-            <span className="text-xs text-white/30">{formatDuration(progressMs)}</span>
+            <span className="text-xs text-white/30">{formatDuration(displayMs)}</span>
             <span className="text-xs text-white/30">{formatDuration(durationMs)}</span>
           </div>
         </div>
