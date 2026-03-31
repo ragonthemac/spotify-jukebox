@@ -56,16 +56,6 @@ export default function NowPlayingHero() {
           <p className="text-white/25 text-xs mt-1">Search for a song to get started</p>
         </div>
 
-        {/* Neon scan lines */}
-        <div className="flex gap-1 mt-1">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="w-1 bg-pink-500/60 rounded-full eq-bar"
-              style={{ height: 16, animationPlayState: 'paused', opacity: 0.2 }}
-            />
-          ))}
-        </div>
       </div>
     )
   }
