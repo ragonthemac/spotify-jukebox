@@ -3,9 +3,9 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import {
-  getRecentlyPlayed, getUserPlaylists, searchTracks, searchArtists, clearToken, formatDuration,
+  getRecentlyPlayed, getUserPlaylists, searchTracks, searchArtists, searchAlbums, clearToken, formatDuration,
   previousTrack as prevTrackApi,
-  type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist,
+  type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
 } from '@/lib/spotify'
 import { globalPlayer } from './SpotifyPlayer'
 import { playTrack } from '@/lib/spotify'
@@ -123,8 +123,8 @@ function JukeboxLogo() {
 
 export default function HomeView() {
   const {
-    accessToken, deviceId, setActiveView, setActivePlaylist, setActiveArtist,
-    currentTrack, isPlaying, setIsPlaying, progressMs, durationMs, queue, skipNext,
+    accessToken, deviceId, setActiveView, setActivePlaylist, setActiveArtist, setActiveAlbum,
+    currentTrack, isPlaying, setIsPlaying, progressMs, durationMs, queue, skipNext, addToQueue,
   } = useJukeboxStore()
 
   const [recentTracks, setRecentTracks] = useState<SpotifyTrack[]>([])
@@ -135,6 +135,11 @@ export default function HomeView() {
   const [artistResults, setArtistResults] = useState<SpotifyArtist[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Inline search dropdown
+  const [inlineQuery, setInlineQuery] = useState('')
+  const [inlineDropdown, setInlineDropdown] = useState<{ type: 'track' | 'artist' | 'album'; item: SpotifyTrack | SpotifyArtist | SpotifyAlbum }[]>([])
+  const inlineDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!accessToken) return
@@ -160,6 +165,45 @@ export default function HomeView() {
     debounceRef.current = setTimeout(() => doSearch(query), 400)
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [query, doSearch])
+
+  useEffect(() => {
+    if (inlineDebounce.current) clearTimeout(inlineDebounce.current)
+    if (!inlineQuery.trim() || !accessToken) { setInlineDropdown([]); return }
+    inlineDebounce.current = setTimeout(async () => {
+      const [tracks, artists, albums] = await Promise.all([
+        searchTracks(inlineQuery, accessToken),
+        searchArtists(inlineQuery, accessToken),
+        searchAlbums(inlineQuery, accessToken),
+      ]).catch(() => [[], [], []])
+      const results: typeof inlineDropdown = []
+      if (artists[0]) results.push({ type: 'artist', item: artists[0] })
+      if (albums[0]) results.push({ type: 'album', item: albums[0] })
+      if (tracks[0]) results.push({ type: 'track', item: tracks[0] })
+      setInlineDropdown(results.slice(0, 3))
+    }, 350)
+    return () => { if (inlineDebounce.current) clearTimeout(inlineDebounce.current) }
+  }, [inlineQuery, accessToken])
+
+  const handleInlineSelect = (entry: typeof inlineDropdown[0]) => {
+    setInlineQuery('')
+    setInlineDropdown([])
+    if (entry.type === 'artist') {
+      const a = entry.item as SpotifyArtist
+      setActiveArtist({ id: a.id, name: a.name, imageUrl: a.images?.[0]?.url })
+      setActiveView('artist')
+    } else if (entry.type === 'album') {
+      const al = entry.item as SpotifyAlbum
+      setActiveAlbum(al)
+      setActiveView('album')
+    } else {
+      const t = entry.item as SpotifyTrack
+      if (!currentTrack && accessToken && deviceId) {
+        playTrack(accessToken, t.uri, deviceId)
+      } else {
+        addToQueue(t)
+      }
+    }
+  }
 
   const togglePlay = () => {
     if (isPlaying) globalPlayer?.pause(); else globalPlayer?.resume()
@@ -253,11 +297,11 @@ export default function HomeView() {
       ) : (
         <>
           {/* Arch — sits above the scrollable body, doesn't scroll */}
-          <div style={{ flexShrink: 0, marginTop: 20 }}>
+          <div style={{ flexShrink: 0, marginTop: -20 }}>
             <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={100} />
           </div>
-          {/* Neon separator under arch — same ring layers as sides, constrained to content width */}
-          <div style={{ flexShrink: 0 }}>
+          {/* Neon separator under arch — clipped to jukebox body width (500px from center each side) */}
+          <div style={{ flexShrink: 0, margin: '0 max(0px, calc(50% - 500px))' }}>
             <div style={{ height: 3, background: chromeH, opacity: 0.75 }} />
             <div style={{ height: 2, background: '#050200' }} />
             <div style={{ height: 3, background: '#ff2d78', opacity: 0.6, boxShadow: '0 0 8px 2px #ff2d7866', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
@@ -348,17 +392,45 @@ export default function HomeView() {
                 <div style={{ display: 'flex', gap: 12 }}><Knob label="bass" color="#ff2d78" /><Knob label="treb" color="#a855f7" /></div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 52, width: '100%', maxWidth: 500, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 6 }}>
-                  <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ color: 'var(--retro-muted)', flexShrink: 0 }}>
-                    <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" /><path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                  <input type="text" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search the catalog…"
-                    className="flex-1 bg-transparent outline-none font-typewriter"
-                    style={{ fontSize: 16, color: 'var(--retro-cream)', caretColor: 'var(--retro-gold)' }} />
-                  {query && <button onClick={() => setQuery('')} style={{ color: 'var(--retro-muted)', padding: 4 }}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                  </button>}
+              <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
+                <div style={{ position: 'relative', width: '100%', maxWidth: 500 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 52, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.28)', borderRadius: inlineDropdown.length > 0 ? '6px 6px 0 0' : 6 }}>
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ color: 'var(--retro-muted)', flexShrink: 0 }}>
+                      <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" /><path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                    <input type="text" value={inlineQuery} onChange={e => setInlineQuery(e.target.value)} placeholder="Search the catalog…"
+                      className="flex-1 bg-transparent outline-none font-typewriter"
+                      style={{ fontSize: 16, color: 'var(--retro-cream)', caretColor: 'var(--retro-gold)' }} />
+                    {inlineQuery && <button onClick={() => { setInlineQuery(''); setInlineDropdown([]) }} style={{ color: 'var(--retro-muted)', padding: 4 }}>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                    </button>}
+                  </div>
+                  {inlineDropdown.length > 0 && (
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'rgba(14,8,0,0.98)', border: '1px solid rgba(201,162,39,0.28)', borderTop: 'none', borderRadius: '0 0 6px 6px', zIndex: 50, overflow: 'hidden' }}>
+                      {inlineDropdown.map((entry, i) => {
+                        const isTrack = entry.type === 'track'
+                        const isArtist = entry.type === 'artist'
+                        const item = entry.item as SpotifyTrack & SpotifyArtist & SpotifyAlbum
+                        const thumb = isArtist ? item.images?.[0]?.url : isTrack ? item.album?.images?.[item.album.images.length - 1]?.url : item.images?.[0]?.url
+                        const title = item.name
+                        const sub = isTrack ? item.artists?.map((a: { name: string }) => a.name).join(', ') : isArtist ? 'Artist' : 'Album'
+                        return (
+                          <button key={i} onClick={() => handleInlineSelect(entry)}
+                            className="hover:bg-white/5 transition-colors"
+                            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', width: '100%', textAlign: 'left', borderBottom: i < inlineDropdown.length - 1 ? '1px solid rgba(201,162,39,0.1)' : 'none' }}>
+                            <div style={{ width: 40, height: 40, borderRadius: isArtist ? '50%' : 6, overflow: 'hidden', flexShrink: 0, background: 'rgba(201,162,39,0.1)' }}>
+                              {thumb && <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--retro-cream)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</p>
+                              <p style={{ fontSize: 12, color: 'var(--retro-muted)', marginTop: 1 }}>{sub}{isTrack ? ' · tap to queue' : ' · tap to browse'}</p>
+                            </div>
+                            <span style={{ fontSize: 11, color: 'rgba(201,162,39,0.4)', fontFamily: 'monospace', textTransform: 'uppercase', flexShrink: 0 }}>{entry.type}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
