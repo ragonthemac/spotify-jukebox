@@ -193,17 +193,19 @@ export default function HomeView() {
   }, [currentTrack?.id, accessToken])
 
   const handleDecadePlay = async (decade: string) => {
-    if (!accessToken || !deviceId || loadingDecade) return
+    if (!accessToken || loadingDecade) return
     setLoadingDecade(decade)
     try {
       const tracks = await getDecadeTracks(decade, accessToken)
       if (!tracks.length) return
-      const { currentTrack: ct, setQueue, addToQueue } = useJukeboxStore.getState()
+      // Read fresh state at play time so deviceId is current
+      const { currentTrack: ct, deviceId: did, setQueue, addToQueue } = useJukeboxStore.getState()
+      if (!did) return
       if (ct) {
         ;[...tracks].reverse().forEach((t) => addToQueue(t))
       } else {
         setQueue(tracks.slice(1))
-        playTrack(accessToken, tracks[0].uri, deviceId)
+        playTrack(accessToken, tracks[0].uri, did)
       }
     } catch (e) {
       console.error(e)
@@ -532,39 +534,48 @@ export default function HomeView() {
 
           {/* Decade Playlists */}
           <div style={{ padding: `12px ${pad} 14px` }}>
-            <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 14, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Decade Playlists</p>
-            <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 ${negPad}`, padding: `0 ${pad} 8px` }}>
+            <div className="scrollbar-none" style={{ display: 'flex', gap: 12, overflowX: 'auto', margin: `0 ${negPad}`, padding: `0 ${pad} 8px` }}>
               {([
-                { decade: '70s', label: "'70s", subtitle: 'Top 100', grad: 'linear-gradient(135deg, #7c4a03 0%, #c97b2a 50%, #e8a84a 100%)', accent: '#e8a84a', icon: '🎸' },
-                { decade: '80s', label: "'80s", subtitle: 'Top 100', grad: 'linear-gradient(135deg, #6b0070 0%, #c2185b 50%, #ff4081 100%)', accent: '#ff4081', icon: '🎹' },
-                { decade: '90s', label: "'90s", subtitle: 'Top 100', grad: 'linear-gradient(135deg, #004d40 0%, #00796b 50%, #26c6da 100%)', accent: '#26c6da', icon: '🎤' },
-                { decade: '00s', label: "'00s", subtitle: 'Top 100', grad: 'linear-gradient(135deg, #0d1b6e 0%, #1565c0 50%, #42a5f5 100%)', accent: '#42a5f5', icon: '💿' },
-              ] as const).map(({ decade, label, subtitle, grad, accent, icon }) => {
+                { decade: '70s', label: "'70s" },
+                { decade: '80s', label: "'80s" },
+                { decade: '90s', label: "'90s" },
+                { decade: '00s', label: "'00s" },
+              ] as const).map(({ decade, label }) => {
                 const isLoading = loadingDecade === decade
                 return (
                   <button key={decade} onClick={() => handleDecadePlay(decade)} disabled={!!loadingDecade}
-                    style={{ flexShrink: 0, width: 150, textAlign: 'left', opacity: loadingDecade && !isLoading ? 0.5 : 1 }}
-                    className="active:scale-95 transition-all">
-                    <div style={{ width: 150, height: 150, borderRadius: 10, overflow: 'hidden', marginBottom: 8, background: grad, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 4 }}>
-                      {isLoading ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                          <div className="skeleton" style={{ width: 32, height: 32, borderRadius: '50%' }} />
-                          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Loading…</span>
-                        </div>
-                      ) : (
-                        <>
-                          <span style={{ fontSize: 36 }}>{icon}</span>
-                          <span style={{ fontSize: 32, fontWeight: 900, color: '#fff', letterSpacing: '-1px', textShadow: `0 0 20px ${accent}` }}>{label}</span>
-                          <div style={{ position: 'absolute', bottom: 8, right: 10 }}>
-                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <svg width="14" height="14" viewBox="0 0 14 14" fill="white"><path d="M3 2L12 7L3 12V2Z" /></svg>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--retro-cream)' }}>{label} Hits</p>
-                    <p style={{ fontSize: 13, color: 'var(--retro-muted)' }}>{subtitle} songs</p>
+                    style={{
+                      flexShrink: 0, width: 148, textAlign: 'center',
+                      opacity: loadingDecade && !isLoading ? 0.45 : 1,
+                      background: 'var(--retro-panel)',
+                      border: `2px solid rgba(201,162,39,${isLoading ? '0.6' : '0.3'})`,
+                      borderRadius: 10,
+                      padding: '20px 0 16px',
+                      boxShadow: isLoading ? '0 0 18px rgba(201,162,39,0.25)' : '0 0 8px rgba(201,162,39,0.08)',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                      transition: 'all 0.2s',
+                    }}
+                    className="active:scale-95">
+                    {isLoading ? (
+                      <>
+                        <div className="skeleton" style={{ width: 36, height: 36, borderRadius: '50%', marginBottom: 4 }} />
+                        <span className="font-typewriter" style={{ fontSize: 11, color: 'var(--retro-muted)', letterSpacing: '0.1em' }}>LOADING…</span>
+                      </>
+                    ) : (
+                      <>
+                        {/* Vinyl grooves SVG */}
+                        <svg width="56" height="56" viewBox="0 0 56 56">
+                          <circle cx="28" cy="28" r="27" fill="#111" stroke="rgba(201,162,39,0.4)" strokeWidth="1.5" />
+                          {[0.75, 0.62, 0.50, 0.38].map((r, i) => (
+                            <circle key={i} cx="28" cy="28" r={28 * r} fill="none" stroke="rgba(201,162,39,0.12)" strokeWidth="1" />
+                          ))}
+                          <circle cx="28" cy="28" r="10" fill="rgba(201,162,39,0.12)" stroke="rgba(201,162,39,0.5)" strokeWidth="1" />
+                          <circle cx="28" cy="28" r="3" fill="#c9a227" />
+                        </svg>
+                        <span className="font-retro" style={{ fontSize: 26, fontWeight: 900, color: 'var(--retro-gold)', letterSpacing: '0.04em', textShadow: '0 0 12px rgba(201,162,39,0.5)' }}>{label}</span>
+                        <span className="font-typewriter" style={{ fontSize: 10, color: 'var(--retro-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Top 100</span>
+                      </>
+                    )}
                   </button>
                 )
               })}
