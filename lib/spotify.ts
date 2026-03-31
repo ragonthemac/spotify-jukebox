@@ -225,6 +225,28 @@ export async function getDecadeTracks(decade: string, token: string): Promise<Sp
   return [...p1.tracks.items, ...p2.tracks.items].filter(Boolean)
 }
 
+export async function searchDecadeSongs(
+  songs: { artist: string; title: string }[],
+  token: string
+): Promise<SpotifyTrack[]> {
+  const results: SpotifyTrack[] = []
+  // Search in batches of 10 to avoid hammering the API
+  const BATCH = 10
+  for (let i = 0; i < songs.length; i += BATCH) {
+    const batch = songs.slice(i, i + BATCH)
+    const fetched = await Promise.all(
+      batch.map(({ artist, title }) =>
+        spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
+          `/search?q=track:${encodeURIComponent(title)}+artist:${encodeURIComponent(artist)}&type=track&limit=1&market=from_token`,
+          token
+        ).then((d) => d.tracks.items[0] ?? null).catch(() => null)
+      )
+    )
+    fetched.forEach((t) => { if (t) results.push(t) })
+  }
+  return results
+}
+
 export async function searchAlbums(
   query: string,
   token: string,

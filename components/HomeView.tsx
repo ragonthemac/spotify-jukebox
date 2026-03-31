@@ -3,10 +3,11 @@
 import { useEffect, useState, useRef } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import {
-  getUserPlaylists, searchAll, clearToken, formatDuration, getDecadeTracks,
+  getUserPlaylists, searchAll, clearToken, formatDuration, searchDecadeSongs,
   previousTrack as prevTrackApi, findOrCreateJukeboxPlaylist, addTrackToJukeboxPlaylist,
   type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
 } from '@/lib/spotify'
+import { DECADE_SONGS } from '@/lib/decade-tracks'
 import { globalPlayer } from './SpotifyPlayer'
 import { playTrack } from '@/lib/spotify'
 import SpinningVinyl from './SpinningVinyl'
@@ -196,7 +197,8 @@ export default function HomeView() {
     if (!accessToken || loadingDecade) return
     setLoadingDecade(decade)
     try {
-      const tracks = await getDecadeTracks(decade, accessToken)
+      const songs = DECADE_SONGS[decade] ?? []
+      const tracks = await searchDecadeSongs(songs, accessToken)
       if (!tracks.length) return
       const { currentTrack: ct, deviceId: did, setQueue, addToQueue } = useJukeboxStore.getState()
       if (ct) {
