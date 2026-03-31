@@ -188,8 +188,11 @@ export default function HomeView() {
   const progress = durationMs > 0 ? (progressMs / durationMs) * 100 : 0
   const albumArt = currentTrack?.album.images[0]?.url
 
-  // side padding matches full 60px jukebox border frame
-  const pad = '68px'
+  // Content padding aligns with inner edge of arch rings (vR=440, gap=2 → 442px from center)
+  // max() ensures at least 16px on narrow screens where rings are off-screen
+  const pad = 'max(16px, calc(50% - 432px))'
+  // Negative pad for edge-to-edge horizontal scrollers
+  const negPad = 'min(-16px, calc(432px - 50%))'
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ color: 'var(--retro-cream)' }}>
@@ -273,29 +276,30 @@ export default function HomeView() {
           <ChromeStrip height={8} opacity={0.5} />
 
           {/* Jukebox body — bordered section aligned with arch curve sides */}
-          <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
-            {/* Left border strips — same layers as arch rings */}
-            <div style={{ position: 'absolute', top: 0, left: 0,   bottom: 0, width: 10, background: chrome,    opacity: 0.75, zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, left: 10,  bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, left: 16,  bottom: 0, width: 6,  background: '#ff2d78', opacity: 0.6, boxShadow: '2px 0 10px 2px #ff2d7855', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
-            <div style={{ position: 'absolute', top: 0, left: 22,  bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, left: 28,  bottom: 0, width: 6,  background: '#00d4ff', opacity: 0.6, boxShadow: '2px 0 10px 2px #00d4ff55', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
-            <div style={{ position: 'absolute', top: 0, left: 34,  bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, left: 40,  bottom: 0, width: 6,  background: chrome,    opacity: 0.65, zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, left: 46,  bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, left: 52,  bottom: 0, width: 6,  background: '#c9a227', opacity: 0.45, zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, left: 58,  bottom: 0, width: 2,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
-            {/* Right border strips */}
-            <div style={{ position: 'absolute', top: 0, right: 0,  bottom: 0, width: 10, background: chrome,    opacity: 0.75, zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, right: 10, bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, right: 16, bottom: 0, width: 6,  background: '#ff2d78', opacity: 0.6, boxShadow: '-2px 0 10px 2px #ff2d7855', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
-            <div style={{ position: 'absolute', top: 0, right: 22, bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, right: 28, bottom: 0, width: 6,  background: '#00d4ff', opacity: 0.6, boxShadow: '-2px 0 10px 2px #00d4ff55', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
-            <div style={{ position: 'absolute', top: 0, right: 34, bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, right: 40, bottom: 0, width: 6,  background: chrome,    opacity: 0.65, zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, right: 46, bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, right: 52, bottom: 0, width: 6,  background: '#c9a227', opacity: 0.45, zIndex: 10, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, right: 58, bottom: 0, width: 2,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+          {/* Strip positions use calc(50% - Xpx) matching arch ring radii at equator (vR=440) */}
+          <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+            {/* Left border strips — gap values: 60,50,44,38,32,26,20,14,8,2 → radii 500,490,484,478,472,466,460,454,448,442 */}
+            <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 500px)', bottom: 0, width: 10, background: chrome,    opacity: 0.75, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 490px)', bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 484px)', bottom: 0, width: 6,  background: '#ff2d78', opacity: 0.6, boxShadow: '2px 0 10px 2px #ff2d7855', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 478px)', bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 472px)', bottom: 0, width: 6,  background: '#00d4ff', opacity: 0.6, boxShadow: '2px 0 10px 2px #00d4ff55', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
+            <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 466px)', bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 460px)', bottom: 0, width: 6,  background: chrome,    opacity: 0.65, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 454px)', bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 448px)', bottom: 0, width: 6,  background: '#c9a227', opacity: 0.45, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 'calc(50% - 442px)', bottom: 0, width: 2,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            {/* Right border strips (mirrored) */}
+            <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 500px)', bottom: 0, width: 10, background: chrome,    opacity: 0.75, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 490px)', bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 484px)', bottom: 0, width: 6,  background: '#ff2d78', opacity: 0.6, boxShadow: '-2px 0 10px 2px #ff2d7855', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 478px)', bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 472px)', bottom: 0, width: 6,  background: '#00d4ff', opacity: 0.6, boxShadow: '-2px 0 10px 2px #00d4ff55', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
+            <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 466px)', bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 460px)', bottom: 0, width: 6,  background: chrome,    opacity: 0.65, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 454px)', bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 448px)', bottom: 0, width: 6,  background: '#c9a227', opacity: 0.45, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 'calc(50% - 442px)', bottom: 0, width: 2,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
 
             {/* Scrollable content inside the bordered body */}
             <div className="overflow-y-auto" style={{ height: '100%' }}>
@@ -406,7 +410,7 @@ export default function HomeView() {
                 {Array.from({ length: 5 }).map((_, i) => <div key={i} className="skeleton" style={{ width: 150, height: 150, borderRadius: 10, flexShrink: 0 }} />)}
               </div>
             ) : (
-              <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 -${pad}`, padding: `0 ${pad} 8px` }}>
+              <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 ${negPad}`, padding: `0 ${pad} 8px` }}>
                 {recentTracks.map(track => (
                   <button key={track.id} onClick={() => { if (!currentTrack && accessToken && deviceId) playTrack(accessToken, track.uri, deviceId); else useJukeboxStore.getState().addToQueue(track) }}
                     style={{ flexShrink: 0, width: 150, textAlign: 'left' }} className="active:scale-95 transition-transform">
@@ -424,7 +428,7 @@ export default function HomeView() {
           {playlists.length > 0 && (
             <div style={{ padding: `0 ${pad} 32px` }}>
               <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 14, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Your Playlists</p>
-              <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 -${pad}`, padding: `0 ${pad} 8px` }}>
+              <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 ${negPad}`, padding: `0 ${pad} 8px` }}>
                 {playlists.map(pl => (
                   <button key={pl.id} onClick={() => { setActivePlaylist(pl); setActiveView('playlist') }}
                     style={{ flexShrink: 0, width: 150, textAlign: 'left' }} className="active:scale-95 transition-transform">
