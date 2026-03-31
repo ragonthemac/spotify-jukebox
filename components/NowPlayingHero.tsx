@@ -23,10 +23,9 @@ export default function NowPlayingHero() {
     setScrubValue(Number(e.target.value))
   }
 
-  const handleScrubEnd = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const ms = Number(e.target.value)
-    globalPlayer?.seek(ms)
-    useJukeboxStore.setState({ progressMs: ms })
+  const handleScrubEnd = () => {
+    globalPlayer?.seek(scrubValue)
+    useJukeboxStore.setState({ progressMs: scrubValue })
     setScrubbing(false)
   }
 
@@ -171,7 +170,7 @@ export default function NowPlayingHero() {
             onTouchStart={handleScrubStart}
             onChange={handleScrubChange}
             onMouseUp={handleScrubEnd}
-            onTouchEnd={handleScrubEnd as unknown as React.TouchEventHandler}
+            onTouchEnd={handleScrubEnd}
             className="w-full"
             style={{
               background: `linear-gradient(to right, #ff2d78 ${progress}%, rgba(255,255,255,0.15) ${progress}%)`,
