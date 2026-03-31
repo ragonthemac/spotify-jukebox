@@ -310,8 +310,9 @@ export async function playTrack(token: string, uri: string, deviceId: string) {
   })
 }
 
-export async function previousTrack(token: string) {
-  await fetch(`${SPOTIFY_API_BASE}/me/player/previous`, {
+export async function previousTrack(token: string, deviceId?: string) {
+  const qs = deviceId ? `?device_id=${deviceId}` : ''
+  await fetch(`${SPOTIFY_API_BASE}/me/player/previous${qs}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
   })

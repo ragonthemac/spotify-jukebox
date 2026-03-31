@@ -67,14 +67,6 @@ function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 0 }: {
         <SpinningVinyl albumArt={albumArt} isPlaying={isPlaying} size={vinylSize} />
       </div>
 
-      {/* Corner bolt clusters */}
-      {[{ left: 28, bottom: 14 }, { right: 28, bottom: 14 }].map((pos, i) => (
-        <div key={i} style={{ position: 'absolute', ...pos, display: 'flex', flexDirection: 'column', gap: 6, zIndex: 3 }}>
-          {[0, 1, 2].map(j => (
-            <div key={j} style={{ width: 14, height: 14, borderRadius: '50%', background: 'radial-gradient(circle at 35% 30%, #fff8e0, #7a5810)', boxShadow: '0 2px 4px rgba(0,0,0,0.8)' }} />
-          ))}
-        </div>
-      ))}
     </div>
   )
 }
@@ -265,7 +257,7 @@ export default function HomeView() {
             <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={100} />
           </div>
           {/* Neon separator under arch — same ring layers as sides, constrained to content width */}
-          <div style={{ margin: `0 ${pad}`, flexShrink: 0 }}>
+          <div style={{ flexShrink: 0 }}>
             <div style={{ height: 3, background: chromeH, opacity: 0.75 }} />
             <div style={{ height: 2, background: '#050200' }} />
             <div style={{ height: 3, background: '#ff2d78', opacity: 0.6, boxShadow: '0 0 8px 2px #ff2d7866', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
@@ -340,7 +332,7 @@ export default function HomeView() {
                 <div style={{ display: 'flex', gap: 12 }}><Knob label="vol" /><Knob label="tone" color="#00d4ff" /></div>
                 <DecoEqualizer />
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <button onClick={() => accessToken && prevTrackApi(accessToken)} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <button onClick={() => accessToken && prevTrackApi(accessToken, deviceId ?? undefined)} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="22" height="22" viewBox="0 0 14 14" fill="none"><rect x="2" y="2.5" width="3" height="9" rx="1" fill="currentColor" /><path d="M12 2.5L6 7L12 11.5V2.5Z" fill="currentColor" opacity="0.7" /></svg>
                   </button>
                   <button onClick={togglePlay} className="active:scale-95" style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--retro-gold)', color: '#0e0800', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 16px rgba(201,162,39,0.45), 0 3px 10px rgba(0,0,0,0.7)', border: '3px solid rgba(255,240,180,0.3)', transition: 'transform 0.1s' }}>
