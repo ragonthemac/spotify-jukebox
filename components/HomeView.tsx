@@ -161,6 +161,7 @@ export default function HomeView() {
 
   // Inline search dropdown
   const [inlineQuery, setInlineQuery] = useState('')
+  const inlineQueryRef = useRef('')
   const [inlineDropdown, setInlineDropdown] = useState<{ type: 'track' | 'artist' | 'album'; item: SpotifyTrack | SpotifyArtist | SpotifyAlbum }[]>([])
   const [searchError, setSearchError] = useState('')
   const [searchLoading, setSearchLoading] = useState(false)
@@ -416,12 +417,13 @@ export default function HomeView() {
                     <input
                       type="text"
                       value={inlineQuery}
-                      onChange={e => setInlineQuery(e.target.value)}
+                      onChange={e => { setInlineQuery(e.target.value); inlineQueryRef.current = e.target.value }}
                       onFocus={() => {
                         setOnKeyPress((key) => {
-                          if (key === 'BACKSPACE') setInlineQuery(q => q.slice(0, -1))
-                          else if (key === 'CLEAR') { setInlineQuery(''); setInlineDropdown([]); setSearchError('') }
-                          else setInlineQuery(q => q + key)
+                          const q = inlineQueryRef.current
+                          if (key === 'BACKSPACE') { const next = q.slice(0, -1); inlineQueryRef.current = next; setInlineQuery(next) }
+                          else if (key === 'CLEAR') { inlineQueryRef.current = ''; setInlineQuery(''); setInlineDropdown([]); setSearchError('') }
+                          else { const next = q + key; inlineQueryRef.current = next; setInlineQuery(next) }
                         })
                         setKeyboardVisible(true)
                       }}

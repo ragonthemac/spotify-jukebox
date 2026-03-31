@@ -113,9 +113,10 @@ export default function SearchView() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => {
               setOnKeyPress((key) => {
-                if (key === 'BACKSPACE') setSearchQuery(q => q.slice(0, -1))
+                const current = useJukeboxStore.getState().searchQuery
+                if (key === 'BACKSPACE') setSearchQuery(current.slice(0, -1))
                 else if (key === 'CLEAR') setSearchQuery('')
-                else setSearchQuery(q => q + key)
+                else setSearchQuery(current + key)
               })
               setKeyboardVisible(true)
             }}
