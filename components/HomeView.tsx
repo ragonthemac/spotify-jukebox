@@ -533,54 +533,69 @@ export default function HomeView() {
           )}
 
           {/* Decade Playlists */}
-          <div style={{ padding: `12px ${pad} 14px` }}>
-            <div className="scrollbar-none" style={{ display: 'flex', gap: 12, overflowX: 'auto', margin: `0 ${negPad}`, padding: `0 ${pad} 8px` }}>
-              {([
-                { decade: '70s', label: "'70s" },
-                { decade: '80s', label: "'80s" },
-                { decade: '90s', label: "'90s" },
-                { decade: '00s', label: "'00s" },
-              ] as const).map(({ decade, label }) => {
-                const isLoading = loadingDecade === decade
-                return (
-                  <button key={decade} onClick={() => handleDecadePlay(decade)} disabled={!!loadingDecade}
-                    style={{
-                      flexShrink: 0, width: 148, textAlign: 'center',
-                      opacity: loadingDecade && !isLoading ? 0.45 : 1,
-                      background: 'var(--retro-panel)',
-                      border: `2px solid rgba(201,162,39,${isLoading ? '0.6' : '0.3'})`,
-                      borderRadius: 10,
-                      padding: '20px 0 16px',
-                      boxShadow: isLoading ? '0 0 18px rgba(201,162,39,0.25)' : '0 0 8px rgba(201,162,39,0.08)',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                      transition: 'all 0.2s',
-                    }}
-                    className="active:scale-95">
-                    {isLoading ? (
-                      <>
-                        <div className="skeleton" style={{ width: 36, height: 36, borderRadius: '50%', marginBottom: 4 }} />
-                        <span className="font-typewriter" style={{ fontSize: 11, color: 'var(--retro-muted)', letterSpacing: '0.1em' }}>LOADING…</span>
-                      </>
-                    ) : (
-                      <>
-                        {/* Vinyl grooves SVG */}
-                        <svg width="56" height="56" viewBox="0 0 56 56">
-                          <circle cx="28" cy="28" r="27" fill="#111" stroke="rgba(201,162,39,0.4)" strokeWidth="1.5" />
-                          {[0.75, 0.62, 0.50, 0.38].map((r, i) => (
-                            <circle key={i} cx="28" cy="28" r={28 * r} fill="none" stroke="rgba(201,162,39,0.12)" strokeWidth="1" />
-                          ))}
-                          <circle cx="28" cy="28" r="10" fill="rgba(201,162,39,0.12)" stroke="rgba(201,162,39,0.5)" strokeWidth="1" />
-                          <circle cx="28" cy="28" r="3" fill="#c9a227" />
-                        </svg>
-                        <span className="font-retro" style={{ fontSize: 26, fontWeight: 900, color: 'var(--retro-gold)', letterSpacing: '0.04em', textShadow: '0 0 12px rgba(201,162,39,0.5)' }}>{label}</span>
-                        <span className="font-typewriter" style={{ fontSize: 10, color: 'var(--retro-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Top 100</span>
-                      </>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+          {(() => {
+            const decades = [
+              { decade: '60s', label: "'60s", wide: true },
+              { decade: '70s', label: "'70s", wide: false },
+              { decade: '80s', label: "'80s", wide: false },
+              { decade: '90s', label: "'90s", wide: false },
+              { decade: '00s', label: "'00s", wide: false },
+            ] as const
+
+            const DecadeCard = ({ decade, label, wide }: { decade: string; label: string; wide: boolean }) => {
+              const isLoading = loadingDecade === decade
+              return (
+                <button
+                  onClick={() => handleDecadePlay(decade)}
+                  disabled={!!loadingDecade}
+                  style={{
+                    gridColumn: wide ? '1 / -1' : undefined,
+                    textAlign: 'center',
+                    opacity: loadingDecade && !isLoading ? 0.45 : 1,
+                    background: 'var(--retro-panel)',
+                    border: `2px solid rgba(201,162,39,${isLoading ? '0.65' : '0.28'})`,
+                    borderRadius: 10,
+                    padding: wide ? '22px 0' : '18px 0 14px',
+                    boxShadow: isLoading ? '0 0 20px rgba(201,162,39,0.3)' : '0 0 6px rgba(201,162,39,0.07)',
+                    display: 'flex', flexDirection: wide ? 'row' : 'column',
+                    alignItems: 'center', justifyContent: 'center',
+                    gap: wide ? 20 : 6,
+                    transition: 'all 0.2s',
+                    width: '100%',
+                  }}
+                  className="active:scale-[0.98]"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="skeleton" style={{ width: 36, height: 36, borderRadius: '50%' }} />
+                      <span className="font-typewriter" style={{ fontSize: 11, color: 'var(--retro-muted)', letterSpacing: '0.1em' }}>LOADING…</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width={wide ? 64 : 52} height={wide ? 64 : 52} viewBox="0 0 56 56">
+                        <circle cx="28" cy="28" r="27" fill="#111" stroke="rgba(201,162,39,0.4)" strokeWidth="1.5" />
+                        {[0.75, 0.62, 0.50, 0.38].map((r, i) => (
+                          <circle key={i} cx="28" cy="28" r={28 * r} fill="none" stroke="rgba(201,162,39,0.12)" strokeWidth="1" />
+                        ))}
+                        <circle cx="28" cy="28" r="10" fill="rgba(201,162,39,0.12)" stroke="rgba(201,162,39,0.5)" strokeWidth="1" />
+                        <circle cx="28" cy="28" r="3" fill="#c9a227" />
+                      </svg>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: wide ? 'flex-start' : 'center', gap: 2 }}>
+                        <span className="font-retro" style={{ fontSize: wide ? 32 : 24, fontWeight: 900, color: 'var(--retro-gold)', letterSpacing: '0.04em', textShadow: '0 0 14px rgba(201,162,39,0.5)', lineHeight: 1 }}>{label}</span>
+                        <span className="font-typewriter" style={{ fontSize: 10, color: 'var(--retro-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Top 100 Hits</span>
+                      </div>
+                    </>
+                  )}
+                </button>
+              )
+            }
+
+            return (
+              <div style={{ padding: `12px ${pad} 14px`, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {decades.map(d => <DecadeCard key={d.decade} {...d} />)}
+              </div>
+            )
+          })()}
 
 
           {playHistory.length > 0 && (

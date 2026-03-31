@@ -204,6 +204,7 @@ export async function searchTracks(
 }
 
 const DECADE_RANGES: Record<string, string> = {
+  '60s': '1960-1969',
   '70s': '1970-1979',
   '80s': '1980-1989',
   '90s': '1990-1999',
