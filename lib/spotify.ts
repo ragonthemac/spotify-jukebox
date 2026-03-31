@@ -228,10 +228,10 @@ export async function searchAll(query: string, token: string): Promise<{
     playlists: { items: SpotifyPlaylist[] }
   }>(`/search?q=${encodeURIComponent(query)}&type=track,artist,album,playlist&limit=5`, token)
   return {
-    tracks: data.tracks.items,
-    artists: data.artists.items,
-    albums: data.albums.items,
-    playlists: data.playlists.items,
+    tracks: data.tracks.items.filter(Boolean),
+    artists: data.artists.items.filter(Boolean),
+    albums: data.albums.items.filter(Boolean),
+    playlists: data.playlists.items.filter(Boolean),
   }
 }
 
