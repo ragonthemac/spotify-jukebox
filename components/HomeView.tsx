@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import {
-  getRecentlyPlayed, getUserPlaylists, searchAll, clearToken, formatDuration,
+  getUserPlaylists, searchAll, clearToken, formatDuration,
   previousTrack as prevTrackApi, findOrCreateJukeboxPlaylist, addTrackToJukeboxPlaylist,
   type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
 } from '@/lib/spotify'
@@ -153,9 +153,9 @@ export default function HomeView() {
   const {
     accessToken, deviceId, setActiveView, setActivePlaylist, setActiveArtist, setActiveAlbum,
     currentTrack, isPlaying, setIsPlaying, progressMs, durationMs, queue, skipNext, addToQueue,
+    playHistory, addToHistory,
   } = useJukeboxStore()
 
-  const [recentTracks, setRecentTracks] = useState<SpotifyTrack[]>([])
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -171,14 +171,13 @@ export default function HomeView() {
   useEffect(() => {
     if (!accessToken || didLoad.current) return
     didLoad.current = true
-    // Playlists fetched independently so a recently-played 403 can't block them
     getUserPlaylists(accessToken).then(setPlaylists).catch(() => {}).finally(() => setLoading(false))
-    getRecentlyPlayed(accessToken).then(setRecentTracks).catch(() => {})
   }, [accessToken])
 
-  // Auto-add every played track to the yearly jukebox playlist
+  // Track play history locally + auto-add to yearly playlist
   useEffect(() => {
     if (!currentTrack || !accessToken) return
+    addToHistory(currentTrack)
     const uri = currentTrack.uri
     const addToYearlyPlaylist = async () => {
       if (!jukeboxPlaylistId.current) {
@@ -517,15 +516,11 @@ export default function HomeView() {
             </div>
           )}
 
+          {playHistory.length > 0 && (
           <div style={{ padding: `12px ${pad} 14px` }}>
             <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 14, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Recently Played</p>
-            {loading ? (
-              <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 8 }}>
-                {Array.from({ length: 5 }).map((_, i) => <div key={i} className="skeleton" style={{ width: 150, height: 150, borderRadius: 10, flexShrink: 0 }} />)}
-              </div>
-            ) : (
               <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 ${negPad}`, padding: `0 ${pad} 8px` }}>
-                {recentTracks.map(track => (
+                {playHistory.map(track => (
                   <button key={track.id} onClick={() => { if (!currentTrack && accessToken && deviceId) playTrack(accessToken, track.uri, deviceId); else useJukeboxStore.getState().addToQueue(track) }}
                     style={{ flexShrink: 0, width: 150, textAlign: 'left' }} className="active:scale-95 transition-transform">
                     <div style={{ width: 150, height: 150, borderRadius: 10, overflow: 'hidden', marginBottom: 8, background: 'rgba(201,162,39,0.08)', border: '1px solid rgba(201,162,39,0.18)' }}>
@@ -536,8 +531,8 @@ export default function HomeView() {
                   </button>
                 ))}
               </div>
-            )}
           </div>
+          )}
 
             </div>{/* end scrollable */}
           </div>{/* end body */}

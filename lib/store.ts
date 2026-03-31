@@ -54,6 +54,10 @@ interface JukeboxState {
   activePlaylist: SpotifyPlaylist | null
   setActivePlaylist: (playlist: SpotifyPlaylist | null) => void
 
+  // Play history (local, replaces restricted Spotify API)
+  playHistory: SpotifyTrack[]
+  addToHistory: (track: SpotifyTrack) => void
+
   // Recently added (for animation)
   recentlyAdded: string | null
   setRecentlyAdded: (id: string | null) => void
@@ -123,6 +127,13 @@ export const useJukeboxStore = create<JukeboxState>((set, get) => ({
   // Playlist
   activePlaylist: null,
   setActivePlaylist: (playlist) => set({ activePlaylist: playlist }),
+
+  // Play history
+  playHistory: [],
+  addToHistory: (track) => set((state) => {
+    const filtered = state.playHistory.filter(t => t.id !== track.id)
+    return { playHistory: [track, ...filtered].slice(0, 20) }
+  }),
 
   // Animation
   recentlyAdded: null,
