@@ -563,13 +563,24 @@ export default function HomeView() {
                   const isLoading = loadingDecade === decade
                   const { neon, neonDim } = DECADE_COLORS[decade]
                   return (
-                    <button
+                    /* Gradient-border wrapper: chrome gradient bg + 2px padding = full chrome stroke */
+                    <div
                       key={decade}
+                      style={{
+                        padding: 2,
+                        borderRadius: 12,
+                        background: isLoading ? neon : chromeH,
+                        boxShadow: isLoading ? `0 0 20px ${neon}66` : '0 0 6px rgba(201,162,39,0.15)',
+                        opacity: loadingDecade && !isLoading ? 0.35 : 1,
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                    <button
                       onClick={() => handleDecadePlay(decade)}
                       disabled={!!loadingDecade}
                       className="active:scale-[0.97]"
                       style={{
-                        opacity: loadingDecade && !isLoading ? 0.35 : 1,
+                        width: '100%',
                         background: `linear-gradient(180deg, rgba(20,10,2,0.98) 0%, rgba(10,5,0,1) 100%)`,
                         borderRadius: 10,
                         padding: '18px 6px 14px',
@@ -577,14 +588,12 @@ export default function HomeView() {
                         transition: 'all 0.2s',
                         position: 'relative',
                         overflow: 'hidden',
-                        border: `1px solid ${isLoading ? neon : 'rgba(201,162,39,0.22)'}`,
+                        border: 'none',
                         boxShadow: isLoading
-                          ? `0 0 20px ${neon}44, inset 0 0 16px ${neonDim}`
-                          : 'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 12px rgba(0,0,0,0.5)',
+                          ? `inset 0 0 16px ${neonDim}`
+                          : 'inset 0 0 12px rgba(0,0,0,0.5)',
                       }}
                     >
-                      {/* Chrome top stripe */}
-                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: chromeH, opacity: 0.8 }} />
                       {/* Neon colour wash at bottom */}
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, background: `linear-gradient(0deg, ${neonDim} 0%, transparent 100%)`, pointerEvents: 'none' }} />
 
@@ -621,6 +630,7 @@ export default function HomeView() {
                         </>
                       )}
                     </button>
+                    </div>
                   )
                 })}
               </div>
