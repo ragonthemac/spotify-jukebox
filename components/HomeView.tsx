@@ -80,9 +80,9 @@ function ChromeStrip({ height = 8, opacity = 1 }: { height?: number; opacity?: n
 /* ─── Speaker grille ─── */
 function SpeakerGrille({ rows = 4, cols = 12 }: { rows?: number; cols?: number }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 6, padding: '10px 16px', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.2)', borderRadius: 4 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 8, padding: '12px 18px', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.2)', borderRadius: 4 }}>
       {Array.from({ length: rows * cols }).map((_, i) => (
-        <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(201,162,39,0.28)', boxShadow: '0 0 2px rgba(201,162,39,0.15)' }} />
+        <div key={i} style={{ width: 9, height: 9, borderRadius: '50%', background: 'rgba(201,162,39,0.28)', boxShadow: '0 0 3px rgba(201,162,39,0.18)' }} />
       ))}
     </div>
   )
@@ -444,11 +444,11 @@ export default function HomeView() {
 
               {/* Decorative speaker grilles inside now-playing */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, paddingBottom: 12 }}>
-                <SpeakerGrille rows={3} cols={10} />
+                <SpeakerGrille rows={4} cols={14} />
                 <div style={{ padding: '4px 14px', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 3, background: 'rgba(201,162,39,0.04)' }}>
                   <span className="font-typewriter" style={{ fontSize: 10, color: 'rgba(201,162,39,0.45)', letterSpacing: '0.22em', textTransform: 'uppercase' }}>stereo hi-fi</span>
                 </div>
-                <SpeakerGrille rows={3} cols={10} />
+                <SpeakerGrille rows={4} cols={14} />
               </div>
             </div>
 
