@@ -194,37 +194,6 @@ export default function HomeView() {
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ color: 'var(--retro-cream)' }}>
 
-      {/* ── Jukebox body border — 60px per side, matching arch ring layers ── */}
-      {/* Outer chrome (0–10px) */}
-      <div style={{ position: 'fixed', top: 0, left: 0,   width: 10, height: '100dvh', background: chrome,     opacity: 0.75, zIndex: 49, pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', top: 0, right: 0,  width: 10, height: '100dvh', background: chrome,     opacity: 0.75, zIndex: 49, pointerEvents: 'none' }} />
-      {/* Dark gap (10–16px) */}
-      <div style={{ position: 'fixed', top: 0, left: 10,  width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', top: 0, right: 10, width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
-      {/* Pink neon (16–22px) */}
-      <div style={{ position: 'fixed', top: 0, left: 16,  width: 6,  height: '100dvh', background: '#ff2d78',  opacity: 0.6, boxShadow: '2px 0 10px 2px #ff2d7855', zIndex: 49, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
-      <div style={{ position: 'fixed', top: 0, right: 16, width: 6,  height: '100dvh', background: '#ff2d78',  opacity: 0.6, boxShadow: '-2px 0 10px 2px #ff2d7855', zIndex: 49, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
-      {/* Dark gap (22–28px) */}
-      <div style={{ position: 'fixed', top: 0, left: 22,  width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', top: 0, right: 22, width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
-      {/* Cyan neon (28–34px) */}
-      <div style={{ position: 'fixed', top: 0, left: 28,  width: 6,  height: '100dvh', background: '#00d4ff',  opacity: 0.6, boxShadow: '2px 0 10px 2px #00d4ff55', zIndex: 49, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
-      <div style={{ position: 'fixed', top: 0, right: 28, width: 6,  height: '100dvh', background: '#00d4ff',  opacity: 0.6, boxShadow: '-2px 0 10px 2px #00d4ff55', zIndex: 49, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
-      {/* Dark gap (34–40px) */}
-      <div style={{ position: 'fixed', top: 0, left: 34,  width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', top: 0, right: 34, width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
-      {/* Inner chrome (40–46px) */}
-      <div style={{ position: 'fixed', top: 0, left: 40,  width: 6,  height: '100dvh', background: chrome,     opacity: 0.65, zIndex: 49, pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', top: 0, right: 40, width: 6,  height: '100dvh', background: chrome,     opacity: 0.65, zIndex: 49, pointerEvents: 'none' }} />
-      {/* Dark gap (46–52px) */}
-      <div style={{ position: 'fixed', top: 0, left: 46,  width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', top: 0, right: 46, width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
-      {/* Gold accent (52–58px) */}
-      <div style={{ position: 'fixed', top: 0, left: 52,  width: 6,  height: '100dvh', background: '#c9a227',  opacity: 0.45, zIndex: 49, pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', top: 0, right: 52, width: 6,  height: '100dvh', background: '#c9a227',  opacity: 0.45, zIndex: 49, pointerEvents: 'none' }} />
-      {/* Inner dark edge (58–60px) */}
-      <div style={{ position: 'fixed', top: 0, left: 58,  width: 2,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', top: 0, right: 58, width: 2,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
 
       {/* ── Top header ── */}
       <div style={{ flexShrink: 0 }}>
@@ -296,13 +265,40 @@ export default function HomeView() {
           )}
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto">
-
-          <div style={{ marginTop: 20 }}>
+        <>
+          {/* Arch — sits above the scrollable body, doesn't scroll */}
+          <div style={{ flexShrink: 0, marginTop: 20 }}>
             <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={100} />
           </div>
-
           <ChromeStrip height={8} opacity={0.5} />
+
+          {/* Jukebox body — bordered section aligned with arch curve sides */}
+          <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+            {/* Left border strips — same layers as arch rings */}
+            <div style={{ position: 'absolute', top: 0, left: 0,   bottom: 0, width: 10, background: chrome,    opacity: 0.75, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 10,  bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 16,  bottom: 0, width: 6,  background: '#ff2d78', opacity: 0.6, boxShadow: '2px 0 10px 2px #ff2d7855', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', top: 0, left: 22,  bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 28,  bottom: 0, width: 6,  background: '#00d4ff', opacity: 0.6, boxShadow: '2px 0 10px 2px #00d4ff55', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
+            <div style={{ position: 'absolute', top: 0, left: 34,  bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 40,  bottom: 0, width: 6,  background: chrome,    opacity: 0.65, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 46,  bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 52,  bottom: 0, width: 6,  background: '#c9a227', opacity: 0.45, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 58,  bottom: 0, width: 2,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            {/* Right border strips */}
+            <div style={{ position: 'absolute', top: 0, right: 0,  bottom: 0, width: 10, background: chrome,    opacity: 0.75, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 10, bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 16, bottom: 0, width: 6,  background: '#ff2d78', opacity: 0.6, boxShadow: '-2px 0 10px 2px #ff2d7855', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', top: 0, right: 22, bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 28, bottom: 0, width: 6,  background: '#00d4ff', opacity: 0.6, boxShadow: '-2px 0 10px 2px #00d4ff55', zIndex: 10, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
+            <div style={{ position: 'absolute', top: 0, right: 34, bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 40, bottom: 0, width: 6,  background: chrome,    opacity: 0.65, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 46, bottom: 0, width: 6,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 52, bottom: 0, width: 6,  background: '#c9a227', opacity: 0.45, zIndex: 10, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 58, bottom: 0, width: 2,  background: '#050200', zIndex: 10, pointerEvents: 'none' }} />
+
+            {/* Scrollable content inside the bordered body */}
+            <div className="overflow-y-auto" style={{ height: '100%' }}>
 
           {/* ── Now playing ── */}
           <div style={{ padding: `18px ${pad} 14px`, background: 'linear-gradient(180deg, rgba(20,10,2,0.98), rgba(14,8,0,1))' }}>
@@ -443,7 +439,9 @@ export default function HomeView() {
             </div>
           )}
 
-        </div>
+            </div>{/* end scrollable */}
+          </div>{/* end body */}
+        </>
       )}
     </div>
   )
