@@ -92,8 +92,9 @@ function VolumeControl({ volume, onChange }: { volume: number; onChange: (v: num
   const steps = [0.2, 0.4, 0.6, 0.8, 1.0]
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 5, alignItems: 'center' }}>
-        {[...steps].reverse().map((step) => {
+      <div style={{ display: 'flex', flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+        <span style={{ fontSize: 9, color: 'rgba(201,162,39,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'monospace' }}>vol</span>
+        {steps.map((step) => {
           const active = volume >= step - 0.01
           return (
             <button
@@ -110,7 +111,6 @@ function VolumeControl({ volume, onChange }: { volume: number; onChange: (v: num
           )
         })}
       </div>
-      <span style={{ fontSize: 9, color: 'rgba(201,162,39,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'monospace' }}>vol</span>
     </div>
   )
 }
@@ -388,7 +388,7 @@ export default function HomeView() {
               )}
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}><VolumeControl volume={volume} onChange={handleVolume} /><Knob label="tone" color="#00d4ff" /></div>
+                <div style={{ display: 'flex', gap: 12 }}><Knob label="vol" /><Knob label="tone" color="#00d4ff" /></div>
                 <DecoEqualizer />
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <button onClick={handlePrev} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -405,6 +405,10 @@ export default function HomeView() {
                 </div>
                 <DecoEqualizer />
                 <div style={{ display: 'flex', gap: 12 }}><Knob label="bass" color="#ff2d78" /><Knob label="treb" color="#a855f7" /></div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+                <VolumeControl volume={volume} onChange={handleVolume} />
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
