@@ -164,10 +164,10 @@ export default function HomeView() {
       try {
         const { tracks, artists, albums } = await searchAll(inlineQuery, accessToken)
         const results: typeof inlineDropdown = []
+        if (tracks[0])  results.push({ type: 'track',  item: tracks[0] })
         if (artists[0]) results.push({ type: 'artist', item: artists[0] })
-        if (albums[0]) results.push({ type: 'album', item: albums[0] })
-        if (tracks[0]) results.push({ type: 'track', item: tracks[0] })
-        setInlineDropdown(results.slice(0, 3))
+        if (albums[0])  results.push({ type: 'album',  item: albums[0] })
+        setInlineDropdown(results)
         setSearchError(results.length === 0 ? 'No results found' : '')
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Search failed'
