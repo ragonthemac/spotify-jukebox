@@ -21,12 +21,16 @@ const chrome = 'linear-gradient(180deg, #e8d5b0 0%, #c9a460 20%, #f5e8c0 50%, #b
 const chromeH = 'linear-gradient(90deg, #e8d5b0 0%, #c9a460 20%, #f5e8c0 50%, #b8902a 80%, #e0c878 100%)'
 
 /* ─── Arch crown ─── */
-function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 0 }: {
-  albumArt?: string; isPlaying: boolean; vinylSize?: number; topPad?: number
+function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 0, vinylScale = 1 }: {
+  albumArt?: string; isPlaying: boolean; vinylSize?: number; topPad?: number; vinylScale?: number
 }) {
   const vR = vinylSize / 2
   const vCenterY = topPad + vR
   const archH = topPad + vR
+  // Scaled vinyl dims — keep centred on same vCenterY
+  const scaledVinylSize = vinylSize * vinylScale
+  const scaledVR = scaledVinylSize / 2
+  const vinylTop = vCenterY - scaledVR
 
   // Circular ring: each layer is a full circle centered on the vinyl center,
   // with radius = vinyl radius + gap. Painted large-to-small to create rings.
@@ -64,8 +68,8 @@ function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 0 }: {
       <div style={ring(2, '#030100')} />
 
       {/* Vinyl */}
-      <div style={{ position: 'absolute', top: topPad, left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
-        <SpinningVinyl albumArt={albumArt} isPlaying={isPlaying} size={vinylSize} />
+      <div style={{ position: 'absolute', top: vinylTop, left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
+        <SpinningVinyl albumArt={albumArt} isPlaying={isPlaying} size={scaledVinylSize} />
       </div>
 
     </div>
@@ -344,7 +348,7 @@ export default function HomeView() {
       <>
           {/* Arch — sits above the scrollable body, doesn't scroll */}
           <div style={{ flexShrink: 0, marginTop: -20 }}>
-            <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={100} />
+            <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={100} vinylScale={0.9} />
           </div>
           {/* Neon separator under arch — clipped to jukebox body width (500px from center each side) */}
           <div style={{ flexShrink: 0, margin: '0 max(0px, calc(50% - 500px))' }}>
