@@ -67,13 +67,6 @@ function ArchCrown({ albumArt, isPlaying, vinylSize = 880, topPad = 0 }: {
         <SpinningVinyl albumArt={albumArt} isPlaying={isPlaying} size={vinylSize} />
       </div>
 
-      {/* Accent dot row */}
-      <div style={{ position: 'absolute', top: Math.max(topPad - 50, 8), left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 14, zIndex: 3 }}>
-        {['#ff2d78', '#c9a227', '#00d4ff', '#a855f7', '#00d4ff', '#c9a227', '#ff2d78'].map((c, i) => (
-          <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: c, boxShadow: `0 0 7px 2px ${c}88`, animation: `neon-pulse 2s ease-in-out ${i * 0.25}s infinite` }} />
-        ))}
-      </div>
-
       {/* Corner bolt clusters */}
       {[{ left: 28, bottom: 14 }, { right: 28, bottom: 14 }].map((pos, i) => (
         <div key={i} style={{ position: 'absolute', ...pos, display: 'flex', flexDirection: 'column', gap: 6, zIndex: 3 }}>
@@ -129,9 +122,9 @@ function DecoEqualizer() {
 function JukeboxLogo() {
   return (
     <div style={{ textAlign: 'center', lineHeight: 1 }}>
-      <div style={{ fontSize: 13, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(201,162,39,0.55)', fontFamily: 'monospace', marginBottom: 4 }}>♪ welcome to ♪</div>
-      <div className="font-retro" style={{ fontSize: 34, fontWeight: 900, background: chromeH, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.01em', lineHeight: 1.05 }}>The Outside Inn</div>
-      <div style={{ fontSize: 11, letterSpacing: '0.45em', textTransform: 'uppercase', color: 'rgba(201,162,39,0.4)', fontFamily: 'monospace', marginTop: 5 }}>── jukebox ──</div>
+      <div style={{ fontSize: 14, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(201,162,39,0.55)', fontFamily: 'monospace', marginBottom: 6 }}>♪ welcome to ♪</div>
+      <div className="font-retro" style={{ fontSize: 56, fontWeight: 900, background: chromeH, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.01em', lineHeight: 1.05 }}>The Outside Inn</div>
+      <div style={{ fontSize: 12, letterSpacing: '0.45em', textTransform: 'uppercase', color: 'rgba(201,162,39,0.4)', fontFamily: 'monospace', marginTop: 7 }}>── jukebox ──</div>
     </div>
   )
 }
@@ -207,16 +200,13 @@ export default function HomeView() {
           <div style={{ flex: 1, background: 'linear-gradient(90deg, transparent, #c9a22777, transparent)' }} />
           <div style={{ flex: 1, background: 'linear-gradient(90deg, transparent, #00d4ff55, transparent)' }} />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: `32px ${pad}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: `44px ${pad}` }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
             <div style={{ width: 44, height: 16, borderRadius: 4, background: 'linear-gradient(180deg, #1a0e04, #0a0500)', border: '1px solid rgba(201,162,39,0.45)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.9)' }} />
             <span style={{ fontSize: 9, color: 'rgba(201,162,39,0.3)', letterSpacing: '0.1em', fontFamily: 'monospace', textTransform: 'uppercase' }}>insert coin</span>
           </div>
           <JukeboxLogo />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 3 }}>
-              {Array.from({ length: 8 }).map((_, i) => <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(201,162,39,0.22)' }} />)}
-            </div>
             <button onClick={() => { clearToken(); window.location.reload() }} style={{ color: 'rgba(201,162,39,0.35)', padding: 4 }}>
               <svg width="18" height="18" viewBox="0 0 14 14" fill="none">
                 <path d="M5 2H2.5A1.5 1.5 0 001 3.5v7A1.5 1.5 0 002.5 12H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
@@ -315,15 +305,6 @@ export default function HomeView() {
 
             {/* ── Now playing — fixed, does not scroll ── */}
             <div style={{ flexShrink: 0, position: 'relative', padding: `18px ${pad} 14px`, background: 'linear-gradient(180deg, rgba(20,10,2,0.98), rgba(14,8,0,1))' }}>
-
-              {/* 3D bolt clusters on each side */}
-              {[{ left: 'calc(50% - 500px + 10px)' }, { right: 'calc(50% - 500px + 10px)' }].map((pos, i) => (
-                <div key={i} style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', ...pos, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {[0, 1, 2].map(j => (
-                    <div key={j} style={{ width: 22, height: 22, borderRadius: '50%', background: 'radial-gradient(circle at 35% 30%, #fff8e0, #7a5810)', boxShadow: '0 3px 6px rgba(0,0,0,0.9), 0 1px 2px rgba(255,248,224,0.3)' }} />
-                  ))}
-                </div>
-              ))}
 
               <div style={{ textAlign: 'center', marginBottom: 14 }}>
                 {currentTrack ? (
