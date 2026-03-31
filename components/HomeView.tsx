@@ -241,7 +241,7 @@ export default function HomeView() {
           </div>
           <JukeboxLogo />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <button onClick={() => { clearToken(); window.location.reload() }} style={{ color: 'rgba(201,162,39,0.45)', padding: 8, borderRadius: 8, border: '1px solid rgba(201,162,39,0.2)', background: 'rgba(201,162,39,0.05)' }}>
+            <button onClick={() => { clearToken(); window.location.reload() }} style={{ color: 'rgba(201,162,39,0.45)', padding: 8 }}>
               <svg width="26" height="26" viewBox="0 0 14 14" fill="none">
                 <path d="M5 2H2.5A1.5 1.5 0 001 3.5v7A1.5 1.5 0 002.5 12H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
                 <path d="M9 10l3-3-3-3M12 7H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
