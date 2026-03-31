@@ -209,6 +209,23 @@ export async function searchAlbums(
   return data.albums.items
 }
 
+export async function searchAll(query: string, token: string): Promise<{
+  tracks: SpotifyTrack[]
+  artists: SpotifyArtist[]
+  albums: SpotifyAlbum[]
+}> {
+  const data = await spotifyFetch<{
+    tracks: { items: SpotifyTrack[] }
+    artists: { items: SpotifyArtist[] }
+    albums: { items: SpotifyAlbum[] }
+  }>(`/search?q=${encodeURIComponent(query)}&type=track,artist,album&limit=3`, token)
+  return {
+    tracks: data.tracks.items,
+    artists: data.artists.items,
+    albums: data.albums.items,
+  }
+}
+
 export async function getFeaturedPlaylists(token: string) {
   const data = await spotifyFetch<{ playlists: { items: SpotifyAlbum[] } }>(
     '/browse/featured-playlists?limit=8',

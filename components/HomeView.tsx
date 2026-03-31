@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import {
-  getRecentlyPlayed, getUserPlaylists, searchTracks, searchArtists, searchAlbums, clearToken, formatDuration,
+  getRecentlyPlayed, getUserPlaylists, searchTracks, searchArtists, searchAll, clearToken, formatDuration,
   previousTrack as prevTrackApi,
   type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
 } from '@/lib/spotify'
@@ -170,17 +170,15 @@ export default function HomeView() {
     if (inlineDebounce.current) clearTimeout(inlineDebounce.current)
     if (!inlineQuery.trim() || !accessToken) { setInlineDropdown([]); return }
     inlineDebounce.current = setTimeout(async () => {
-      const [tracks, artists, albums] = await Promise.all([
-        searchTracks(inlineQuery, accessToken),
-        searchArtists(inlineQuery, accessToken),
-        searchAlbums(inlineQuery, accessToken),
-      ]).catch(() => [[], [], []])
-      const results: typeof inlineDropdown = []
-      if (artists[0]) results.push({ type: 'artist', item: artists[0] })
-      if (albums[0]) results.push({ type: 'album', item: albums[0] })
-      if (tracks[0]) results.push({ type: 'track', item: tracks[0] })
-      setInlineDropdown(results.slice(0, 3))
-    }, 350)
+      try {
+        const { tracks, artists, albums } = await searchAll(inlineQuery, accessToken)
+        const results: typeof inlineDropdown = []
+        if (artists[0]) results.push({ type: 'artist', item: artists[0] })
+        if (albums[0]) results.push({ type: 'album', item: albums[0] })
+        if (tracks[0]) results.push({ type: 'track', item: tracks[0] })
+        setInlineDropdown(results.slice(0, 3))
+      } catch { setInlineDropdown([]) }
+    }, 600)
     return () => { if (inlineDebounce.current) clearTimeout(inlineDebounce.current) }
   }, [inlineQuery, accessToken])
 
