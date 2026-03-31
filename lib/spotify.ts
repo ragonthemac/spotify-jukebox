@@ -142,10 +142,15 @@ export async function getValidAccessToken(): Promise<string | null> {
 
 // ─── API calls ────────────────────────────────────────────────────────────────
 
-async function spotifyFetch<T>(path: string, token: string): Promise<T> {
+async function spotifyFetch<T>(path: string, token: string, retries = 2): Promise<T> {
   const res = await fetch(`${SPOTIFY_API_BASE}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
+  if (res.status === 429 && retries > 0) {
+    const wait = parseInt(res.headers.get('Retry-After') || '2', 10)
+    await new Promise(r => setTimeout(r, wait * 1000))
+    return spotifyFetch(path, token, retries - 1)
+  }
   if (!res.ok) {
     const body = await res.text().catch(() => '')
     throw new Error(`Spotify API error: ${res.status} — ${body}`)

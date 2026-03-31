@@ -162,7 +162,7 @@ export default function HomeView() {
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => doSearch(query), 400)
+    debounceRef.current = setTimeout(() => doSearch(query), 800)
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [query, doSearch])
 
@@ -178,7 +178,7 @@ export default function HomeView() {
         if (tracks[0]) results.push({ type: 'track', item: tracks[0] })
         setInlineDropdown(results.slice(0, 3))
       } catch { setInlineDropdown([]) }
-    }, 600)
+    }, 800)
     return () => { if (inlineDebounce.current) clearTimeout(inlineDebounce.current) }
   }, [inlineQuery, accessToken])
 
