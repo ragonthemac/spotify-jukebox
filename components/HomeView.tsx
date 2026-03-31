@@ -92,8 +92,8 @@ function VolumeControl({ volume, onChange }: { volume: number; onChange: (v: num
   const steps = [0.2, 0.4, 0.6, 0.8, 1.0]
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-      <div style={{ display: 'flex', flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-        <span style={{ fontSize: 9, color: 'rgba(201,162,39,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'monospace' }}>vol</span>
+      <div style={{ display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+        <span style={{ fontSize: 11, color: 'rgba(201,162,39,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'monospace' }}>vol</span>
         {steps.map((step) => {
           const active = volume >= step - 0.01
           return (
@@ -101,10 +101,10 @@ function VolumeControl({ volume, onChange }: { volume: number; onChange: (v: num
               key={step}
               onClick={() => onChange(step)}
               style={{
-                width: 14, height: 14, borderRadius: '50%', flexShrink: 0,
+                width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
                 background: active ? '#c9a227' : 'rgba(201,162,39,0.12)',
                 border: `1px solid ${active ? 'rgba(201,162,39,0.8)' : 'rgba(201,162,39,0.25)'}`,
-                boxShadow: active ? '0 0 6px 2px rgba(201,162,39,0.5)' : 'none',
+                boxShadow: active ? '0 0 8px 3px rgba(201,162,39,0.55)' : 'none',
                 transition: 'all 0.15s',
               }}
             />
@@ -407,7 +407,7 @@ export default function HomeView() {
                 <div style={{ display: 'flex', gap: 12 }}><Knob label="bass" color="#ff2d78" /><Knob label="treb" color="#a855f7" /></div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
                 <VolumeControl volume={volume} onChange={handleVolume} />
               </div>
 
