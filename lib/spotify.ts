@@ -203,6 +203,27 @@ export async function searchTracks(
   return data.tracks.items
 }
 
+const DECADE_RANGES: Record<string, string> = {
+  '70s': '1970-1979',
+  '80s': '1980-1989',
+  '90s': '1990-1999',
+  '00s': '2000-2009',
+}
+
+export async function getDecadeTracks(decade: string, token: string): Promise<SpotifyTrack[]> {
+  const range = DECADE_RANGES[decade]
+  if (!range) return []
+  const [p1, p2] = await Promise.all([
+    spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
+      `/search?q=year:${range}&type=track&limit=50&offset=0&market=from_token`, token
+    ),
+    spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
+      `/search?q=year:${range}&type=track&limit=50&offset=50&market=from_token`, token
+    ),
+  ])
+  return [...p1.tracks.items, ...p2.tracks.items].filter(Boolean)
+}
+
 export async function searchAlbums(
   query: string,
   token: string,

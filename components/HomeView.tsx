@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import {
-  getUserPlaylists, searchAll, clearToken, formatDuration,
+  getUserPlaylists, searchAll, clearToken, formatDuration, getDecadeTracks,
   previousTrack as prevTrackApi, findOrCreateJukeboxPlaylist, addTrackToJukeboxPlaylist,
   type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
 } from '@/lib/spotify'
@@ -158,6 +158,7 @@ export default function HomeView() {
 
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingDecade, setLoadingDecade] = useState<string | null>(null)
 
   // Inline search dropdown
   const [inlineQuery, setInlineQuery] = useState('')
@@ -190,6 +191,26 @@ export default function HomeView() {
     }
     addToYearlyPlaylist()
   }, [currentTrack?.id, accessToken])
+
+  const handleDecadePlay = async (decade: string) => {
+    if (!accessToken || !deviceId || loadingDecade) return
+    setLoadingDecade(decade)
+    try {
+      const tracks = await getDecadeTracks(decade, accessToken)
+      if (!tracks.length) return
+      const { currentTrack: ct, setQueue, addToQueue } = useJukeboxStore.getState()
+      if (ct) {
+        ;[...tracks].reverse().forEach((t) => addToQueue(t))
+      } else {
+        setQueue(tracks.slice(1))
+        playTrack(accessToken, tracks[0].uri, deviceId)
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoadingDecade(null)
+    }
+  }
 
   useEffect(() => {
     if (inlineDebounce.current) clearTimeout(inlineDebounce.current)
@@ -513,6 +534,47 @@ export default function HomeView() {
               </div>
             </div>
           )}
+
+          {/* Decade Playlists */}
+          <div style={{ padding: `12px ${pad} 14px` }}>
+            <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 14, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Decade Playlists</p>
+            <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 ${negPad}`, padding: `0 ${pad} 8px` }}>
+              {([
+                { decade: '70s', label: "'70s", subtitle: 'Top 100', grad: 'linear-gradient(135deg, #7c4a03 0%, #c97b2a 50%, #e8a84a 100%)', accent: '#e8a84a', icon: '🎸' },
+                { decade: '80s', label: "'80s", subtitle: 'Top 100', grad: 'linear-gradient(135deg, #6b0070 0%, #c2185b 50%, #ff4081 100%)', accent: '#ff4081', icon: '🎹' },
+                { decade: '90s', label: "'90s", subtitle: 'Top 100', grad: 'linear-gradient(135deg, #004d40 0%, #00796b 50%, #26c6da 100%)', accent: '#26c6da', icon: '🎤' },
+                { decade: '00s', label: "'00s", subtitle: 'Top 100', grad: 'linear-gradient(135deg, #0d1b6e 0%, #1565c0 50%, #42a5f5 100%)', accent: '#42a5f5', icon: '💿' },
+              ] as const).map(({ decade, label, subtitle, grad, accent, icon }) => {
+                const isLoading = loadingDecade === decade
+                return (
+                  <button key={decade} onClick={() => handleDecadePlay(decade)} disabled={!!loadingDecade}
+                    style={{ flexShrink: 0, width: 150, textAlign: 'left', opacity: loadingDecade && !isLoading ? 0.5 : 1 }}
+                    className="active:scale-95 transition-all">
+                    <div style={{ width: 150, height: 150, borderRadius: 10, overflow: 'hidden', marginBottom: 8, background: grad, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 4 }}>
+                      {isLoading ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                          <div className="skeleton" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Loading…</span>
+                        </div>
+                      ) : (
+                        <>
+                          <span style={{ fontSize: 36 }}>{icon}</span>
+                          <span style={{ fontSize: 32, fontWeight: 900, color: '#fff', letterSpacing: '-1px', textShadow: `0 0 20px ${accent}` }}>{label}</span>
+                          <div style={{ position: 'absolute', bottom: 8, right: 10 }}>
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <svg width="14" height="14" viewBox="0 0 14 14" fill="white"><path d="M3 2L12 7L3 12V2Z" /></svg>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--retro-cream)' }}>{label} Hits</p>
+                    <p style={{ fontSize: 13, color: 'var(--retro-muted)' }}>{subtitle} songs</p>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
           {playlists.length > 0 && (
             <div style={{ padding: `12px ${pad} 14px` }}>
