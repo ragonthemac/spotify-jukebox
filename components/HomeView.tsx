@@ -200,17 +200,23 @@ export default function HomeView() {
       const songs = DECADE_SONGS[decade] ?? []
       const tracks = await searchDecadeSongs(songs, accessToken)
       if (!tracks.length) return
+      // Fisher-Yates shuffle
+      const shuffled = [...tracks]
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      }
       const { currentTrack: ct, deviceId: did, setQueue, addToQueue } = useJukeboxStore.getState()
       if (ct) {
         // Song playing — add all tracks to top of queue in order
-        ;[...tracks].reverse().forEach((t) => addToQueue(t))
+        ;[...shuffled].reverse().forEach((t) => addToQueue(t))
       } else if (did) {
         // Nothing playing and device ready — play first, queue rest
-        setQueue(tracks.slice(1))
-        playTrack(accessToken, tracks[0].uri, did)
+        setQueue(shuffled.slice(1))
+        playTrack(accessToken, shuffled[0].uri, did)
       } else {
         // Device not ready yet — load queue so it's ready to go
-        setQueue(tracks)
+        setQueue(shuffled)
       }
     } catch (e) {
       console.error(e)
