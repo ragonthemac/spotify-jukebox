@@ -198,14 +198,17 @@ export default function HomeView() {
     try {
       const tracks = await getDecadeTracks(decade, accessToken)
       if (!tracks.length) return
-      // Read fresh state at play time so deviceId is current
       const { currentTrack: ct, deviceId: did, setQueue, addToQueue } = useJukeboxStore.getState()
-      if (!did) return
       if (ct) {
+        // Song playing — add all tracks to top of queue in order
         ;[...tracks].reverse().forEach((t) => addToQueue(t))
-      } else {
+      } else if (did) {
+        // Nothing playing and device ready — play first, queue rest
         setQueue(tracks.slice(1))
         playTrack(accessToken, tracks[0].uri, did)
+      } else {
+        // Device not ready yet — load queue so it's ready to go
+        setQueue(tracks)
       }
     } catch (e) {
       console.error(e)
@@ -533,69 +536,67 @@ export default function HomeView() {
           )}
 
           {/* Decade Playlists */}
-          {(() => {
-            const decades = [
-              { decade: '60s', label: "'60s", wide: true },
-              { decade: '70s', label: "'70s", wide: false },
-              { decade: '80s', label: "'80s", wide: false },
-              { decade: '90s', label: "'90s", wide: false },
-              { decade: '00s', label: "'00s", wide: false },
-            ] as const
-
-            const DecadeCard = ({ decade, label, wide }: { decade: string; label: string; wide: boolean }) => {
+          <div style={{ padding: `8px ${pad} 14px`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+            {(['60s', '70s', '80s', '90s', '00s'] as const).map((decade) => {
               const isLoading = loadingDecade === decade
               return (
                 <button
+                  key={decade}
                   onClick={() => handleDecadePlay(decade)}
                   disabled={!!loadingDecade}
+                  className="active:scale-95"
                   style={{
-                    gridColumn: wide ? '1 / -1' : undefined,
-                    textAlign: 'center',
-                    opacity: loadingDecade && !isLoading ? 0.45 : 1,
+                    opacity: loadingDecade && !isLoading ? 0.4 : 1,
                     background: 'var(--retro-panel)',
-                    border: `2px solid rgba(201,162,39,${isLoading ? '0.65' : '0.28'})`,
-                    borderRadius: 10,
-                    padding: wide ? '22px 0' : '18px 0 14px',
-                    boxShadow: isLoading ? '0 0 20px rgba(201,162,39,0.3)' : '0 0 6px rgba(201,162,39,0.07)',
-                    display: 'flex', flexDirection: wide ? 'row' : 'column',
-                    alignItems: 'center', justifyContent: 'center',
-                    gap: wide ? 20 : 6,
+                    borderRadius: 8,
+                    padding: '12px 4px 10px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
                     transition: 'all 0.2s',
-                    width: '100%',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(201,162,39,0.18)',
+                    boxShadow: isLoading
+                      ? '0 0 16px rgba(201,162,39,0.25), inset 0 0 12px rgba(201,162,39,0.05)'
+                      : 'inset 0 0 8px rgba(0,0,0,0.4)',
                   }}
-                  className="active:scale-[0.98]"
                 >
+                  {/* Chrome gold top stripe — matches dividers */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: chromeH, opacity: isLoading ? 1 : 0.7 }} />
+
                   {isLoading ? (
                     <>
-                      <div className="skeleton" style={{ width: 36, height: 36, borderRadius: '50%' }} />
-                      <span className="font-typewriter" style={{ fontSize: 11, color: 'var(--retro-muted)', letterSpacing: '0.1em' }}>LOADING…</span>
+                      <div className="skeleton" style={{ width: 28, height: 28, borderRadius: '50%', marginTop: 4 }} />
+                      <span className="font-typewriter" style={{ fontSize: 9, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>LOADING</span>
                     </>
                   ) : (
                     <>
-                      <svg width={wide ? 64 : 52} height={wide ? 64 : 52} viewBox="0 0 56 56">
-                        <circle cx="28" cy="28" r="27" fill="#111" stroke="rgba(201,162,39,0.4)" strokeWidth="1.5" />
-                        {[0.75, 0.62, 0.50, 0.38].map((r, i) => (
-                          <circle key={i} cx="28" cy="28" r={28 * r} fill="none" stroke="rgba(201,162,39,0.12)" strokeWidth="1" />
+                      {/* Mini vinyl */}
+                      <svg width="38" height="38" viewBox="0 0 56 56" style={{ marginTop: 4 }}>
+                        <circle cx="28" cy="28" r="27" fill="#0e0800" />
+                        {/* Chrome stroke ring — matches gold dividers */}
+                        <circle cx="28" cy="28" r="27" fill="none" stroke="url(#cg)" strokeWidth="2" />
+                        <defs>
+                          <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#e8d5b0" />
+                            <stop offset="30%" stopColor="#f5e8c0" />
+                            <stop offset="70%" stopColor="#b8902a" />
+                            <stop offset="100%" stopColor="#e0c878" />
+                          </linearGradient>
+                        </defs>
+                        {[0.76, 0.62, 0.49, 0.36].map((r, i) => (
+                          <circle key={i} cx="28" cy="28" r={28 * r} fill="none" stroke="rgba(201,162,39,0.14)" strokeWidth="1" />
                         ))}
-                        <circle cx="28" cy="28" r="10" fill="rgba(201,162,39,0.12)" stroke="rgba(201,162,39,0.5)" strokeWidth="1" />
+                        <circle cx="28" cy="28" r="9" fill="rgba(201,162,39,0.1)" stroke="rgba(201,162,39,0.45)" strokeWidth="1" />
                         <circle cx="28" cy="28" r="3" fill="#c9a227" />
                       </svg>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: wide ? 'flex-start' : 'center', gap: 2 }}>
-                        <span className="font-retro" style={{ fontSize: wide ? 32 : 24, fontWeight: 900, color: 'var(--retro-gold)', letterSpacing: '0.04em', textShadow: '0 0 14px rgba(201,162,39,0.5)', lineHeight: 1 }}>{label}</span>
-                        <span className="font-typewriter" style={{ fontSize: 10, color: 'var(--retro-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Top 100 Hits</span>
-                      </div>
+                      <span className="font-retro" style={{ fontSize: 18, fontWeight: 900, color: 'var(--retro-gold)', letterSpacing: '0.02em', textShadow: '0 0 10px rgba(201,162,39,0.45)', lineHeight: 1 }}>&apos;{decade}</span>
+                      <span className="font-typewriter" style={{ fontSize: 8, color: 'var(--retro-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Top 100</span>
                     </>
                   )}
                 </button>
               )
-            }
-
-            return (
-              <div style={{ padding: `12px ${pad} 14px`, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {decades.map(d => <DecadeCard key={d.decade} {...d} />)}
-              </div>
-            )
-          })()}
+            })}
+          </div>
 
 
           {playHistory.length > 0 && (
