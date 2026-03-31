@@ -98,17 +98,6 @@ export default function OnScreenKeyboard() {
       background: 'rgba(10,5,0,0.98)',
       boxShadow: '0 -8px 40px rgba(0,0,0,0.9)',
     }}>
-      {/* Neon separator — same as BottomNav / HomeView */}
-      <div>
-        <div style={{ height: 3, background: chromeH, opacity: 0.75 }} />
-        <div style={{ height: 2, background: '#050200' }} />
-        <div style={{ height: 3, background: '#ff2d78', opacity: 0.6, boxShadow: '0 0 8px 2px #ff2d7866', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
-        <div style={{ height: 2, background: '#050200' }} />
-        <div style={{ height: 3, background: '#00d4ff', opacity: 0.6, boxShadow: '0 0 8px 2px #00d4ff66', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
-        <div style={{ height: 2, background: '#050200' }} />
-        <div style={{ height: 3, background: chromeH, opacity: 0.65 }} />
-      </div>
-
       <div style={{ padding: '12px 8px 16px', display: 'flex', flexDirection: 'column', gap: 7 }}>
         {/* Character rows */}
         {rows.map((row, ri) => (
