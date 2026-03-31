@@ -171,12 +171,9 @@ export default function HomeView() {
   useEffect(() => {
     if (!accessToken || didLoad.current) return
     didLoad.current = true
-    Promise.allSettled([getRecentlyPlayed(accessToken), getUserPlaylists(accessToken)])
-      .then(([r, p]) => {
-        if (r.status === 'fulfilled') setRecentTracks(r.value)
-        if (p.status === 'fulfilled') setPlaylists(p.value)
-      })
-      .finally(() => setLoading(false))
+    // Playlists fetched independently so a recently-played 403 can't block them
+    getUserPlaylists(accessToken).then(setPlaylists).catch(() => {}).finally(() => setLoading(false))
+    getRecentlyPlayed(accessToken).then(setRecentTracks).catch(() => {})
   }, [accessToken])
 
   // Auto-add every played track to the yearly jukebox playlist

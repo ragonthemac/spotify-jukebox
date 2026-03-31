@@ -12,10 +12,10 @@ const SCOPES = [
   'user-read-playback-state',
   'user-modify-playback-state',
   'user-read-currently-playing',
-  'user-read-recently-played',
-  'user-top-read',
   'playlist-read-private',
   'playlist-read-collaborative',
+  'playlist-modify-private',
+  'playlist-modify-public',
 ].join(' ')
 
 // ─── PKCE helpers ────────────────────────────────────────────────────────────
