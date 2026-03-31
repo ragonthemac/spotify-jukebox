@@ -188,17 +188,43 @@ export default function HomeView() {
   const progress = durationMs > 0 ? (progressMs / durationMs) * 100 : 0
   const albumArt = currentTrack?.album.images[0]?.url
 
-  // side padding accounts for chrome rail width (10px)
-  const pad = '16px'
+  // side padding matches full 60px jukebox border frame
+  const pad = '68px'
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ color: 'var(--retro-cream)' }}>
 
-      {/* Arch side extension — chrome rail + neon accent lights */}
-      <div style={{ position: 'fixed', top: 0, left: 0, width: 10, height: '100dvh', background: chrome, opacity: 0.75, zIndex: 49, pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', top: 0, right: 0, width: 10, height: '100dvh', background: chrome, opacity: 0.75, zIndex: 49, pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', top: 0, left: 10, width: 2, height: '100dvh', background: '#ff2d78', opacity: 0.55, boxShadow: '0 0 8px 3px #ff2d7866', zIndex: 48, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
-      <div style={{ position: 'fixed', top: 0, right: 10, width: 2, height: '100dvh', background: '#00d4ff', opacity: 0.55, boxShadow: '0 0 8px 3px #00d4ff66', zIndex: 48, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
+      {/* ── Jukebox body border — 60px per side, matching arch ring layers ── */}
+      {/* Outer chrome (0–10px) */}
+      <div style={{ position: 'fixed', top: 0, left: 0,   width: 10, height: '100dvh', background: chrome,     opacity: 0.75, zIndex: 49, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: 0, right: 0,  width: 10, height: '100dvh', background: chrome,     opacity: 0.75, zIndex: 49, pointerEvents: 'none' }} />
+      {/* Dark gap (10–16px) */}
+      <div style={{ position: 'fixed', top: 0, left: 10,  width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: 0, right: 10, width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
+      {/* Pink neon (16–22px) */}
+      <div style={{ position: 'fixed', top: 0, left: 16,  width: 6,  height: '100dvh', background: '#ff2d78',  opacity: 0.6, boxShadow: '2px 0 10px 2px #ff2d7855', zIndex: 49, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
+      <div style={{ position: 'fixed', top: 0, right: 16, width: 6,  height: '100dvh', background: '#ff2d78',  opacity: 0.6, boxShadow: '-2px 0 10px 2px #ff2d7855', zIndex: 49, pointerEvents: 'none', animation: 'neon-pulse 2.5s ease-in-out infinite' }} />
+      {/* Dark gap (22–28px) */}
+      <div style={{ position: 'fixed', top: 0, left: 22,  width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: 0, right: 22, width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
+      {/* Cyan neon (28–34px) */}
+      <div style={{ position: 'fixed', top: 0, left: 28,  width: 6,  height: '100dvh', background: '#00d4ff',  opacity: 0.6, boxShadow: '2px 0 10px 2px #00d4ff55', zIndex: 49, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
+      <div style={{ position: 'fixed', top: 0, right: 28, width: 6,  height: '100dvh', background: '#00d4ff',  opacity: 0.6, boxShadow: '-2px 0 10px 2px #00d4ff55', zIndex: 49, pointerEvents: 'none', animation: 'neon-pulse 2.8s ease-in-out 1.2s infinite' }} />
+      {/* Dark gap (34–40px) */}
+      <div style={{ position: 'fixed', top: 0, left: 34,  width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: 0, right: 34, width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
+      {/* Inner chrome (40–46px) */}
+      <div style={{ position: 'fixed', top: 0, left: 40,  width: 6,  height: '100dvh', background: chrome,     opacity: 0.65, zIndex: 49, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: 0, right: 40, width: 6,  height: '100dvh', background: chrome,     opacity: 0.65, zIndex: 49, pointerEvents: 'none' }} />
+      {/* Dark gap (46–52px) */}
+      <div style={{ position: 'fixed', top: 0, left: 46,  width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: 0, right: 46, width: 6,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
+      {/* Gold accent (52–58px) */}
+      <div style={{ position: 'fixed', top: 0, left: 52,  width: 6,  height: '100dvh', background: '#c9a227',  opacity: 0.45, zIndex: 49, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: 0, right: 52, width: 6,  height: '100dvh', background: '#c9a227',  opacity: 0.45, zIndex: 49, pointerEvents: 'none' }} />
+      {/* Inner dark edge (58–60px) */}
+      <div style={{ position: 'fixed', top: 0, left: 58,  width: 2,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: 0, right: 58, width: 2,  height: '100dvh', background: '#050200',  zIndex: 49, pointerEvents: 'none' }} />
 
       {/* ── Top header ── */}
       <div style={{ flexShrink: 0 }}>
