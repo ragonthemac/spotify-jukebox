@@ -57,6 +57,24 @@ export default function SpotifyPlayer() {
   const playerRef = useRef<SpotifyPlayerInstance | null>(null)
   const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null)
   const prevPausedRef = useRef<boolean>(true)
+  const hasImportedQueue = useRef(false)
+
+  // Fetch the Spotify queue immediately when the token is available — before
+  // the SDK loads and claims the active device. This captures whatever queue
+  // the user had on their phone/desktop Spotify.
+  useEffect(() => {
+    if (!accessToken || hasImportedQueue.current) return
+    import('@/lib/spotify').then(({ getSpotifyCurrentQueue }) => {
+      const { queue, importQueue } = useJukeboxStore.getState()
+      if (queue.length > 0) return // already have a queue, don't overwrite
+      getSpotifyCurrentQueue(accessToken).then((tracks) => {
+        if (tracks.length > 0) {
+          importQueue(tracks)
+          hasImportedQueue.current = true
+        }
+      }).catch(() => {})
+    })
+  }, [accessToken])
 
   useEffect(() => {
     if (!accessToken) return
@@ -79,15 +97,6 @@ export default function SpotifyPlayer() {
       player.addListener('ready', (state) => {
         const { device_id } = state as { device_id: string }
         setDeviceId(device_id)
-        // Import Spotify's queue if our queue is empty
-        import('@/lib/spotify').then(({ getSpotifyCurrentQueue }) => {
-          const { accessToken: tok, importQueue } = useJukeboxStore.getState()
-          if (tok) {
-            getSpotifyCurrentQueue(tok).then((tracks) => {
-              if (tracks.length > 0) importQueue(tracks)
-            }).catch(() => {})
-          }
-        })
       })
 
       player.addListener('not_ready', () => {
@@ -98,6 +107,20 @@ export default function SpotifyPlayer() {
         if (!state) return
         const s = state as SpotifyPlaybackState
         const track = s.track_window.current_track
+
+        // If user switched to Jukebox mid-session and we haven't imported the
+        // queue yet (early fetch may have found nothing), try once more now.
+        if (!hasImportedQueue.current) {
+          const { queue, importQueue, accessToken: tok } = useJukeboxStore.getState()
+          if (queue.length === 0 && tok) {
+            hasImportedQueue.current = true // prevent retrying on every state change
+            import('@/lib/spotify').then(({ getSpotifyCurrentQueue }) => {
+              getSpotifyCurrentQueue(tok).then((tracks) => {
+                if (tracks.length > 0) importQueue(tracks)
+              }).catch(() => {})
+            })
+          }
+        }
 
         // Auto-play next queued song when track ends naturally
         const wasPaused = prevPausedRef.current
