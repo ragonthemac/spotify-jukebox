@@ -163,11 +163,14 @@ export default function HomeView() {
     inlineDebounce.current = setTimeout(async () => {
       try {
         const { tracks, artists, albums } = await searchAll(inlineQuery, accessToken)
-        const results: typeof inlineDropdown = []
-        if (tracks[0])  results.push({ type: 'track',  item: tracks[0] })
-        if (artists[0]) results.push({ type: 'artist', item: artists[0] })
-        if (albums[0])  results.push({ type: 'album',  item: albums[0] })
-        setInlineDropdown(results)
+        // Interleave all types and take the top 3 most relevant
+        const pool: typeof inlineDropdown = []
+        for (let i = 0; i < 3; i++) {
+          if (tracks[i])  pool.push({ type: 'track',  item: tracks[i] })
+          if (artists[i]) pool.push({ type: 'artist', item: artists[i] })
+          if (albums[i])  pool.push({ type: 'album',  item: albums[i] })
+        }
+        setInlineDropdown(pool.slice(0, 3))
         setSearchError(results.length === 0 ? 'No results found' : '')
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Search failed'
