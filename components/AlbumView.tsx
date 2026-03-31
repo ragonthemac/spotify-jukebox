@@ -25,7 +25,7 @@ export default function AlbumView() {
 
   if (!activeAlbum) return null
 
-  const art = activeAlbum.images[0]?.url
+  const art = activeAlbum.images?.[0]?.url
   const artist = activeAlbum.artists[0]?.name
 
   return (

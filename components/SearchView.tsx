@@ -151,11 +151,11 @@ export default function SearchView() {
                   {artistResults.map((artist) => (
                     <button
                       key={artist.id}
-                      onClick={() => { setActiveArtist({ id: artist.id, name: artist.name, imageUrl: artist.images[0]?.url }); setActiveView('artist') }}
+                      onClick={() => { setActiveArtist({ id: artist.id, name: artist.name, imageUrl: artist.images?.[0]?.url }); setActiveView('artist') }}
                       className="flex items-center gap-3 p-4 rounded-xl hover:bg-white/5 transition-all text-left w-full"
                     >
                       <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-white/10">
-                        {artist.images[0]?.url && <img src={artist.images[0].url} alt={artist.name} className="w-full h-full object-cover" />}
+                        {artist.images?.[0]?.url && <img src={artist.images[0].url} alt={artist.name} className="w-full h-full object-cover" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-base font-medium truncate">{artist.name}</p>

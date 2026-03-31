@@ -10,7 +10,7 @@ interface Props {
 export default function AlbumCard({ album }: Props) {
   const { setActiveView, setActiveAlbum } = useJukeboxStore()
 
-  const art = album.images[0]?.url
+  const art = album.images?.[0]?.url
   const artist = album.artists[0]?.name || 'Unknown'
 
   return (

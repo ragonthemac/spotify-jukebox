@@ -23,7 +23,7 @@ export default function BottomPlayer() {
   if (!currentTrack) return null
 
   const progress = durationMs > 0 ? (progressMs / durationMs) * 100 : 0
-  const art = currentTrack.album.images[1]?.url || currentTrack.album.images[0]?.url
+  const art = currentTrack.album.images?.[1]?.url || currentTrack.album.images?.[0]?.url
 
   const togglePlay = () => {
     if (isPlaying) {

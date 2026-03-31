@@ -415,9 +415,9 @@ export function formatDuration(ms: number): string {
 }
 
 export function getAlbumArt(track: SpotifyTrack, size: 'sm' | 'md' | 'lg' = 'md'): string {
-  const images = track.album.images
+  const images = track.album.images ?? []
   if (!images.length) return '/placeholder.svg'
-  if (size === 'lg') return images[0]?.url || images[images.length - 1].url
-  if (size === 'sm') return images[images.length - 1]?.url || images[0].url
-  return images[1]?.url || images[0].url
+  if (size === 'lg') return images[0]?.url || images[images.length - 1]?.url || '/placeholder.svg'
+  if (size === 'sm') return images[images.length - 1]?.url || images[0]?.url || '/placeholder.svg'
+  return images[1]?.url || images[0]?.url || '/placeholder.svg'
 }

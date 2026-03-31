@@ -269,7 +269,7 @@ export default function HomeView() {
   }
 
   const progress = durationMs > 0 ? (progressMs / durationMs) * 100 : 0
-  const albumArt = currentTrack?.album.images[0]?.url
+  const albumArt = currentTrack?.album.images?.[0]?.url
 
   // Content padding aligns with inner edge of arch rings (vR=440, gap=2 → 442px from center)
   // max() ensures at least 16px on narrow screens where rings are off-screen
@@ -486,7 +486,7 @@ export default function HomeView() {
                 {queue.slice(0, 1).map((track, i) => (
                   <div key={track.queueId} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderBottom: i < queue.length - 1 ? '1px solid rgba(201,162,39,0.1)' : 'none', background: i % 2 === 0 ? 'rgba(201,162,39,0.03)' : 'transparent' }}>
                     <div style={{ width: 40, height: 40, borderRadius: 6, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(201,162,39,0.12)', border: '1px solid rgba(201,162,39,0.25)', fontSize: 13, fontWeight: 700, fontFamily: 'monospace', color: 'var(--retro-gold)' }}>{rowLabel(i)}</div>
-                    <img src={track.album.images[track.album.images.length - 1]?.url} alt="" style={{ width: 48, height: 48, borderRadius: 6, flexShrink: 0, objectFit: 'cover', opacity: 0.85 }} />
+                    <img src={(track.album.images ?? []).at(-1)?.url} alt="" style={{ width: 48, height: 48, borderRadius: 6, flexShrink: 0, objectFit: 'cover', opacity: 0.85 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: 15, fontWeight: 500, color: 'var(--retro-cream)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{track.name}</p>
                       <p style={{ fontSize: 13, color: 'var(--retro-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{track.artists.map(a => a.name).join(', ')}</p>
@@ -506,7 +506,7 @@ export default function HomeView() {
                   <button key={pl.id} onClick={() => { setActivePlaylist(pl); setActiveView('playlist') }}
                     style={{ flexShrink: 0, width: 150, textAlign: 'left' }} className="active:scale-95 transition-transform">
                     <div style={{ width: 150, height: 150, borderRadius: 10, overflow: 'hidden', marginBottom: 8, background: 'rgba(201,162,39,0.08)', border: '1px solid rgba(201,162,39,0.18)' }}>
-                      {pl.images[0]?.url ? <img src={pl.images[0].url} alt={pl.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="36" height="36" viewBox="0 0 28 28" fill="none" style={{ opacity: 0.2, color: 'var(--retro-gold)' }}><path d="M7 8H21M7 12H21M7 16H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg></div>}
+                      {pl.images?.[0]?.url ? <img src={pl.images[0].url} alt={pl.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="36" height="36" viewBox="0 0 28 28" fill="none" style={{ opacity: 0.2, color: 'var(--retro-gold)' }}><path d="M7 8H21M7 12H21M7 16H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg></div>}
                     </div>
                     <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--retro-cream)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.name}</p>
                     <p style={{ fontSize: 13, color: 'var(--retro-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.tracks?.total} songs</p>

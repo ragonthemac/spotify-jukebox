@@ -8,7 +8,7 @@ export default function NowPlayingHero() {
   const { currentTrack, isPlaying, progressMs, durationMs, setIsPlaying, setActiveView, setActiveArtist } = useJukeboxStore()
 
   const progress = durationMs > 0 ? (progressMs / durationMs) * 100 : 0
-  const art = currentTrack?.album.images[0]?.url
+  const art = currentTrack?.album.images?.[0]?.url
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const ms = Number(e.target.value)

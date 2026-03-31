@@ -23,7 +23,7 @@ export default function PlaylistView() {
 
   if (!activePlaylist) return null
 
-  const art = activePlaylist.images[0]?.url
+  const art = activePlaylist.images?.[0]?.url
 
   return (
     <div className="h-full flex flex-col">

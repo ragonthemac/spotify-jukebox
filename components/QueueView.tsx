@@ -47,7 +47,7 @@ export default function QueueView() {
             </p>
             <div className="flex items-center gap-3 p-3 rounded-xl bg-pink-500/10 border border-pink-500/20">
               <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden ring-2 ring-pink-500">
-                {currentTrack.album.images[0]?.url && (
+                {currentTrack.album.images?.[0]?.url && (
                   <img
                     src={currentTrack.album.images[0].url}
                     alt={currentTrack.album.name}

@@ -21,7 +21,7 @@ function AlbumCard({ album, token }: { album: SpotifyAlbum; token: string }) {
     setExpanded((v) => !v)
   }
 
-  const art = album.images[0]?.url
+  const art = album.images?.[0]?.url
 
   return (
     <div className="rounded-2xl overflow-hidden glass border border-white/5">
