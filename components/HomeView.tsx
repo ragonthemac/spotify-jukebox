@@ -92,6 +92,23 @@ function SpeakerGrille({ rows = 4, cols = 12 }: { rows?: number; cols?: number }
   )
 }
 
+/* ─── Neon wave grille ─── */
+const WAVE_HEIGHTS = [0.25, 0.45, 0.70, 0.55, 0.85, 0.60, 0.95, 0.50, 0.80, 0.40, 0.65, 0.90, 0.35, 0.75, 0.55, 0.88]
+function WaveGrille({ isPlaying, bars = 16 }: { isPlaying: boolean; bars?: number }) {
+  return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: 3, padding: '14px 14px 10px', height: 96, background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(201,162,39,0.22)', borderRadius: 6, overflow: 'hidden' }}>
+      {Array.from({ length: bars }).map((_, i) => {
+        const baseH = WAVE_HEIGHTS[i % WAVE_HEIGHTS.length]
+        const delay = `${((i * 0.11) % 0.8).toFixed(2)}s`
+        const duration = `${0.55 + (i % 6) * 0.12}s`
+        return (
+          <div key={i} style={{ flex: 1, borderRadius: 2, transformOrigin: 'bottom', background: isPlaying ? 'rgba(201,162,39,0.75)' : 'rgba(201,162,39,0.22)', boxShadow: isPlaying ? '0 0 4px rgba(201,162,39,0.4)' : 'none', height: `${baseH * 100}%`, animation: isPlaying ? `equalizer ${duration} ease-in-out ${delay} infinite` : 'none', transition: 'background 0.4s, box-shadow 0.4s' }} />
+        )
+      })}
+    </div>
+  )
+}
+
 /* ─── Volume dots ─── */
 function VolumeControl({ volume, onChange }: { volume: number; onChange: (v: number) => void }) {
   const steps = [0.2, 0.4, 0.6, 0.8, 1.0]
@@ -422,37 +439,36 @@ export default function HomeView() {
                 </div>
               )}
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
-                <div style={{ display: 'flex', gap: 12 }}><Knob label="vol" /><Knob label="tone" color="#00d4ff" /></div>
-                <DecoEqualizer />
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <button onClick={handlePrev} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {/* Row 1: wave grilles flanking playback buttons */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
+                <WaveGrille isPlaying={isPlaying} bars={16} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                  <button onClick={handlePrev} className="active:scale-95 transition-transform" style={{ width: 58, height: 58, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg width="22" height="22" viewBox="0 0 14 14" fill="none"><rect x="2" y="2.5" width="3" height="9" rx="1" fill="currentColor" /><path d="M12 2.5L6 7L12 11.5V2.5Z" fill="currentColor" opacity="0.7" /></svg>
                   </button>
-                  <button onClick={togglePlay} className="active:scale-95" style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--retro-gold)', color: '#0e0800', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 16px rgba(201,162,39,0.45), 0 3px 10px rgba(0,0,0,0.7)', border: '3px solid rgba(255,240,180,0.3)', transition: 'transform 0.1s' }}>
+                  <button onClick={togglePlay} className="active:scale-95" style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--retro-gold)', color: '#0e0800', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 20px rgba(201,162,39,0.5), 0 3px 10px rgba(0,0,0,0.7)', border: '3px solid rgba(255,240,180,0.3)', transition: 'transform 0.1s' }}>
                     {isPlaying
                       ? <svg width="26" height="26" viewBox="0 0 18 18" fill="currentColor"><rect x="3" y="2" width="4" height="14" rx="1.5" /><rect x="11" y="2" width="4" height="14" rx="1.5" /></svg>
                       : <svg width="26" height="26" viewBox="0 0 18 18" fill="currentColor"><path d="M4 3L16 9L4 15V3Z" /></svg>}
                   </button>
-                  <button onClick={handleSkip} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <button onClick={handleSkip} className="active:scale-95 transition-transform" style={{ width: 58, height: 58, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg width="22" height="22" viewBox="0 0 14 14" fill="none"><path d="M2 2.5L8 7L2 11.5V2.5Z" fill="currentColor" opacity="0.7" /><rect x="9" y="2.5" width="3" height="9" rx="1" fill="currentColor" /></svg>
                   </button>
                 </div>
-                <DecoEqualizer />
-                <div style={{ display: 'flex', gap: 12 }}><Knob label="bass" color="#ff2d78" /><Knob label="treb" color="#a855f7" /></div>
+                <WaveGrille isPlaying={isPlaying} bars={16} />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 0 8px' }}>
-                <VolumeControl volume={volume} onChange={handleVolume} />
-              </div>
-
-              {/* Decorative speaker grilles inside now-playing */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, paddingBottom: 12 }}>
-                <SpeakerGrille rows={4} cols={14} />
-                <div style={{ padding: '4px 14px', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 3, background: 'rgba(201,162,39,0.04)' }}>
-                  <span className="font-typewriter" style={{ fontSize: 10, color: 'rgba(201,162,39,0.45)', letterSpacing: '0.22em', textTransform: 'uppercase' }}>stereo hi-fi</span>
+              {/* Row 2: vol+tone knobs | volume dots | bass+treb knobs */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 10 }}>
+                <div style={{ display: 'flex', gap: 14 }}>
+                  <Knob label="vol" />
+                  <Knob label="tone" color="#00d4ff" />
                 </div>
-                <SpeakerGrille rows={4} cols={14} />
+                <VolumeControl volume={volume} onChange={handleVolume} />
+                <div style={{ display: 'flex', gap: 14 }}>
+                  <Knob label="bass" color="#ff2d78" />
+                  <Knob label="treb" color="#a855f7" />
+                </div>
               </div>
             </div>
 
