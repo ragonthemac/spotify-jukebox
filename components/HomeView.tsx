@@ -87,6 +87,34 @@ function SpeakerGrille({ rows = 4, cols = 12 }: { rows?: number; cols?: number }
   )
 }
 
+/* ─── Volume dots ─── */
+function VolumeControl({ volume, onChange }: { volume: number; onChange: (v: number) => void }) {
+  const steps = [0.2, 0.4, 0.6, 0.8, 1.0]
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5, alignItems: 'center' }}>
+        {[...steps].reverse().map((step) => {
+          const active = volume >= step - 0.01
+          return (
+            <button
+              key={step}
+              onClick={() => onChange(step)}
+              style={{
+                width: 14, height: 14, borderRadius: '50%', flexShrink: 0,
+                background: active ? '#c9a227' : 'rgba(201,162,39,0.12)',
+                border: `1px solid ${active ? 'rgba(201,162,39,0.8)' : 'rgba(201,162,39,0.25)'}`,
+                boxShadow: active ? '0 0 6px 2px rgba(201,162,39,0.5)' : 'none',
+                transition: 'all 0.15s',
+              }}
+            />
+          )
+        })}
+      </div>
+      <span style={{ fontSize: 9, color: 'rgba(201,162,39,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'monospace' }}>vol</span>
+    </div>
+  )
+}
+
 /* ─── Knob ─── */
 function Knob({ label, color = '#c9a227' }: { label: string; color?: string }) {
   return (
@@ -218,6 +246,12 @@ export default function HomeView() {
         addToQueue(t)
       }
     }
+  }
+
+  const [volume, setVolume] = useState(0.8)
+  const handleVolume = (v: number) => {
+    setVolume(v)
+    globalPlayer?.setVolume(v)
   }
 
   const togglePlay = () => {
@@ -354,7 +388,7 @@ export default function HomeView() {
               )}
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
-                <div style={{ display: 'flex', gap: 12 }}><Knob label="vol" /><Knob label="tone" color="#00d4ff" /></div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}><VolumeControl volume={volume} onChange={handleVolume} /><Knob label="tone" color="#00d4ff" /></div>
                 <DecoEqualizer />
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <button onClick={handlePrev} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
