@@ -52,12 +52,12 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
   return (
     <div
       onClick={() => handleAdd()}
-      className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200
+      className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-all duration-200
         ${isCurrentlyPlaying ? 'bg-pink-500/10 border border-pink-500/20' : 'hover:bg-white/5 active:bg-white/8'}
         ${wasRecentlyAdded ? 'animate-slide-up' : ''}`}
     >
       {/* Art */}
-      <div className={`relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden
+      <div className={`relative flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden
         ${isCurrentlyPlaying ? 'ring-2 ring-pink-500' : ''}`}>
         {art ? (
           <img src={art} alt={track.album.name} className="w-full h-full object-cover" />
@@ -77,14 +77,14 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium truncate leading-tight
+        <p className={`text-base font-medium truncate leading-tight
           ${isCurrentlyPlaying ? 'text-pink-300' : 'text-white'}`}>
           {track.name}
           {track.explicit && (
             <span className="ml-1.5 text-[9px] px-1 py-0.5 rounded bg-white/10 text-white/40 font-normal align-middle">E</span>
           )}
         </p>
-        <p className="text-xs text-white/40 truncate mt-0.5">
+        <p className="text-sm text-white/40 truncate mt-0.5">
           {track.artists.map((a, i) => (
             <span key={a.id}>
               {i > 0 && ', '}
@@ -112,28 +112,28 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
       {inQueue ? (
         <button
           onClick={handleRemove}
-          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+          className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0
             text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-all duration-150"
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
             <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
       ) : (
         <button
           onClick={handleAdd}
-          className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+          className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0
             transition-all duration-200 active:scale-90
             ${justAdded
               ? 'bg-pink-500 glow-pink animate-add-pop'
               : 'bg-white/8 hover:bg-white/15 text-white/60 hover:text-white'}`}
         >
           {justAdded ? (
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
               <path d="M2 6L5 9L10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           ) : (
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
               <path d="M7 2V12M2 7H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           )}

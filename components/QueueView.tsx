@@ -22,15 +22,15 @@ export default function QueueView() {
       {/* Header */}
       <div className="flex-shrink-0 px-4 pt-4 pb-3 flex items-center justify-between">
         <div>
-          <h2 className="text-white font-bold text-lg">Up Next</h2>
-          <p className="text-white/30 text-xs">
+          <h2 className="text-white font-bold text-xl">Up Next</h2>
+          <p className="text-white/30 text-sm">
             {queue.length === 0 ? 'Queue is empty' : `${queue.length} track${queue.length !== 1 ? 's' : ''}`}
           </p>
         </div>
         {queue.length > 0 && (
           <button
             onClick={clearQueue}
-            className="text-white/30 text-xs hover:text-white/60 transition-colors px-3 py-1.5 rounded-full glass"
+            className="text-white/30 text-sm hover:text-white/60 transition-colors px-4 py-2.5 rounded-full glass"
           >
             Clear all
           </button>
@@ -81,9 +81,9 @@ export default function QueueView() {
               {queue.length > 0 && (
                 <button
                   onClick={handleSkip}
-                  className="w-8 h-8 rounded-full glass flex items-center justify-center text-white/50 hover:text-white transition-colors flex-shrink-0"
+                  className="w-11 h-11 rounded-full glass flex items-center justify-center text-white/50 hover:text-white transition-colors flex-shrink-0"
                 >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
                     <path d="M2 3L9 7L2 11V3Z" fill="currentColor" />
                     <rect x="10" y="3" width="2" height="8" rx="1" fill="currentColor" />
                   </svg>

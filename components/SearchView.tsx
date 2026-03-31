@@ -99,8 +99,8 @@ export default function SearchView() {
     <div className="h-full flex flex-col">
       {/* Search bar */}
       <div className="flex-shrink-0 px-4 pt-4 pb-3 flex items-center gap-3">
-        <div className="flex-1 flex items-center gap-3 glass rounded-2xl px-4 h-12 border border-white/10">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 text-white/40">
+        <div className="flex-1 flex items-center gap-3 glass rounded-2xl px-4 h-14 border border-white/10">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 text-white/40">
             <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
             <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
@@ -110,17 +110,17 @@ export default function SearchView() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search songs, artists, albums…"
-            className="flex-1 bg-transparent text-white placeholder-white/30 text-sm outline-none"
+            className="flex-1 bg-transparent text-white placeholder-white/30 text-base outline-none"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="text-white/40 hover:text-white/70 transition-colors">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <button onClick={() => setSearchQuery('')} className="text-white/40 hover:text-white/70 transition-colors p-1">
+              <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
                 <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </button>
           )}
         </div>
-        <button onClick={() => setActiveView('home')} className="text-white/50 text-sm hover:text-white transition-colors">
+        <button onClick={() => setActiveView('home')} className="text-white/50 text-base hover:text-white transition-colors px-2 py-3">
           Cancel
         </button>
       </div>
@@ -152,16 +152,16 @@ export default function SearchView() {
                     <button
                       key={artist.id}
                       onClick={() => { setActiveArtist({ id: artist.id, name: artist.name, imageUrl: artist.images[0]?.url }); setActiveView('artist') }}
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all text-left w-full"
+                      className="flex items-center gap-3 p-4 rounded-xl hover:bg-white/5 transition-all text-left w-full"
                     >
-                      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-white/10">
+                      <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-white/10">
                         {artist.images[0]?.url && <img src={artist.images[0].url} alt={artist.name} className="w-full h-full object-cover" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium truncate">{artist.name}</p>
-                        <p className="text-white/40 text-xs mt-0.5">Artist</p>
+                        <p className="text-white text-base font-medium truncate">{artist.name}</p>
+                        <p className="text-white/40 text-sm mt-0.5">Artist</p>
                       </div>
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white/20 flex-shrink-0">
+                      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" className="text-white/20 flex-shrink-0">
                         <path d="M4 3L9 7L4 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </button>
@@ -198,14 +198,14 @@ export default function SearchView() {
             <div className="flex gap-1 mb-4 glass rounded-xl p-1 border border-white/5">
               <button
                 onClick={() => setTab('recent')}
-                className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all duration-200
                   ${tab === 'recent' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'}`}
               >
                 Recent Searches
               </button>
               <button
                 onClick={() => setTab('played')}
-                className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all duration-200
                   ${tab === 'played' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'}`}
               >
                 Recently Played

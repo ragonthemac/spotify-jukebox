@@ -1,8 +1,21 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { initiateLogin } from '@/lib/spotify'
 
 export default function LoginScreen() {
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const err = params.get('error')
+    if (err === 'access_denied') {
+      setErrorMsg("Your Spotify account isn't authorised for this jukebox yet. Ask the venue owner to add you in the Spotify dashboard.")
+    } else if (err) {
+      setErrorMsg('Login failed — please try again.')
+    }
+  }, [])
+
   return (
     <div className="h-full flex flex-col items-center justify-center bg-jukebox px-6">
       {/* Decorative rings */}
@@ -44,6 +57,13 @@ export default function LoginScreen() {
           </span>
         ))}
       </div>
+
+      {errorMsg && (
+        <div className="mb-6 px-4 py-3 rounded-xl text-center text-sm max-w-xs"
+          style={{ background: 'rgba(255,45,120,0.12)', border: '1px solid rgba(255,45,120,0.3)', color: 'rgba(255,255,255,0.75)' }}>
+          {errorMsg}
+        </div>
+      )}
 
       <button
         onClick={() => initiateLogin()}
