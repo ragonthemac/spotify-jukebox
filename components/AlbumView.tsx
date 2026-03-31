@@ -6,7 +6,7 @@ import { getAlbumTracks, playTrack, type SpotifyTrack } from '@/lib/spotify'
 import TrackRow from './TrackRow'
 
 export default function AlbumView() {
-  const { activeAlbum, accessToken, deviceId, setActiveView, setQueue } = useJukeboxStore()
+  const { activeAlbum, accessToken, deviceId, currentTrack, setActiveView, setQueue, addToQueue } = useJukeboxStore()
   const [tracks, setTracks] = useState<SpotifyTrack[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -25,8 +25,14 @@ export default function AlbumView() {
 
   const handlePlayAll = () => {
     if (!tracks.length || !accessToken || !deviceId) return
-    setQueue(tracks.slice(1))
-    playTrack(accessToken, tracks[0].uri, deviceId)
+    if (currentTrack) {
+      // Song already playing — add all tracks to top of queue in order
+      ;[...tracks].reverse().forEach((t) => addToQueue(t))
+    } else {
+      // Nothing playing — start immediately
+      setQueue(tracks.slice(1))
+      playTrack(accessToken, tracks[0].uri, deviceId)
+    }
   }
 
   if (!activeAlbum) return null
