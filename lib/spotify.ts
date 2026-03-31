@@ -310,6 +310,13 @@ export async function playTrack(token: string, uri: string, deviceId: string) {
   })
 }
 
+export async function previousTrack(token: string) {
+  await fetch(`${SPOTIFY_API_BASE}/me/player/previous`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+}
+
 export async function pausePlayback(token: string) {
   await fetch(`${SPOTIFY_API_BASE}/me/player/pause`, {
     method: 'PUT',

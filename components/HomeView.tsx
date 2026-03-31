@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import {
   getRecentlyPlayed, getUserPlaylists, searchTracks, searchArtists, clearToken, formatDuration,
+  previousTrack as prevTrackApi,
   type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist,
 } from '@/lib/spotify'
 import { globalPlayer } from './SpotifyPlayer'
@@ -358,7 +359,7 @@ export default function HomeView() {
                 <div style={{ display: 'flex', gap: 12 }}><Knob label="vol" /><Knob label="tone" color="#00d4ff" /></div>
                 <DecoEqualizer />
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <button onClick={() => globalPlayer?.previousTrack()} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <button onClick={() => accessToken && prevTrackApi(accessToken)} className="active:scale-95 transition-transform" style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid rgba(201,162,39,0.35)', color: 'var(--retro-gold)', background: 'rgba(201,162,39,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="22" height="22" viewBox="0 0 14 14" fill="none"><rect x="2" y="2.5" width="3" height="9" rx="1" fill="currentColor" /><path d="M12 2.5L6 7L12 11.5V2.5Z" fill="currentColor" opacity="0.7" /></svg>
                   </button>
                   <button onClick={togglePlay} className="active:scale-95" style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--retro-gold)', color: '#0e0800', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 16px rgba(201,162,39,0.45), 0 3px 10px rgba(0,0,0,0.7)', border: '3px solid rgba(255,240,180,0.3)', transition: 'transform 0.1s' }}>
@@ -389,18 +390,21 @@ export default function HomeView() {
               </div>
             </div>
 
+            {/* Speaker grille — fixed, does not scroll */}
+            <div style={{ flexShrink: 0 }}>
+              <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: `10px ${pad}`, background: 'rgba(8,4,0,0.95)' }}>
+                <SpeakerGrille rows={3} cols={12} />
+                <div style={{ padding: '6px 16px', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 3, background: 'rgba(201,162,39,0.04)', whiteSpace: 'nowrap' }}>
+                  <span className="font-typewriter" style={{ fontSize: 11, color: 'rgba(201,162,39,0.45)', letterSpacing: '0.22em', textTransform: 'uppercase' }}>stereo hi-fi</span>
+                </div>
+                <SpeakerGrille rows={3} cols={12} />
+              </div>
+              <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
+            </div>
+
             {/* Scrollable content inside the bordered body */}
             <div className="overflow-y-auto" style={{ flex: 1 }}>
-
-          <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: `10px ${pad}`, background: 'rgba(8,4,0,0.95)' }}>
-            <SpeakerGrille rows={3} cols={12} />
-            <div style={{ padding: '6px 16px', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 3, background: 'rgba(201,162,39,0.04)', whiteSpace: 'nowrap' }}>
-              <span className="font-typewriter" style={{ fontSize: 11, color: 'rgba(201,162,39,0.45)', letterSpacing: '0.22em', textTransform: 'uppercase' }}>stereo hi-fi</span>
-            </div>
-            <SpeakerGrille rows={3} cols={12} />
-          </div>
-          <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: `14px ${pad} 0` }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(201,162,39,0.15)' }} />
@@ -412,7 +416,7 @@ export default function HomeView() {
             <div style={{ padding: `12px ${pad} 16px` }}>
               <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 10, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Up Next</p>
               <div style={{ borderRadius: 6, overflow: 'hidden', border: '1px solid rgba(201,162,39,0.2)' }}>
-                {queue.slice(0, 8).map((track, i) => (
+                {queue.slice(0, 1).map((track, i) => (
                   <div key={track.queueId} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderBottom: i < queue.length - 1 ? '1px solid rgba(201,162,39,0.1)' : 'none', background: i % 2 === 0 ? 'rgba(201,162,39,0.03)' : 'transparent' }}>
                     <div style={{ width: 40, height: 40, borderRadius: 6, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(201,162,39,0.12)', border: '1px solid rgba(201,162,39,0.25)', fontSize: 13, fontWeight: 700, fontFamily: 'monospace', color: 'var(--retro-gold)' }}>{rowLabel(i)}</div>
                     <img src={track.album.images[track.album.images.length - 1]?.url} alt="" style={{ width: 48, height: 48, borderRadius: 6, flexShrink: 0, objectFit: 'cover', opacity: 0.85 }} />
