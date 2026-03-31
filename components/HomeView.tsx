@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import {
-  getRecentlyPlayed, getUserPlaylists, searchTracks, searchArtists, searchAll, clearToken, formatDuration,
+  getRecentlyPlayed, getUserPlaylists, searchAll, clearToken, formatDuration,
   previousTrack as prevTrackApi,
   type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
 } from '@/lib/spotify'
@@ -130,19 +130,18 @@ export default function HomeView() {
   const [recentTracks, setRecentTracks] = useState<SpotifyTrack[]>([])
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([])
   const [loading, setLoading] = useState(true)
-  const [query, setQuery] = useState('')
-  const [trackResults, setTrackResults] = useState<SpotifyTrack[]>([])
-  const [artistResults, setArtistResults] = useState<SpotifyArtist[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Inline search dropdown
   const [inlineQuery, setInlineQuery] = useState('')
   const [inlineDropdown, setInlineDropdown] = useState<{ type: 'track' | 'artist' | 'album'; item: SpotifyTrack | SpotifyArtist | SpotifyAlbum }[]>([])
+  const [searchError, setSearchError] = useState('')
+  const [searchLoading, setSearchLoading] = useState(false)
   const inlineDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const didLoad = useRef(false)
 
   useEffect(() => {
-    if (!accessToken) return
+    if (!accessToken || didLoad.current) return
+    didLoad.current = true
     Promise.allSettled([getRecentlyPlayed(accessToken), getUserPlaylists(accessToken)])
       .then(([r, p]) => {
         if (r.status === 'fulfilled') setRecentTracks(r.value)
@@ -151,24 +150,16 @@ export default function HomeView() {
       .finally(() => setLoading(false))
   }, [accessToken])
 
-  const doSearch = useCallback((q: string) => {
-    if (!q.trim() || !accessToken) { setTrackResults([]); setArtistResults([]); return }
-    setIsSearching(true)
-    Promise.all([searchTracks(q, accessToken), searchArtists(q, accessToken)])
-      .then(([tracks, artists]) => { setTrackResults(tracks); setArtistResults(artists) })
-      .catch(console.error)
-      .finally(() => setIsSearching(false))
-  }, [accessToken])
-
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => doSearch(query), 800)
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
-  }, [query, doSearch])
-
   useEffect(() => {
     if (inlineDebounce.current) clearTimeout(inlineDebounce.current)
-    if (!inlineQuery.trim() || !accessToken) { setInlineDropdown([]); return }
+    if (!inlineQuery.trim() || inlineQuery.length < 2 || !accessToken) {
+      setInlineDropdown([])
+      setSearchError('')
+      setSearchLoading(false)
+      return
+    }
+    setSearchLoading(true)
+    setSearchError('')
     inlineDebounce.current = setTimeout(async () => {
       try {
         const { tracks, artists, albums } = await searchAll(inlineQuery, accessToken)
@@ -177,7 +168,14 @@ export default function HomeView() {
         if (albums[0]) results.push({ type: 'album', item: albums[0] })
         if (tracks[0]) results.push({ type: 'track', item: tracks[0] })
         setInlineDropdown(results.slice(0, 3))
-      } catch { setInlineDropdown([]) }
+        setSearchError(results.length === 0 ? 'No results found' : '')
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Search failed'
+        setSearchError(msg.includes('429') ? 'Too many requests — wait a moment' : 'Search failed')
+        setInlineDropdown([])
+      } finally {
+        setSearchLoading(false)
+      }
     }, 800)
     return () => { if (inlineDebounce.current) clearTimeout(inlineDebounce.current) }
   }, [inlineQuery, accessToken])
@@ -251,49 +249,7 @@ export default function HomeView() {
         </div>
       </div>
 
-      {query ? (
-        <div className="flex-1 overflow-y-auto" style={{ padding: `12px ${pad} 20px` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <button onClick={() => setQuery('')} style={{ color: 'var(--retro-gold)', padding: 8 }}>
-              <svg width="22" height="22" viewBox="0 0 16 16" fill="none">
-                <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            <span className="font-typewriter" style={{ fontSize: 15, color: 'var(--retro-muted)' }}>Results for "{query}"</span>
-          </div>
-          {isSearching ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} style={{ display: 'flex', gap: 14, padding: 12, alignItems: 'center' }}>
-                  <div className="skeleton" style={{ width: 56, height: 56, borderRadius: 8, flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div className="skeleton" style={{ height: 16, width: 160, borderRadius: 4, marginBottom: 8 }} />
-                    <div className="skeleton" style={{ height: 12, width: 100, borderRadius: 4 }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <>
-              {artistResults.map(artist => (
-                <button key={artist.id} onClick={() => { setActiveArtist({ id: artist.id, name: artist.name, imageUrl: artist.images[0]?.url }); setActiveView('artist') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px', borderRadius: 10, width: '100%', textAlign: 'left', marginBottom: 4 }}
-                  className="hover:bg-white/5 transition-colors">
-                  <div style={{ width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.08)', flexShrink: 0 }}>
-                    {artist.images[0]?.url && <img src={artist.images[0].url} alt={artist.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                  </div>
-                  <div>
-                    <p style={{ fontSize: 17, fontWeight: 500, color: 'var(--retro-cream)' }}>{artist.name}</p>
-                    <p style={{ fontSize: 13, color: 'var(--retro-muted)' }}>Artist</p>
-                  </div>
-                </button>
-              ))}
-              {trackResults.map((track, i) => <TrackRow key={track.id + i} track={track} />)}
-            </>
-          )}
-        </div>
-      ) : (
-        <>
+      <>
           {/* Arch — sits above the scrollable body, doesn't scroll */}
           <div style={{ flexShrink: 0, marginTop: -20 }}>
             <ArchCrown albumArt={albumArt} isPlaying={isPlaying} vinylSize={880} topPad={100} />
@@ -392,17 +348,24 @@ export default function HomeView() {
 
               <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
                 <div style={{ position: 'relative', width: '100%', maxWidth: 500 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 52, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.28)', borderRadius: inlineDropdown.length > 0 ? '6px 6px 0 0' : 6 }}>
-                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ color: 'var(--retro-muted)', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 52, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.28)', borderRadius: (inlineDropdown.length > 0 || searchError || searchLoading) ? '6px 6px 0 0' : 6 }}>
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ color: searchLoading ? 'var(--retro-gold)' : 'var(--retro-muted)', flexShrink: 0 }}>
                       <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" /><path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
                     <input type="text" value={inlineQuery} onChange={e => setInlineQuery(e.target.value)} placeholder="Search the catalog…"
                       className="flex-1 bg-transparent outline-none font-typewriter"
                       style={{ fontSize: 16, color: 'var(--retro-cream)', caretColor: 'var(--retro-gold)' }} />
-                    {inlineQuery && <button onClick={() => { setInlineQuery(''); setInlineDropdown([]) }} style={{ color: 'var(--retro-muted)', padding: 4 }}>
+                    {inlineQuery && <button onClick={() => { setInlineQuery(''); setInlineDropdown([]); setSearchError('') }} style={{ color: 'var(--retro-muted)', padding: 4 }}>
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
                     </button>}
                   </div>
+                  {(searchLoading || searchError) && inlineDropdown.length === 0 && (
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'rgba(14,8,0,0.98)', border: '1px solid rgba(201,162,39,0.28)', borderTop: 'none', borderRadius: '0 0 6px 6px', zIndex: 50, padding: '12px 16px' }}>
+                      <p className="font-typewriter" style={{ fontSize: 13, color: searchError ? '#ff6b6b' : 'var(--retro-muted)' }}>
+                        {searchLoading ? 'Searching…' : searchError}
+                      </p>
+                    </div>
+                  )}
                   {inlineDropdown.length > 0 && (
                     <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'rgba(14,8,0,0.98)', border: '1px solid rgba(201,162,39,0.28)', borderTop: 'none', borderRadius: '0 0 6px 6px', zIndex: 50, overflow: 'hidden' }}>
                       {inlineDropdown.map((entry, i) => {
@@ -516,8 +479,7 @@ export default function HomeView() {
 
             </div>{/* end scrollable */}
           </div>{/* end body */}
-        </>
-      )}
+      </>
     </div>
   )
 }
