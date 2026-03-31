@@ -438,14 +438,27 @@ export default function HomeView() {
                 <div style={{ display: 'flex', gap: 12 }}><Knob label="bass" color="#ff2d78" /><Knob label="treb" color="#a855f7" /></div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 0 8px' }}>
                 <VolumeControl volume={volume} onChange={handleVolume} />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
-                <div style={{ position: 'relative', width: '100%', maxWidth: 500 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 52, background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(201,162,39,0.28)', borderRadius: (inlineDropdown.length > 0 || searchError || searchLoading) ? '6px 6px 0 0' : 6 }}>
-                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ color: searchLoading ? 'var(--retro-gold)' : 'var(--retro-muted)', flexShrink: 0 }}>
+              {/* Decorative speaker grilles inside now-playing */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, paddingBottom: 12 }}>
+                <SpeakerGrille rows={3} cols={10} />
+                <div style={{ padding: '4px 14px', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 3, background: 'rgba(201,162,39,0.04)' }}>
+                  <span className="font-typewriter" style={{ fontSize: 10, color: 'rgba(201,162,39,0.45)', letterSpacing: '0.22em', textTransform: 'uppercase' }}>stereo hi-fi</span>
+                </div>
+                <SpeakerGrille rows={3} cols={10} />
+              </div>
+            </div>
+
+            {/* Search bar — fixed, does not scroll */}
+            <div style={{ flexShrink: 0 }}>
+              <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
+              <div style={{ padding: `10px ${pad}`, background: 'rgba(8,4,0,0.97)', position: 'relative' }}>
+                <div style={{ position: 'relative' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', height: 56, background: 'rgba(201,162,39,0.07)', border: '2px solid rgba(201,162,39,0.55)', borderRadius: (inlineDropdown.length > 0 || searchError || searchLoading) ? '8px 8px 0 0' : 8, boxShadow: '0 0 18px rgba(201,162,39,0.12), inset 0 0 10px rgba(201,162,39,0.03)' }}>
+                    <svg width="20" height="20" viewBox="0 0 16 16" fill="none" style={{ color: searchLoading ? 'var(--retro-gold)' : 'rgba(201,162,39,0.55)', flexShrink: 0 }}>
                       <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" /><path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
                     <input
@@ -466,19 +479,19 @@ export default function HomeView() {
                       className="flex-1 bg-transparent outline-none font-typewriter"
                       style={{ fontSize: 16, color: 'var(--retro-cream)', caretColor: 'var(--retro-gold)' }}
                     />
-                    {inlineQuery && <button onClick={() => { setInlineQuery(''); setInlineDropdown([]); setSearchError('') }} style={{ color: 'var(--retro-muted)', padding: 4 }}>
+                    {inlineQuery && <button onClick={() => { setInlineQuery(''); setInlineDropdown([]); setSearchError('') }} style={{ color: 'rgba(201,162,39,0.5)', padding: 4 }}>
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
                     </button>}
                   </div>
                   {(searchLoading || searchError) && inlineDropdown.length === 0 && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'rgba(14,8,0,0.98)', border: '1px solid rgba(201,162,39,0.28)', borderTop: 'none', borderRadius: '0 0 6px 6px', zIndex: 50, padding: '12px 16px' }}>
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'rgba(14,8,0,0.98)', border: '2px solid rgba(201,162,39,0.55)', borderTop: 'none', borderRadius: '0 0 8px 8px', zIndex: 50, padding: '12px 16px' }}>
                       <p className="font-typewriter" style={{ fontSize: 13, color: searchError ? '#ff6b6b' : 'var(--retro-muted)' }}>
                         {searchLoading ? 'Searching…' : searchError}
                       </p>
                     </div>
                   )}
                   {inlineDropdown.length > 0 && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'rgba(14,8,0,0.98)', border: '1px solid rgba(201,162,39,0.28)', borderTop: 'none', borderRadius: '0 0 6px 6px', zIndex: 50, overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'rgba(14,8,0,0.98)', border: '2px solid rgba(201,162,39,0.55)', borderTop: 'none', borderRadius: '0 0 8px 8px', zIndex: 50, overflow: 'hidden' }}>
                       {inlineDropdown.map((entry, i) => {
                         const isTrack = entry.type === 'track'
                         const isArtist = entry.type === 'artist'
@@ -504,18 +517,6 @@ export default function HomeView() {
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
-
-            {/* Speaker grille — fixed, does not scroll */}
-            <div style={{ flexShrink: 0 }}>
-              <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: `10px ${pad}`, background: 'rgba(8,4,0,0.95)' }}>
-                <SpeakerGrille rows={3} cols={12} />
-                <div style={{ padding: '6px 16px', border: '1px solid rgba(201,162,39,0.28)', borderRadius: 3, background: 'rgba(201,162,39,0.04)', whiteSpace: 'nowrap' }}>
-                  <span className="font-typewriter" style={{ fontSize: 11, color: 'rgba(201,162,39,0.45)', letterSpacing: '0.22em', textTransform: 'uppercase' }}>stereo hi-fi</span>
-                </div>
-                <SpeakerGrille rows={3} cols={12} />
               </div>
               <div style={{ margin: `0 ${pad}` }}><ChromeStrip height={8} opacity={0.5} /></div>
             </div>
@@ -544,67 +545,83 @@ export default function HomeView() {
           )}
 
           {/* Decade Playlists */}
-          <div style={{ padding: `8px ${pad} 14px`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
-            {(['60s', '70s', '80s', '90s', '00s'] as const).map((decade) => {
-              const isLoading = loadingDecade === decade
-              return (
-                <button
-                  key={decade}
-                  onClick={() => handleDecadePlay(decade)}
-                  disabled={!!loadingDecade}
-                  className="active:scale-95"
-                  style={{
-                    opacity: loadingDecade && !isLoading ? 0.4 : 1,
-                    background: 'var(--retro-panel)',
-                    borderRadius: 8,
-                    padding: '12px 4px 10px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
-                    transition: 'all 0.2s',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    border: '1px solid rgba(201,162,39,0.18)',
-                    boxShadow: isLoading
-                      ? '0 0 16px rgba(201,162,39,0.25), inset 0 0 12px rgba(201,162,39,0.05)'
-                      : 'inset 0 0 8px rgba(0,0,0,0.4)',
-                  }}
-                >
-                  {/* Chrome gold top stripe — matches dividers */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: chromeH, opacity: isLoading ? 1 : 0.7 }} />
+          {(() => {
+            const DECADE_COLORS: Record<string, { neon: string; neonDim: string; label: string }> = {
+              '60s': { neon: '#f5a623', neonDim: 'rgba(245,166,35,0.18)', label: 'Sixties' },
+              '70s': { neon: '#ff7b2e', neonDim: 'rgba(255,123,46,0.18)', label: 'Seventies' },
+              '80s': { neon: '#ff2d78', neonDim: 'rgba(255,45,120,0.18)', label: 'Eighties' },
+              '90s': { neon: '#00d4ff', neonDim: 'rgba(0,212,255,0.18)', label: 'Nineties' },
+              '00s': { neon: '#b06cf5', neonDim: 'rgba(176,108,245,0.18)', label: 'Two-thousands' },
+            }
+            return (
+              <div style={{ padding: `10px ${pad} 16px`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+                {(['60s', '70s', '80s', '90s', '00s'] as const).map((decade) => {
+                  const isLoading = loadingDecade === decade
+                  const { neon, neonDim } = DECADE_COLORS[decade]
+                  return (
+                    <button
+                      key={decade}
+                      onClick={() => handleDecadePlay(decade)}
+                      disabled={!!loadingDecade}
+                      className="active:scale-[0.97]"
+                      style={{
+                        opacity: loadingDecade && !isLoading ? 0.35 : 1,
+                        background: `linear-gradient(180deg, rgba(20,10,2,0.98) 0%, rgba(10,5,0,1) 100%)`,
+                        borderRadius: 10,
+                        padding: '18px 6px 14px',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                        transition: 'all 0.2s',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        border: `1px solid ${isLoading ? neon : 'rgba(201,162,39,0.22)'}`,
+                        boxShadow: isLoading
+                          ? `0 0 20px ${neon}44, inset 0 0 16px ${neonDim}`
+                          : 'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 12px rgba(0,0,0,0.5)',
+                      }}
+                    >
+                      {/* Chrome top stripe */}
+                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: chromeH, opacity: 0.8 }} />
+                      {/* Neon colour wash at bottom */}
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, background: `linear-gradient(0deg, ${neonDim} 0%, transparent 100%)`, pointerEvents: 'none' }} />
 
-                  {isLoading ? (
-                    <>
-                      <div className="skeleton" style={{ width: 28, height: 28, borderRadius: '50%', marginTop: 4 }} />
-                      <span className="font-typewriter" style={{ fontSize: 9, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>LOADING</span>
-                    </>
-                  ) : (
-                    <>
-                      {/* Mini vinyl */}
-                      <svg width="38" height="38" viewBox="0 0 56 56" style={{ marginTop: 4 }}>
-                        <circle cx="28" cy="28" r="27" fill="#0e0800" />
-                        {/* Chrome stroke ring — matches gold dividers */}
-                        <circle cx="28" cy="28" r="27" fill="none" stroke="url(#cg)" strokeWidth="2" />
-                        <defs>
-                          <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stopColor="#e8d5b0" />
-                            <stop offset="30%" stopColor="#f5e8c0" />
-                            <stop offset="70%" stopColor="#b8902a" />
-                            <stop offset="100%" stopColor="#e0c878" />
-                          </linearGradient>
-                        </defs>
-                        {[0.76, 0.62, 0.49, 0.36].map((r, i) => (
-                          <circle key={i} cx="28" cy="28" r={28 * r} fill="none" stroke="rgba(201,162,39,0.14)" strokeWidth="1" />
-                        ))}
-                        <circle cx="28" cy="28" r="9" fill="rgba(201,162,39,0.1)" stroke="rgba(201,162,39,0.45)" strokeWidth="1" />
-                        <circle cx="28" cy="28" r="3" fill="#c9a227" />
-                      </svg>
-                      <span className="font-retro" style={{ fontSize: 18, fontWeight: 900, color: 'var(--retro-gold)', letterSpacing: '0.02em', textShadow: '0 0 10px rgba(201,162,39,0.45)', lineHeight: 1 }}>&apos;{decade}</span>
-                      <span className="font-typewriter" style={{ fontSize: 8, color: 'var(--retro-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Top 100</span>
-                    </>
-                  )}
-                </button>
-              )
-            })}
-          </div>
+                      {isLoading ? (
+                        <>
+                          <div className="skeleton" style={{ width: 52, height: 52, borderRadius: '50%', marginTop: 6 }} />
+                          <span className="font-typewriter" style={{ fontSize: 9, color: neon, letterSpacing: '0.15em', opacity: 0.8 }}>LOADING…</span>
+                        </>
+                      ) : (
+                        <>
+                          {/* Vinyl record */}
+                          <svg width="58" height="58" viewBox="0 0 64 64" style={{ marginTop: 4, filter: `drop-shadow(0 0 6px ${neon}55)` }}>
+                            <defs>
+                              <linearGradient id={`cg-${decade}`} x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stopColor="#e8d5b0" />
+                                <stop offset="40%" stopColor="#f5e8c0" />
+                                <stop offset="100%" stopColor="#b8902a" />
+                              </linearGradient>
+                            </defs>
+                            {/* Outer chrome ring */}
+                            <circle cx="32" cy="32" r="31" fill="#080400" stroke={`url(#cg-${decade})`} strokeWidth="2.5" />
+                            {/* Groove rings */}
+                            {[0.82, 0.70, 0.58, 0.46].map((r, i) => (
+                              <circle key={i} cx="32" cy="32" r={31 * r} fill="none" stroke="rgba(201,162,39,0.12)" strokeWidth="1" />
+                            ))}
+                            {/* Neon label ring */}
+                            <circle cx="32" cy="32" r="12" fill="rgba(0,0,0,0.7)" stroke={neon} strokeWidth="1.5" style={{ filter: `drop-shadow(0 0 3px ${neon})` }} />
+                            {/* Center hole */}
+                            <circle cx="32" cy="32" r="3.5" fill={neon} />
+                          </svg>
+
+                          <span className="font-retro" style={{ fontSize: 22, fontWeight: 900, color: neon, letterSpacing: '0.01em', textShadow: `0 0 14px ${neon}88`, lineHeight: 1 }}>&apos;{decade}</span>
+                          <span className="font-typewriter" style={{ fontSize: 8, color: 'rgba(201,162,39,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Shuffle Play</span>
+                        </>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            )
+          })()}
 
 
           {playHistory.length > 0 && (
