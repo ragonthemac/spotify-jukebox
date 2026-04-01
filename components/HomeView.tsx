@@ -274,7 +274,7 @@ export default function HomeView() {
       } finally {
         setSearchLoading(false)
       }
-    }, 800)
+    }, 1600)
     return () => { if (inlineDebounce.current) clearTimeout(inlineDebounce.current) }
   }, [inlineQuery, accessToken])
 
@@ -457,17 +457,9 @@ export default function HomeView() {
                 <WaveGrille isPlaying={isPlaying} bars={16} />
               </div>
 
-              {/* Row 2: vol+tone knobs | volume dots | bass+treb knobs */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 10 }}>
-                <div style={{ display: 'flex', gap: 14 }}>
-                  <Knob label="vol" />
-                  <Knob label="tone" color="#00d4ff" />
-                </div>
+              {/* Row 2: volume dots only */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingBottom: 10 }}>
                 <VolumeControl volume={volume} onChange={handleVolume} />
-                <div style={{ display: 'flex', gap: 14 }}>
-                  <Knob label="bass" color="#ff2d78" />
-                  <Knob label="treb" color="#a855f7" />
-                </div>
               </div>
             </div>
 
@@ -550,7 +542,7 @@ export default function HomeView() {
             <div style={{ padding: `12px ${pad} 16px` }}>
               <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 10, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Up Next</p>
               <div style={{ padding: 2, borderRadius: 8, background: chromeH, boxShadow: '0 0 8px rgba(201,162,39,0.15)' }}>
-              <div style={{ borderRadius: 6, overflow: 'hidden' }}>
+              <div style={{ borderRadius: 6, overflow: 'hidden', background: 'rgba(10,5,0,0.95)' }}>
                 {queue.slice(0, 1).map((track, i) => (
                   <div key={track.queueId} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderBottom: i < queue.length - 1 ? '1px solid rgba(201,162,39,0.1)' : 'none', background: i % 2 === 0 ? 'rgba(201,162,39,0.03)' : 'transparent' }}>
                     <div style={{ width: 40, height: 40, borderRadius: 6, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(201,162,39,0.12)', border: '1px solid rgba(201,162,39,0.25)', fontSize: 13, fontWeight: 700, fontFamily: 'monospace', color: 'var(--retro-gold)' }}>{rowLabel(i)}</div>
