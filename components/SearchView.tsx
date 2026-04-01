@@ -87,7 +87,7 @@ export default function SearchView() {
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => doSearch(searchQuery), 400)
+    debounceRef.current = setTimeout(() => doSearch(searchQuery), 600)
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [searchQuery, doSearch])
 
