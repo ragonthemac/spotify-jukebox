@@ -59,22 +59,8 @@ export default function SpotifyPlayer() {
   const prevPausedRef = useRef<boolean>(true)
   const hasImportedQueue = useRef(false)
 
-  // Fetch the Spotify queue immediately when the token is available — before
-  // the SDK loads and claims the active device. This captures whatever queue
-  // the user had on their phone/desktop Spotify.
-  useEffect(() => {
-    if (!accessToken || hasImportedQueue.current) return
-    import('@/lib/spotify').then(({ getSpotifyCurrentQueue }) => {
-      const { queue, importQueue } = useJukeboxStore.getState()
-      if (queue.length > 0) return // already have a queue, don't overwrite
-      getSpotifyCurrentQueue(accessToken).then((tracks) => {
-        if (tracks.length > 0) {
-          importQueue(tracks)
-          hasImportedQueue.current = true
-        }
-      }).catch(() => {})
-    })
-  }, [accessToken])
+  // Queue import is intentionally deferred to the 'ready' event handler below
+  // so it doesn't compete with the SDK's own internal API calls on startup.
 
   useEffect(() => {
     if (!accessToken) return
@@ -97,6 +83,21 @@ export default function SpotifyPlayer() {
       player.addListener('ready', (state) => {
         const { device_id } = state as { device_id: string }
         setDeviceId(device_id)
+        // Wait 2s after SDK ready before fetching queue — lets the SDK finish
+        // its internal API calls so we don't contribute to rate limiting.
+        if (!hasImportedQueue.current) {
+          setTimeout(() => {
+            if (hasImportedQueue.current) return
+            const { queue, importQueue, accessToken: tok } = useJukeboxStore.getState()
+            if (queue.length > 0) { hasImportedQueue.current = true; return }
+            if (!tok) return
+            import('@/lib/spotify').then(({ getSpotifyCurrentQueue }) => {
+              getSpotifyCurrentQueue(tok).then((tracks) => {
+                if (tracks.length > 0) { importQueue(tracks); hasImportedQueue.current = true }
+              }).catch(() => {})
+            })
+          }, 2000)
+        }
       })
 
       player.addListener('not_ready', () => {
