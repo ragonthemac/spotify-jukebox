@@ -229,25 +229,43 @@ export async function getDecadeTracks(decade: string, token: string): Promise<Sp
   return [...p1.tracks.items, ...p2.tracks.items].filter(Boolean)
 }
 
+const DECADE_CACHE_TTL = 7 * 24 * 60 * 60 * 1000 // 7 days
+
 export async function searchDecadeSongs(
   songs: { artist: string; title: string }[],
-  token: string
+  token: string,
+  cacheKey?: string
 ): Promise<SpotifyTrack[]> {
-  const results: SpotifyTrack[] = []
-  const BATCH = 3
-  for (let i = 0; i < songs.length; i += BATCH) {
-    const batch = songs.slice(i, i + BATCH)
-    const fetched = await Promise.all(
-      batch.map(({ artist, title }) =>
-        spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
-          `/search?q=track:${encodeURIComponent(title)}+artist:${encodeURIComponent(artist)}&type=track&limit=1&market=from_token`,
-          token
-        ).then((d) => d.tracks.items[0] ?? null).catch(() => null)
-      )
-    )
-    fetched.forEach((t) => { if (t) results.push(t) })
-    if (i + BATCH < songs.length) await new Promise(r => setTimeout(r, 200))
+  // Return cached results if available and fresh
+  if (cacheKey && typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(`jukebox_decade_v1_${cacheKey}`)
+      if (raw) {
+        const { ts, tracks } = JSON.parse(raw) as { ts: number; tracks: SpotifyTrack[] }
+        if (Date.now() - ts < DECADE_CACHE_TTL && tracks.length > 0) return tracks
+      }
+    } catch {}
   }
+
+  const results: SpotifyTrack[] = []
+  for (const { artist, title } of songs) {
+    try {
+      const data = await spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
+        `/search?q=track:${encodeURIComponent(title)}+artist:${encodeURIComponent(artist)}&type=track&limit=1&market=from_token`,
+        token
+      )
+      if (data.tracks.items[0]) results.push(data.tracks.items[0])
+    } catch {}
+    await new Promise(r => setTimeout(r, 120))
+  }
+
+  // Save to localStorage for future sessions
+  if (cacheKey && typeof window !== 'undefined' && results.length > 0) {
+    try {
+      localStorage.setItem(`jukebox_decade_v1_${cacheKey}`, JSON.stringify({ ts: Date.now(), tracks: results }))
+    } catch {}
+  }
+
   return results
 }
 

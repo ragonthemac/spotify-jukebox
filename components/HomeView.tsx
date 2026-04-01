@@ -218,7 +218,7 @@ export default function HomeView() {
     setLoadingDecade(decade)
     try {
       const songs = DECADE_SONGS[decade] ?? []
-      const tracks = await searchDecadeSongs(songs, accessToken)
+      const tracks = await searchDecadeSongs(songs, accessToken, decade)
       if (!tracks.length) return
       // Fisher-Yates shuffle
       const shuffled = [...tracks]
