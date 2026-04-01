@@ -3,9 +3,9 @@
 import { useEffect, useState, useRef } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 import {
-  getUserPlaylists, searchAll, clearToken, formatDuration, searchDecadeSongs,
+  searchAll, clearToken, formatDuration, searchDecadeSongs,
   previousTrack as prevTrackApi, findOrCreateJukeboxPlaylist, addTrackToJukeboxPlaylist,
-  type SpotifyPlaylist, type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
+  type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
 } from '@/lib/spotify'
 import { DECADE_SONGS } from '@/lib/decade-tracks'
 import { globalPlayer } from './SpotifyPlayer'
@@ -178,7 +178,6 @@ export default function HomeView() {
     playHistory, addToHistory, setKeyboardVisible, setOnKeyPress,
   } = useJukeboxStore()
 
-  const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingDecade, setLoadingDecade] = useState<string | null>(null)
 
@@ -195,7 +194,7 @@ export default function HomeView() {
   useEffect(() => {
     if (!accessToken || didLoad.current) return
     didLoad.current = true
-    getUserPlaylists(accessToken).then(setPlaylists).catch(() => {}).finally(() => setLoading(false))
+    setLoading(false) // No playlist fetch, just mark not loading
   }, [accessToken])
 
   // Track play history locally + auto-add to yearly playlist
