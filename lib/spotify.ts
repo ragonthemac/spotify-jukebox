@@ -234,8 +234,7 @@ export async function searchDecadeSongs(
   token: string
 ): Promise<SpotifyTrack[]> {
   const results: SpotifyTrack[] = []
-  // Search in batches of 10 to avoid hammering the API
-  const BATCH = 10
+  const BATCH = 3
   for (let i = 0; i < songs.length; i += BATCH) {
     const batch = songs.slice(i, i + BATCH)
     const fetched = await Promise.all(
@@ -247,6 +246,7 @@ export async function searchDecadeSongs(
       )
     )
     fetched.forEach((t) => { if (t) results.push(t) })
+    if (i + BATCH < songs.length) await new Promise(r => setTimeout(r, 200))
   }
   return results
 }
