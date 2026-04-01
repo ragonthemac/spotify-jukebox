@@ -58,7 +58,7 @@ export default function SearchView() {
 
   const doSearch = useCallback(
     (q: string) => {
-      if (!q.trim() || !accessToken) {
+      if (!q.trim() || q.trim().length < 2 || !accessToken) {
         setSearchResults([])
         setArtistResults([])
         setAlbumResults([])
@@ -77,7 +77,8 @@ export default function SearchView() {
           setRecentSearches(getRecentSearches())
         })
         .catch((err) => {
-          setSearchError(String(err?.message ?? err))
+          const msg = String(err?.message ?? err)
+          setSearchError(msg.includes('429') ? 'Too many requests — wait a bit' : msg)
         })
         .finally(() => setIsSearching(false))
     },
@@ -86,14 +87,9 @@ export default function SearchView() {
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => doSearch(searchQuery), 400)
+    debounceRef.current = setTimeout(() => doSearch(searchQuery), 1200)
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [searchQuery, doSearch])
-
-  useEffect(() => {
-    if (searchQuery) doSearch(searchQuery)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const hasResults = artistResults.length > 0 || searchResults.length > 0 || albumResults.length > 0 || playlistResults.length > 0
 
