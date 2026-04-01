@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { useJukeboxStore } from '@/lib/store'
-import { searchAll, type SpotifyArtist, type SpotifyTrack, type SpotifyAlbum, type SpotifyPlaylist } from '@/lib/spotify'
+import { searchAll, type SpotifyArtist, type SpotifyTrack, type SpotifyAlbum } from '@/lib/spotify'
 import TrackRow from './TrackRow'
 
 const RECENT_SEARCHES_KEY = 'jukebox_recent_searches'
@@ -44,7 +44,6 @@ export default function SearchView() {
   const [searchError, setSearchError] = useState<string | null>(null)
   const [artistResults, setArtistResults] = useState<SpotifyArtist[]>([])
   const [albumResults, setAlbumResults] = useState<SpotifyAlbum[]>([])
-  const [playlistResults, setPlaylistResults] = useState<SpotifyPlaylist[]>([])
   const [tab, setTab] = useState<'recent' | 'played'>('recent')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
 
@@ -62,17 +61,15 @@ export default function SearchView() {
         setSearchResults([])
         setArtistResults([])
         setAlbumResults([])
-        setPlaylistResults([])
         return
       }
       setIsSearching(true)
       setSearchError(null)
       searchAll(q, accessToken)
-        .then(({ tracks, artists, albums, playlists }) => {
+        .then(({ tracks, artists, albums }) => {
           setSearchResults(tracks)
           setArtistResults(artists)
           setAlbumResults(albums)
-          setPlaylistResults(playlists)
           saveRecentSearch(q.trim())
           setRecentSearches(getRecentSearches())
         })
@@ -91,7 +88,7 @@ export default function SearchView() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [searchQuery, doSearch])
 
-  const hasResults = artistResults.length > 0 || searchResults.length > 0 || albumResults.length > 0 || playlistResults.length > 0
+  const hasResults = searchResults.length > 0 || artistResults.length > 0 || albumResults.length > 0
 
   return (
     <div className="h-full flex flex-col">
@@ -175,6 +172,13 @@ export default function SearchView() {
         {/* Search results */}
         {!isSearching && hasResults && (
           <div className="flex flex-col gap-1 mt-1">
+            {searchResults.length > 0 && (
+              <div className="mb-4">
+                <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Songs</p>
+                {searchResults.map((track, idx) => <TrackRow key={track.id + idx} track={track} />)}
+              </div>
+            )}
+
             {artistResults.length > 0 && (
               <div className="mb-4">
                 <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Artists</p>
@@ -191,32 +195,6 @@ export default function SearchView() {
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-base font-medium truncate">{artist.name}</p>
                         <p className="text-white/40 text-sm mt-0.5">Artist</p>
-                      </div>
-                      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" className="text-white/20 flex-shrink-0">
-                        <path d="M4 3L9 7L4 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {playlistResults.length > 0 && (
-              <div className="mb-4">
-                <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Playlists</p>
-                <div className="flex flex-col gap-1">
-                  {playlistResults.map((pl) => (
-                    <button
-                      key={pl.id}
-                      onClick={() => { setActivePlaylist(pl); setActiveView('playlist') }}
-                      className="flex items-center gap-3 p-4 rounded-xl hover:bg-white/5 transition-all text-left w-full"
-                    >
-                      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-white/10">
-                        {pl.images?.[0]?.url && <img src={pl.images[0].url} alt={pl.name} className="w-full h-full object-cover" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-base font-medium truncate">{pl.name}</p>
-                        <p className="text-white/40 text-sm mt-0.5">{pl.tracks?.total} songs · {pl.owner?.display_name}</p>
                       </div>
                       <svg width="16" height="16" viewBox="0 0 14 14" fill="none" className="text-white/20 flex-shrink-0">
                         <path d="M4 3L9 7L4 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -250,13 +228,6 @@ export default function SearchView() {
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {searchResults.length > 0 && (
-              <div>
-                <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Songs</p>
-                {searchResults.map((track, idx) => <TrackRow key={track.id + idx} track={track} />)}
               </div>
             )}
           </div>
