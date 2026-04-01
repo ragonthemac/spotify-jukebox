@@ -496,7 +496,7 @@ export default function HomeView() {
                     </button>}
                   </div>
                   {(searchLoading || searchError) && inlineDropdown.length === 0 && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, padding: '0 2px 2px', background: chromeH, borderRadius: '0 0 10px 10px' }}>
+                    <div style={{ position: 'absolute', top: '100%', left: -2, right: -2, zIndex: 50, padding: '0 2px 2px', background: chromeH, borderRadius: '0 0 10px 10px' }}>
                       <div style={{ background: 'rgba(10,5,0,0.99)', borderRadius: '0 0 8px 8px', padding: '12px 16px' }}>
                         <p className="font-typewriter" style={{ fontSize: 13, color: searchError ? '#ff6b6b' : 'var(--retro-muted)' }}>
                           {searchLoading ? 'Searching…' : searchError}
@@ -505,7 +505,7 @@ export default function HomeView() {
                     </div>
                   )}
                   {inlineDropdown.length > 0 && (
-                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, padding: '0 2px 2px', background: chromeH, borderRadius: '0 0 10px 10px' }}>
+                    <div style={{ position: 'absolute', top: '100%', left: -2, right: -2, zIndex: 50, padding: '0 2px 2px', background: chromeH, borderRadius: '0 0 10px 10px' }}>
                     <div style={{ background: 'rgba(10,5,0,0.99)', borderRadius: '0 0 8px 8px', overflow: 'hidden' }}>
                       {inlineDropdown.map((entry, i) => {
                         const isTrack = entry.type === 'track'
