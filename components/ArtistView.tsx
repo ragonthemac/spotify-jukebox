@@ -84,7 +84,7 @@ export default function ArtistView() {
     setLoading(true)
     setError(null)
     Promise.all([
-      getArtistTopTracks(activeArtist.name, accessToken),
+      getArtistTopTracks(activeArtist.id, activeArtist.name, accessToken),
       getArtistAlbums(activeArtist.name, accessToken),
     ])
       .then(([t, a]) => {
@@ -154,9 +154,12 @@ export default function ArtistView() {
             {/* Popular songs */}
             {tracks.length > 0 && (
               <div className="mb-6">
-                <p className="text-white/40 text-xs uppercase tracking-widest mb-3">Popular</p>
-                <div className="flex flex-col gap-1">
-                  {tracks.slice(0, 10).map((track) => (
+                <div className="flex items-baseline justify-between mb-3">
+                  <p className="text-white/40 text-xs uppercase tracking-widest">Popular</p>
+                  <p className="text-white/25 text-xs">{tracks.length} songs</p>
+                </div>
+                <div className="overflow-y-auto flex flex-col gap-1" style={{ maxHeight: 420 }}>
+                  {tracks.map((track) => (
                     <TrackRow key={track.id} track={track} />
                   ))}
                 </div>
