@@ -269,8 +269,32 @@ export default function HomeView() {
         setSearchError(pool.length === 0 ? 'No results found' : '')
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Search failed'
-        setSearchError(msg.includes('429') ? 'Too many requests — wait a moment' : 'Search failed')
+        const is429 = msg.includes('429')
+        setSearchError(is429 ? 'Rate limited — retrying…' : 'Search failed')
         setInlineDropdown([])
+        if (is429) {
+          // Auto-retry once after Spotify's typical rate-limit window
+          inlineDebounce.current = setTimeout(async () => {
+            try {
+              setSearchError('')
+              setSearchLoading(true)
+              const { tracks, artists, albums } = await searchAll(inlineQuery, accessToken)
+              const pool: typeof inlineDropdown = []
+              for (let i = 0; i < 3; i++) {
+                if (tracks[i])  pool.push({ type: 'track',  item: tracks[i] })
+                if (artists[i]) pool.push({ type: 'artist', item: artists[i] })
+                if (albums[i])  pool.push({ type: 'album',  item: albums[i] })
+              }
+              setInlineDropdown(pool.slice(0, 3))
+              setSearchError(pool.length === 0 ? 'No results found' : '')
+            } catch {
+              setSearchError('Too many requests — wait a moment')
+              setInlineDropdown([])
+            } finally {
+              setSearchLoading(false)
+            }
+          }, 5000)
+        }
       } finally {
         setSearchLoading(false)
       }

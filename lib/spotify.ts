@@ -151,8 +151,10 @@ async function spotifyFetch<T>(path: string, token: string, retries = 3, options
   if (res.status === 429 && retries > 0) {
     const retryAfter = res.headers.get('Retry-After')
     const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : delayMs
+    // If Spotify wants us to wait more than 4s, fail fast so the caller can surface the error immediately
+    if (waitMs > 4000) throw new Error('Spotify API error: 429 — too many requests')
     await new Promise(r => setTimeout(r, waitMs))
-    return spotifyFetch(path, token, retries - 1, options, Math.min(delayMs * 2, 16000))
+    return spotifyFetch(path, token, retries - 1, options, Math.min(delayMs * 2, 8000))
   }
 
   if (!res.ok) {
