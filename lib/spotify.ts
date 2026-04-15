@@ -351,7 +351,7 @@ export async function searchArtists(query: string, token: string): Promise<Spoti
 
 export async function getArtistTopTracks(artistId: string, token: string): Promise<SpotifyTrack[]> {
   const data = await spotifyFetch<{ tracks: SpotifyTrack[] }>(
-    `/artists/${artistId}/top-tracks?market=from_token`,
+    `/artists/${artistId}/top-tracks`,
     token
   )
   return data.tracks
@@ -359,7 +359,7 @@ export async function getArtistTopTracks(artistId: string, token: string): Promi
 
 export async function getArtistAlbums(artistId: string, token: string): Promise<SpotifyAlbum[]> {
   const data = await spotifyFetch<{ items: SpotifyAlbum[] }>(
-    `/artists/${artistId}/albums?include_groups=album,single&limit=20`,
+    `/artists/${artistId}/albums?include_groups=album%2Csingle&limit=20`,
     token
   )
   return data.items
@@ -435,9 +435,8 @@ export async function findOrCreateJukeboxPlaylist(token: string): Promise<string
   if (existing) return existing.id
 
   // Create it
-  const profile = await getUserProfile(token)
   const created = await spotifyFetch<{ id: string }>(
-    `/users/${profile.id}/playlists`,
+    `/me/playlists`,
     token,
     2,
     {
