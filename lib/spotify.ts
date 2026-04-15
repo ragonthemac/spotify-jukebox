@@ -313,16 +313,20 @@ export async function searchArtists(query: string, token: string): Promise<Spoti
 }
 
 export async function getArtistTopTracks(artistId: string, token: string): Promise<SpotifyTrack[]> {
-  const data = await spotifyFetch<{ tracks: SpotifyTrack[] }>(
-    `/artists/${artistId}/top-tracks`,
-    token
-  )
-  return data.tracks
+  try {
+    const data = await spotifyFetch<{ tracks: SpotifyTrack[] }>(
+      `/artists/${artistId}/top-tracks`,
+      token
+    )
+    return data.tracks
+  } catch {
+    return []
+  }
 }
 
 export async function getArtistAlbums(artistId: string, token: string): Promise<SpotifyAlbum[]> {
   const data = await spotifyFetch<{ items: SpotifyAlbum[] }>(
-    `/artists/${artistId}/albums?include_groups=album%2Csingle&limit=20`,
+    `/artists/${artistId}/albums?limit=20`,
     token
   )
   return data.items
