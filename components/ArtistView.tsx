@@ -84,8 +84,8 @@ export default function ArtistView() {
     setLoading(true)
     setError(null)
     Promise.all([
-      getArtistTopTracks(activeArtist.id, activeArtist.name, accessToken),
-      getArtistAlbums(activeArtist.name, accessToken),
+      getArtistTopTracks(activeArtist.id, accessToken),
+      getArtistAlbums(activeArtist.id, accessToken),
     ])
       .then(([t, a]) => {
         setTracks(t)

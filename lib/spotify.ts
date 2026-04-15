@@ -349,24 +349,20 @@ export async function searchArtists(query: string, token: string): Promise<Spoti
   return data.artists.items
 }
 
-export async function getArtistTopTracks(artistId: string, artistName: string, token: string): Promise<SpotifyTrack[]> {
-  const [official, search] = await Promise.all([
-    spotifyFetch<{ tracks: SpotifyTrack[] }>(`/artists/${artistId}/top-tracks`, token),
-    spotifyFetch<{ tracks: { items: SpotifyTrack[] } }>(
-      `/search?q=artist:${encodeURIComponent(artistName)}&type=track&limit=20`, token
-    ),
-  ])
-  const seen = new Set(official.tracks.map((t) => t.id))
-  const extras = search.tracks.items.filter((t) => !seen.has(t.id))
-  return [...official.tracks, ...extras].slice(0, 15)
-}
-
-export async function getArtistAlbums(artistName: string, token: string): Promise<SpotifyAlbum[]> {
-  const data = await spotifyFetch<{ albums: { items: SpotifyAlbum[] } }>(
-    `/search?q=artist:${encodeURIComponent(artistName)}&type=album&limit=20`,
+export async function getArtistTopTracks(artistId: string, token: string): Promise<SpotifyTrack[]> {
+  const data = await spotifyFetch<{ tracks: SpotifyTrack[] }>(
+    `/artists/${artistId}/top-tracks?market=from_token`,
     token
   )
-  return data.albums.items
+  return data.tracks
+}
+
+export async function getArtistAlbums(artistId: string, token: string): Promise<SpotifyAlbum[]> {
+  const data = await spotifyFetch<{ items: SpotifyAlbum[] }>(
+    `/artists/${artistId}/albums?include_groups=album,single&limit=20`,
+    token
+  )
+  return data.items
 }
 
 export async function getAlbumTracks(albumId: string, token: string): Promise<SpotifyTrack[]> {
