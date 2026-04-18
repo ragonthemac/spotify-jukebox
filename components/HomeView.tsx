@@ -176,6 +176,7 @@ export default function HomeView() {
     accessToken, deviceId, setActiveView, setActivePlaylist, setActiveArtist, setActiveAlbum,
     currentTrack, isPlaying, setIsPlaying, progressMs, durationMs, queue, skipNext, addToQueue,
     playHistory, addToHistory, setKeyboardVisible, setOnKeyPress,
+    volume, setVolume,
   } = useJukeboxStore()
 
   const [loading, setLoading] = useState(true)
@@ -323,7 +324,6 @@ export default function HomeView() {
     }
   }
 
-  const [volume, setVolume] = useState(0.8)
   const handleVolume = (v: number) => {
     setVolume(v)
     globalPlayer?.setVolume(v)

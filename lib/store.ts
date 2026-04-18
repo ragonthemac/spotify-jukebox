@@ -65,6 +65,10 @@ interface JukeboxState {
   recentlyAdded: string | null
   setRecentlyAdded: (id: string | null) => void
 
+  // Volume
+  volume: number
+  setVolume: (v: number) => void
+
   // On-screen keyboard
   keyboardVisible: boolean
   setKeyboardVisible: (v: boolean) => void
@@ -172,6 +176,10 @@ export const useJukeboxStore = create<JukeboxState>((set, get) => ({
   // Animation
   recentlyAdded: null,
   setRecentlyAdded: (id) => set({ recentlyAdded: id }),
+
+  // Volume
+  volume: 0.8,
+  setVolume: (v) => set({ volume: v }),
 
   // On-screen keyboard
   keyboardVisible: false,
