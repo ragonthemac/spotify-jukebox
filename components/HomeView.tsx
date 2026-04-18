@@ -8,6 +8,7 @@ import {
   type SpotifyTrack, type SpotifyArtist, type SpotifyAlbum,
 } from '@/lib/spotify'
 import { DECADE_SONGS } from '@/lib/decade-tracks'
+import { GENRES } from '@/lib/genres'
 import { globalPlayer } from './SpotifyPlayer'
 import { playTrack } from '@/lib/spotify'
 import SpinningVinyl from './SpinningVinyl'
@@ -697,16 +698,9 @@ export default function HomeView() {
 
           {/* Genre buttons */}
           {(() => {
-            const GENRE_COLORS: { label: string; neon: string; neonDim: string }[] = [
-              { label: 'Pop',        neon: '#ff2d78', neonDim: 'rgba(255,45,120,0.18)' },
-              { label: 'Rock',       neon: '#f5a623', neonDim: 'rgba(245,166,35,0.18)' },
-              { label: 'Dance',      neon: '#00d4ff', neonDim: 'rgba(0,212,255,0.18)' },
-              { label: 'Electronic', neon: '#b06cf5', neonDim: 'rgba(176,108,245,0.18)' },
-              { label: 'Metal',      neon: '#ff7b2e', neonDim: 'rgba(255,123,46,0.18)' },
-            ]
             return (
               <div style={{ padding: `8px ${pad} 20px`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
-                {GENRE_COLORS.map(({ label, neon, neonDim }) => (
+                {GENRES.map(({ label, neon, neonDim }) => (
                   <div
                     key={label}
                     style={{
