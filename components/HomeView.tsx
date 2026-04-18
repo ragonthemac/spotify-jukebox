@@ -715,11 +715,6 @@ export default function HomeView() {
                       }}
                     >
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 32, background: `linear-gradient(0deg, ${neonDim} 0%, transparent 100%)`, pointerEvents: 'none' }} />
-                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style={{ filter: `drop-shadow(0 0 4px ${neon}66)` }}>
-                        <circle cx="16" cy="16" r="14" fill="#080400" stroke={neon} strokeWidth="1.5" />
-                        <circle cx="16" cy="16" r="4" fill="none" stroke={neon} strokeWidth="1" opacity="0.6" />
-                        <circle cx="16" cy="16" r="2" fill={neon} />
-                      </svg>
                       <span className="font-retro" style={{ fontSize: 13, fontWeight: 900, color: neon, letterSpacing: '0.01em', textShadow: `0 0 10px ${neon}88`, lineHeight: 1 }}>{label}</span>
                     </button>
                   </div>
