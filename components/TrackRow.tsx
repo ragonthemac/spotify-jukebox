@@ -32,17 +32,19 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
 
   const handleAdd = (e?: React.MouseEvent) => {
     e?.stopPropagation()
+    const currentView = useJukeboxStore.getState().activeView
+    const stayOnPage = currentView === 'search' || currentView === 'queue'
     if (inQueue && queueId) {
       // Play this track immediately and remove it from the queue
       if (accessToken && deviceId) playTrack(accessToken, track.uri, deviceId)
       removeFromQueue(queueId)
-      setActiveView('home')
+      if (!stayOnPage) setActiveView('home')
       return
     }
     if (!currentTrack && accessToken && deviceId) {
       // Nothing playing — play immediately
       playTrack(accessToken, track.uri, deviceId)
-      setActiveView('home')
+      if (!stayOnPage) setActiveView('home')
     } else {
       // Something already playing — add to queue
       addToQueue(track)
