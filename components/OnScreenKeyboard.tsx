@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useJukeboxStore } from '@/lib/store'
 
 const chromeH = 'linear-gradient(90deg, #e8d5b0 0%, #c9a460 20%, #f5e8c0 50%, #b8902a 80%, #e0c878 100%)'
@@ -28,11 +28,19 @@ function Key({
   variant?: Variant
   fontSize?: number
 }) {
+  const [pressed, setPressed] = useState(false)
+
   const bg: Record<Variant, string> = {
     default: 'rgba(201,162,39,0.07)',
     accent:  'rgba(201,162,39,0.15)',
     active:  'rgba(201,162,39,0.28)',
     danger:  'rgba(255,80,80,0.1)',
+  }
+  const bgPressed: Record<Variant, string> = {
+    default: 'rgba(201,162,39,0.45)',
+    accent:  'rgba(201,162,39,0.55)',
+    active:  'rgba(201,162,39,0.65)',
+    danger:  'rgba(255,80,80,0.45)',
   }
   const border: Record<Variant, string> = {
     default: 'rgba(201,162,39,0.22)',
@@ -41,11 +49,17 @@ function Key({
     danger:  'rgba(255,80,80,0.3)',
   }
   const color = variant === 'danger' ? 'rgba(255,120,120,0.85)' : 'rgba(201,162,39,0.9)'
-  const shadow = variant === 'active' ? '0 0 10px rgba(201,162,39,0.35)' : 'none'
+  const shadow = (variant === 'active' || pressed) ? '0 0 10px rgba(201,162,39,0.35)' : 'none'
+
+  const handlePress = useCallback(() => {
+    setPressed(true)
+    onPress()
+    setTimeout(() => setPressed(false), 150)
+  }, [onPress])
 
   return (
     <button
-      onPointerDown={(e) => { e.preventDefault(); onPress() }}
+      onPointerDown={(e) => { e.preventDefault(); handlePress() }}
       style={{
         flex,
         height: 56,
@@ -53,7 +67,7 @@ function Key({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: bg[variant],
+        background: pressed ? bgPressed[variant] : bg[variant],
         border: `1px solid ${border[variant]}`,
         color,
         fontSize,
@@ -65,7 +79,7 @@ function Key({
         flexShrink: 0,
         minWidth: 0,
         boxShadow: shadow,
-        transition: 'background 0.08s',
+        transition: 'background 0.1s',
       }}
     >
       {label}
