@@ -101,7 +101,7 @@ export const useJukeboxStore = create<JukeboxState>((set, get) => ({
       queueId: `${track.id}-${Date.now()}-${Math.random()}`,
       addedAt: Date.now(),
     }
-    set((s) => ({ queue: [queueTrack, ...s.queue] }))
+    set((s) => ({ queue: [...s.queue, queueTrack] }))
     // Flash recently added
     set({ recentlyAdded: track.id })
     setTimeout(() => set({ recentlyAdded: null }), 1500)
