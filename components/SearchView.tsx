@@ -266,6 +266,34 @@ export default function SearchView() {
           </div>
         )}
 
+        {/* Genre grid */}
+        {!searchQuery && !isSearching && (
+          <div className="mt-2 mb-4">
+            <p className="text-white/30 text-xs uppercase tracking-widest mb-3">Browse by Genre</p>
+            <div className="grid grid-cols-3 gap-2">
+              {GENRES.map(({ label, neon, neonDim }) => (
+                <button
+                  key={label}
+                  onClick={() => setSearchQuery(label)}
+                  className="active:scale-[0.97] transition-transform"
+                  style={{
+                    padding: '16px 8px',
+                    borderRadius: 12,
+                    background: `linear-gradient(180deg, rgba(20,10,2,0.98) 0%, rgba(10,5,0,1) 100%)`,
+                    border: `1px solid ${neon}44`,
+                    boxShadow: `inset 0 0 12px rgba(0,0,0,0.5), 0 0 8px ${neon}22`,
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 36, background: `linear-gradient(0deg, ${neonDim} 0%, transparent 100%)`, pointerEvents: 'none' }} />
+                  <span style={{ fontSize: 16, fontWeight: 900, color: neon, textShadow: `0 0 10px ${neon}88`, fontFamily: 'var(--font-retro, monospace)' }}>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Empty state — recent searches */}
         {!searchQuery && !isSearching && (
           <div className="mt-1">
@@ -322,33 +350,6 @@ export default function SearchView() {
           </div>
         )}
 
-        {/* Genre grid — shown below recent/played when no query */}
-        {!searchQuery && !isSearching && (
-          <div className="mt-2">
-            <p className="text-white/30 text-xs uppercase tracking-widest mb-3">Browse by Genre</p>
-            <div className="grid grid-cols-3 gap-2">
-              {GENRES.map(({ label, neon, neonDim }) => (
-                <button
-                  key={label}
-                  onClick={() => setSearchQuery(label)}
-                  className="active:scale-[0.97] transition-transform"
-                  style={{
-                    padding: '16px 8px',
-                    borderRadius: 12,
-                    background: `linear-gradient(180deg, rgba(20,10,2,0.98) 0%, rgba(10,5,0,1) 100%)`,
-                    border: `1px solid ${neon}44`,
-                    boxShadow: `inset 0 0 12px rgba(0,0,0,0.5), 0 0 8px ${neon}22`,
-                    position: 'relative',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 36, background: `linear-gradient(0deg, ${neonDim} 0%, transparent 100%)`, pointerEvents: 'none' }} />
-                  <span style={{ fontSize: 16, fontWeight: 900, color: neon, textShadow: `0 0 10px ${neon}88`, fontFamily: 'var(--font-retro, monospace)' }}>{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
