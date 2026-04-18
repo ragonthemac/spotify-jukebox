@@ -8,10 +8,7 @@ import TrackRow from './TrackRow'
 const RECENT_SEARCHES_KEY = 'jukebox_recent_searches'
 const MAX_RECENT = 8
 
-const GENRES = [
-  'Rock', 'Pop', 'Hip-Hop', 'R&B', 'Soul', 'Country', 'Electronic',
-  'Dance', 'Jazz', 'Blues', 'Classical', 'Reggae', 'Punk', 'Metal', 'Folk', 'Indie', 'Latin',
-]
+type Filter = 'all' | 'songs' | 'artists' | 'albums'
 
 function getRecentSearches(): string[] {
   try { return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]') } catch { return [] }
@@ -36,7 +33,6 @@ export default function SearchView() {
     setActiveView,
     setActiveArtist,
     setActiveAlbum,
-    setActivePlaylist,
     setKeyboardVisible,
     setOnKeyPress,
   } = useJukeboxStore()
@@ -44,6 +40,7 @@ export default function SearchView() {
   const [searchError, setSearchError] = useState<string | null>(null)
   const [artistResults, setArtistResults] = useState<SpotifyArtist[]>([])
   const [albumResults, setAlbumResults] = useState<SpotifyAlbum[]>([])
+  const [filter, setFilter] = useState<Filter>('all')
   const [tab, setTab] = useState<'recent' | 'played'>('recent')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
 
@@ -90,6 +87,17 @@ export default function SearchView() {
 
   const hasResults = searchResults.length > 0 || artistResults.length > 0 || albumResults.length > 0
 
+  const showSongs   = filter === 'all' || filter === 'songs'
+  const showArtists = filter === 'all' || filter === 'artists'
+  const showAlbums  = filter === 'all' || filter === 'albums'
+
+  const FILTERS: { id: Filter; label: string }[] = [
+    { id: 'all',     label: 'All' },
+    { id: 'songs',   label: 'Songs' },
+    { id: 'artists', label: 'Artists' },
+    { id: 'albums',  label: 'Albums' },
+  ]
+
   return (
     <div className="h-full flex flex-col">
       {/* Gold search bar */}
@@ -114,7 +122,7 @@ export default function SearchView() {
               })
               setKeyboardVisible(true)
             }}
-            placeholder="Search songs, artists, albums, playlists…"
+            placeholder="Search songs, artists, albums…"
             inputMode="none"
             className="flex-1 bg-transparent placeholder-white/30 text-base outline-none"
             style={{ color: 'var(--retro-cream)' }}
@@ -132,24 +140,27 @@ export default function SearchView() {
         </button>
       </div>
 
-      {/* Genre quick buttons — always visible */}
+      {/* Filter tabs — Songs / Artists / Albums */}
       <div className="flex-shrink-0 px-4 pb-3">
-        <div className="scrollbar-none flex gap-2 overflow-x-auto pb-1">
-          {GENRES.map((genre) => (
-            <button
-              key={genre}
-              onClick={() => setSearchQuery(genre)}
-              className="flex-shrink-0 px-4 py-2.5 rounded-full text-sm font-medium transition-all active:scale-95"
-              style={{
-                background: searchQuery === genre ? 'rgba(201,162,39,0.25)' : 'rgba(201,162,39,0.08)',
-                border: searchQuery === genre ? '1px solid rgba(201,162,39,0.7)' : '1px solid rgba(201,162,39,0.3)',
-                color: searchQuery === genre ? 'rgba(201,162,39,1)' : 'rgba(201,162,39,0.85)',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {genre}
-            </button>
-          ))}
+        <div className="flex gap-2">
+          {FILTERS.map(({ id, label }) => {
+            const active = filter === id
+            return (
+              <button
+                key={id}
+                onClick={() => setFilter(id)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 active:scale-95"
+                style={{
+                  background: active ? 'rgba(201,162,39,0.22)' : 'rgba(201,162,39,0.07)',
+                  border: active ? '1px solid rgba(201,162,39,0.7)' : '1px solid rgba(201,162,39,0.2)',
+                  color: active ? 'rgba(201,162,39,1)' : 'rgba(201,162,39,0.55)',
+                  boxShadow: active ? '0 0 10px rgba(201,162,39,0.15)' : 'none',
+                }}
+              >
+                {label}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -172,14 +183,14 @@ export default function SearchView() {
         {/* Search results */}
         {!isSearching && hasResults && (
           <div className="flex flex-col gap-1 mt-1">
-            {searchResults.length > 0 && (
+            {showSongs && searchResults.length > 0 && (
               <div className="mb-4">
                 <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Songs</p>
                 {searchResults.map((track, idx) => <TrackRow key={track.id + idx} track={track} />)}
               </div>
             )}
 
-            {artistResults.length > 0 && (
+            {showArtists && artistResults.length > 0 && (
               <div className="mb-4">
                 <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Artists</p>
                 <div className="flex flex-col gap-1">
@@ -205,7 +216,7 @@ export default function SearchView() {
               </div>
             )}
 
-            {albumResults.length > 0 && (
+            {showAlbums && albumResults.length > 0 && (
               <div className="mb-4">
                 <p className="text-white/30 text-xs uppercase tracking-widest mb-2">Albums</p>
                 <div className="flex flex-col gap-1">
