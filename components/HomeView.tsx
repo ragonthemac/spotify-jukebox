@@ -623,7 +623,7 @@ export default function HomeView() {
                         width: '100%',
                         background: `linear-gradient(180deg, rgba(20,10,2,0.98) 0%, rgba(10,5,0,1) 100%)`,
                         borderRadius: 10,
-                        padding: '18px 6px 14px',
+                        padding: '18px 6px 0',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                         transition: 'all 0.2s',
                         position: 'relative',
