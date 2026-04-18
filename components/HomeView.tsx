@@ -176,7 +176,7 @@ export default function HomeView() {
     accessToken, deviceId, setActiveView, setActivePlaylist, setActiveArtist, setActiveAlbum,
     currentTrack, isPlaying, setIsPlaying, progressMs, durationMs, queue, skipNext, addToQueue,
     playHistory, addToHistory, setKeyboardVisible, setOnKeyPress,
-    volume, setVolume,
+    volume, setVolume, setSearchQuery,
   } = useJukeboxStore()
 
   const [loading, setLoading] = useState(true)
@@ -676,6 +676,57 @@ export default function HomeView() {
             )
           })()}
 
+
+          {/* Genre buttons */}
+          {(() => {
+            const GENRE_COLORS: { label: string; neon: string; neonDim: string }[] = [
+              { label: 'Pop',        neon: '#ff2d78', neonDim: 'rgba(255,45,120,0.18)' },
+              { label: 'Rock',       neon: '#f5a623', neonDim: 'rgba(245,166,35,0.18)' },
+              { label: 'Dance',      neon: '#00d4ff', neonDim: 'rgba(0,212,255,0.18)' },
+              { label: 'Electronic', neon: '#b06cf5', neonDim: 'rgba(176,108,245,0.18)' },
+              { label: 'Metal',      neon: '#ff7b2e', neonDim: 'rgba(255,123,46,0.18)' },
+            ]
+            return (
+              <div style={{ padding: `0 ${pad} 16px`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+                {GENRE_COLORS.map(({ label, neon, neonDim }) => (
+                  <div
+                    key={label}
+                    style={{
+                      padding: 2,
+                      borderRadius: 12,
+                      background: chromeH,
+                      boxShadow: '0 0 6px rgba(201,162,39,0.15)',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <button
+                      onClick={() => { setSearchQuery(label); setActiveView('search') }}
+                      className="active:scale-[0.97]"
+                      style={{
+                        width: '100%',
+                        background: 'linear-gradient(180deg, rgba(20,10,2,0.98) 0%, rgba(10,5,0,1) 100%)',
+                        borderRadius: 10,
+                        padding: '14px 6px 12px',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                        border: 'none',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        boxShadow: 'inset 0 0 12px rgba(0,0,0,0.5)',
+                      }}
+                    >
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 32, background: `linear-gradient(0deg, ${neonDim} 0%, transparent 100%)`, pointerEvents: 'none' }} />
+                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style={{ filter: `drop-shadow(0 0 4px ${neon}66)` }}>
+                        <circle cx="16" cy="16" r="14" fill="#080400" stroke={neon} strokeWidth="1.5" />
+                        <circle cx="16" cy="16" r="4" fill="none" stroke={neon} strokeWidth="1" opacity="0.6" />
+                        <circle cx="16" cy="16" r="2" fill={neon} />
+                      </svg>
+                      <span className="font-retro" style={{ fontSize: 13, fontWeight: 900, color: neon, letterSpacing: '0.01em', textShadow: `0 0 10px ${neon}88`, lineHeight: 1 }}>{label}</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
 
           {playHistory.length > 0 && (
           <div style={{ padding: `12px ${pad} 14px` }}>
