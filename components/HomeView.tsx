@@ -598,7 +598,7 @@ export default function HomeView() {
               '00s': { neon: '#b06cf5', neonDim: 'rgba(176,108,245,0.18)', label: 'Two-thousands' },
             }
             return (
-              <div style={{ padding: `10px ${pad} 16px`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+              <div style={{ padding: `10px ${pad} 0`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
                 {(['60s', '70s', '80s', '90s', '00s'] as const).map((decade) => {
                   const isLoading = loadingDecade === decade
                   const { neon, neonDim } = DECADE_COLORS[decade]
@@ -623,7 +623,7 @@ export default function HomeView() {
                         width: '100%',
                         background: `linear-gradient(180deg, rgba(20,10,2,0.98) 0%, rgba(10,5,0,1) 100%)`,
                         borderRadius: 10,
-                        padding: '18px 6px 0',
+                        padding: '18px 6px 14px',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                         transition: 'all 0.2s',
                         position: 'relative',
