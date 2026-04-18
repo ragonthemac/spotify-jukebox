@@ -6,6 +6,14 @@ import { searchAll, type SpotifyArtist, type SpotifyTrack, type SpotifyAlbum } f
 import { GENRES } from '@/lib/genres'
 import TrackRow from './TrackRow'
 
+const GENRE_LABELS = new Set(GENRES.map(g => g.label.toLowerCase()))
+
+function toSearchQuery(q: string): string {
+  const lower = q.trim().toLowerCase()
+  if (GENRE_LABELS.has(lower)) return `genre:"${lower}"`
+  return q
+}
+
 const RECENT_SEARCHES_KEY = 'jukebox_recent_searches'
 const MAX_RECENT = 8
 
@@ -63,7 +71,7 @@ export default function SearchView() {
       }
       setIsSearching(true)
       setSearchError(null)
-      searchAll(q, accessToken)
+      searchAll(toSearchQuery(q), accessToken)
         .then(({ tracks, artists, albums }) => {
           setSearchResults(tracks)
           setArtistResults(artists)
