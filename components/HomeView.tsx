@@ -677,7 +677,6 @@ export default function HomeView() {
             )
           })()}
 
-
           {playHistory.length > 0 && (
           <div style={{ padding: `12px ${pad} 14px` }}>
             <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 14, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Recently Played</p>
@@ -698,9 +697,10 @@ export default function HomeView() {
 
           {/* Genre buttons */}
           {(() => {
+            const HOME_GENRES = GENRES.filter(g => ['Pop','Rock','Dance','Electronic','Metal'].includes(g.label))
             return (
-              <div style={{ padding: `8px ${pad} 20px`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
-                {GENRES.map(({ label, neon, neonDim }) => (
+              <div style={{ padding: `10px ${pad} 16px`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+                {HOME_GENRES.map(({ label, neon, neonDim }) => (
                   <div
                     key={label}
                     style={{
