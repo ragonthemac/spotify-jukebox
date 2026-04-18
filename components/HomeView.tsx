@@ -677,6 +677,24 @@ export default function HomeView() {
           })()}
 
 
+          {playHistory.length > 0 && (
+          <div style={{ padding: `12px ${pad} 14px` }}>
+            <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 14, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Recently Played</p>
+              <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 ${negPad}`, padding: `0 ${pad} 8px` }}>
+                {playHistory.map(track => (
+                  <button key={track.id} onClick={() => { if (!currentTrack && accessToken && deviceId) playTrack(accessToken, track.uri, deviceId); else useJukeboxStore.getState().addToQueue(track) }}
+                    style={{ flexShrink: 0, width: 150, textAlign: 'left' }} className="active:scale-95 transition-transform">
+                    <div style={{ width: 150, height: 150, borderRadius: 10, overflow: 'hidden', marginBottom: 8, background: 'rgba(201,162,39,0.08)', border: '1px solid rgba(201,162,39,0.18)' }}>
+                      {track.album.images[0]?.url ? <img src={track.album.images[0].url} alt={track.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="36" height="36" viewBox="0 0 28 28" fill="none" style={{ opacity: 0.2, color: 'var(--retro-gold)' }}><circle cx="14" cy="14" r="10" stroke="currentColor" strokeWidth="1.5" /><circle cx="14" cy="14" r="3" stroke="currentColor" strokeWidth="1.5" /></svg></div>}
+                    </div>
+                    <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--retro-cream)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{track.name}</p>
+                    <p style={{ fontSize: 13, color: 'var(--retro-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{track.artists.map(a => a.name).join(', ')}</p>
+                  </button>
+                ))}
+              </div>
+          </div>
+          )}
+
           {/* Genre buttons */}
           {(() => {
             const GENRE_COLORS: { label: string; neon: string; neonDim: string }[] = [
@@ -687,7 +705,7 @@ export default function HomeView() {
               { label: 'Metal',      neon: '#ff7b2e', neonDim: 'rgba(255,123,46,0.18)' },
             ]
             return (
-              <div style={{ padding: `0 ${pad} 16px`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+              <div style={{ padding: `8px ${pad} 20px`, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
                 {GENRE_COLORS.map(({ label, neon, neonDim }) => (
                   <div
                     key={label}
@@ -706,7 +724,7 @@ export default function HomeView() {
                         width: '100%',
                         background: 'linear-gradient(180deg, rgba(20,10,2,0.98) 0%, rgba(10,5,0,1) 100%)',
                         borderRadius: 10,
-                        padding: '14px 6px 12px',
+                        padding: '20px 6px 18px',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
                         border: 'none',
                         position: 'relative',
@@ -714,32 +732,14 @@ export default function HomeView() {
                         boxShadow: 'inset 0 0 12px rgba(0,0,0,0.5)',
                       }}
                     >
-                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 32, background: `linear-gradient(0deg, ${neonDim} 0%, transparent 100%)`, pointerEvents: 'none' }} />
-                      <span className="font-retro" style={{ fontSize: 13, fontWeight: 900, color: neon, letterSpacing: '0.01em', textShadow: `0 0 10px ${neon}88`, lineHeight: 1 }}>{label}</span>
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 36, background: `linear-gradient(0deg, ${neonDim} 0%, transparent 100%)`, pointerEvents: 'none' }} />
+                      <span className="font-retro" style={{ fontSize: 16, fontWeight: 900, color: neon, letterSpacing: '0.01em', textShadow: `0 0 10px ${neon}88`, lineHeight: 1 }}>{label}</span>
                     </button>
                   </div>
                 ))}
               </div>
             )
           })()}
-
-          {playHistory.length > 0 && (
-          <div style={{ padding: `12px ${pad} 14px` }}>
-            <p className="font-typewriter" style={{ fontSize: 13, textTransform: 'uppercase', marginBottom: 14, color: 'var(--retro-muted)', letterSpacing: '0.08em' }}>Recently Played</p>
-              <div className="scrollbar-none" style={{ display: 'flex', gap: 14, overflowX: 'auto', margin: `0 ${negPad}`, padding: `0 ${pad} 8px` }}>
-                {playHistory.map(track => (
-                  <button key={track.id} onClick={() => { if (!currentTrack && accessToken && deviceId) playTrack(accessToken, track.uri, deviceId); else useJukeboxStore.getState().addToQueue(track) }}
-                    style={{ flexShrink: 0, width: 150, textAlign: 'left' }} className="active:scale-95 transition-transform">
-                    <div style={{ width: 150, height: 150, borderRadius: 10, overflow: 'hidden', marginBottom: 8, background: 'rgba(201,162,39,0.08)', border: '1px solid rgba(201,162,39,0.18)' }}>
-                      {track.album.images[0]?.url ? <img src={track.album.images[0].url} alt={track.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="36" height="36" viewBox="0 0 28 28" fill="none" style={{ opacity: 0.2, color: 'var(--retro-gold)' }}><circle cx="14" cy="14" r="10" stroke="currentColor" strokeWidth="1.5" /><circle cx="14" cy="14" r="3" stroke="currentColor" strokeWidth="1.5" /></svg></div>}
-                    </div>
-                    <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--retro-cream)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{track.name}</p>
-                    <p style={{ fontSize: 13, color: 'var(--retro-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{track.artists.map(a => a.name).join(', ')}</p>
-                  </button>
-                ))}
-              </div>
-          </div>
-          )}
 
             </div>{/* end scrollable */}
           </div>{/* end body */}
