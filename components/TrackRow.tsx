@@ -35,10 +35,10 @@ export default function TrackRow({ track, inQueue, queueId }: Props) {
     const currentView = useJukeboxStore.getState().activeView
     const stayOnPage = currentView === 'search' || currentView === 'queue'
     if (inQueue && queueId) {
-      // Play this track immediately and remove it from the queue
-      if (accessToken && deviceId) playTrack(accessToken, track.uri, deviceId)
-      removeFromQueue(queueId)
-      if (!stayOnPage) setActiveView('home')
+      // Move to front of queue so it plays next
+      const { queue, reorderQueue } = useJukeboxStore.getState()
+      const idx = queue.findIndex(t => t.queueId === queueId)
+      if (idx > 0) reorderQueue(idx, 0)
       return
     }
     if (!currentTrack && accessToken && deviceId) {
